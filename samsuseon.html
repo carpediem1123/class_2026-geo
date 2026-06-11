@@ -288,6 +288,14 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
 </style>
 </head>
 <body>
+<!-- 부팅 로딩 오버레이: 3D 초기화 동안 화성 화면 깜빡임 차단 -->
+<div id="bootLoading" style="position:fixed;inset:0;z-index:99999;background:#050a14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s">
+  <div style="font-size:34px">🛰</div>
+  <div style="font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:900;color:#88f0e0;letter-spacing:.04em">삼수선의 정리로 기지 복구 중</div>
+  <div style="font-family:monospace;font-size:12px;color:#4a8a9a;letter-spacing:.12em">통신시설 복구 모듈 로딩 ┄┄┄</div>
+  <div style="width:150px;height:3px;background:#0d2030;border-radius:2px;overflow:hidden"><div style="width:40%;height:100%;background:#33ddc8;animation:bootBar 1.1s ease-in-out infinite alternate"></div></div>
+  <style>@keyframes bootBar{from{margin-left:0}to{margin-left:60%}}</style>
+</div>
 <div id="app">
   <!-- 전체화면 전환 오버레이 (좌우패널 포함 전체 덮음) -->
   <div id="transit">
@@ -315,6 +323,7 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
     <button class="mt ac" id="m1">🚨 M1</button>
     <button class="mt lk" id="m2">🔒 M2</button>
     <button class="mt lk" id="m3">🔒 M3</button>
+    <button class="mt" id="mReflect" style="border-color:#2a8a5a;color:#66e8a8;background:#06150c">📝 성찰로그</button>
     <button class="hb" id="bM" style="margin-left:auto">🪐 Mars</button>
     <button class="hb" id="bD">🔄 회전</button>
     <button class="hb" id="bR">↺ 초기화</button>
@@ -403,7 +412,7 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
             <button class="sb" data-sid="sZ" data-dir="1">+</button>
           </div>
         </div>
-        <div class="cr"><div class="cr-label">H 위치 <span class="cv" id="vH">-2.0</span></div>
+        <div class="cr" id="rH" style="display:none"><div class="cr-label">H 위치 <span class="cv" id="vH">-2.0</span></div>
           <div class="cr-row">
             <button class="sb" data-sid="sH" data-dir="-1">−</button>
             <input type="range" id="sH" min="-7" max="7" step="0.05" value="-2">
@@ -843,10 +852,11 @@ var MC={
      hud:[['PH⊥l','ph'],['OH⊥l','oh'],['PO⊥OH','pooh'],['PO⊥α','po']],hudInit:3,
      steps:[
       {l:'STEP 1',d:'[기어1] 전력선과 수직\nH를 조정하여 PH⊥l 을 달성하세요.',btn:'기어① 맞물림(PH⊥l)!',cond:'ph'},
-      {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh',showO:1},
-      {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l \n(β : PO와 PH가 결정하는 평면)\n→PO ∈β이므로 ∴PO⊥l 자동 성립!',btn:'기어 평면 확인!',auto:1,beta:1,hlPO:1},
-      {l:'STEP 4',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
-      {l:'STEP 5',d:'3개 기어 완전 맞물림!\n기둥이 완벽하게 수직 고정됨\n PO⊥l, PO⊥OH → PO⊥α 자동 성립!\n(α: OH, l에 의하여 결정된 평면)\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
+      {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh'},
+      {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l\n(β : PH와 OH가 결정하는 평면)',btn:'기어 평면 확인!',auto:1,beta:1},
+      {l:'STEP 4',d:'β 위의 한 직선 PO 확인\nPO ∈ β 이고 β⊥l 이므로\n∴ PO⊥l 자동 성립!',btn:'PO⊥l 확인!',auto:1,hlPO:1},
+      {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
+      {l:'STEP 6',d:'3개 기어 완전 맞물림!\n기둥이 완벽하게 수직 고정됨\n PO⊥l, PO⊥OH → PO⊥α 자동 성립!\n(α: OH, l에 의하여 결정된 평면)\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
     ]}
 };
 
@@ -1017,16 +1027,8 @@ var restoreSceneForMission=function(mis){
     mvPHCable(pos.P,pos.H);
   }
   
-  // U/V 슬라이더 가시성 (미션3 step>=2)
-  if(mis===3&&s&&s.step>=2){
-    document.getElementById('rV').style.display='flex';
-    document.getElementById('rU').style.display='flex';
-    var sh=document.getElementById('sliderHint');if(sh)sh.style.display='block';
-  }else{
-    document.getElementById('rV').style.display='none';
-    document.getElementById('rU').style.display='none';
-    var sh=document.getElementById('sliderHint');if(sh)sh.style.display='none';
-  }
+  // 슬라이더 가시성은 단계 연동 함수로 일원화
+  updSliders();
 };
 
 // 인트로 → 활성 전환
@@ -1042,15 +1044,18 @@ var activateMission=function(){
   document.getElementById('saBadge').textContent=q.badge;
   document.getElementById('saTitle').textContent=q.saTitle;
   document.getElementById('saStory').textContent=q.saStory;
-  document.getElementById('saThm').textContent=q.saThm;
+  document.getElementById('ioThm').textContent=q.saThm;  // 정리 핵심은 우측 패널에 표시
   sa.className='show';
   document.getElementById('sti').textContent=q.saTitle;
   document.getElementById('sbo').textContent=q.saStory;
   ST.introMode=false;
+  updSliders();  // 미션 시작 시 해당 단계 슬라이더 즉시 노출 (M3 STEP1의 H 등)
 };
 
 // 인트로 화면 표시
 var showIntro=function(mis){
+  var bl=document.getElementById('bootLoading');
+  if(bl){bl.style.opacity='0';setTimeout(function(){if(bl.parentNode)bl.parentNode.removeChild(bl);},550);}
   var q=QD[mis];
   var sp=document.getElementById('storyPanel');
   var si=document.getElementById('storyIntro');
@@ -1215,6 +1220,25 @@ var updHUD=function(a,b,c,d){
     document.getElementById('hk'+i).textContent=v>=88?'✅':'';
   }
 };
+// ── 단계 연동 슬라이더 가시성: 해당 단계에서 필요한 조작만 노출 ──
+var updSliders=function(){
+  var rH=document.getElementById('rH'),rV=document.getElementById('rV'),rU=document.getElementById('rU');
+  var sh=document.getElementById('sliderHint');
+  var showH=false,showV=false,showU=false;
+  if(!ST.introMode){
+    if(ST.mis===1||ST.mis===2){
+      showH = ST.step>=2 || ST.missionDone;          // STEP 2부터 H 조작 필요
+    }else if(ST.mis===3){
+      showH = true;                                   // STEP 1: PH⊥l (H 필요)
+      showV = ST.step>=2 || ST.missionDone;           // STEP 2: OH⊥l (O(v))
+      showU = ST.step>=5 || ST.missionDone;           // STEP 5: PO⊥OH (O(u))
+    }
+  }
+  if(rH)rH.style.display=showH?'flex':'none';
+  if(rV)rV.style.display=showV?'flex':'none';
+  if(rU)rU.style.display=showU?'flex':'none';
+  if(sh)sh.style.display=(ST.mis===3&&showV)?'block':'none';
+};
 var buildUI=function(){updTabs();setupHUD();buildSteps();updProgress();};
 var buildSteps=function(){
   var mc=MC[ST.mis],el=document.getElementById('sp');el.innerHTML='';
@@ -1248,6 +1272,7 @@ var buildSteps=function(){
     };}
     dv2.appendChild(b2);el.appendChild(dv2);
   }
+  updSliders();
 };
 var doConfirm=function(idx){
   if(ST.done.indexOf(idx)>=0)return;
@@ -1337,7 +1362,6 @@ var doConfirm=function(idx){
   }
   if(s.final){ST.missionDone=true;ST.cleared[ST.mis-1]=true;if(ST.mis<3)ST.unlocked[ST.mis]=true;saveMissionState(ST.mis);updTabs();updProgress();}
   if(idx<MC[ST.mis].steps.length)ST.step=idx+1;
-  if(ST.mis===3&&ST.step>=2){document.getElementById('rV').style.display='flex';document.getElementById('rU').style.display='flex';var sh=document.getElementById('sliderHint');if(sh)sh.style.display='block';}
   buildSteps();updProgress();
 };
 var updAntenna=function(){
@@ -1693,7 +1717,7 @@ var doResetMis=function(){
   }
   
   ['sZ','sH','sU','sV'].forEach(function(id,i){document.getElementById(id).value=[3.5,-2,1,2][i];});
-  document.getElementById('rU').style.display='none';document.getElementById('rV').style.display='none';
+  updSliders();
   // 스토리 패널 인트로 모드로 복귀
   var sa=document.getElementById('storyActive');sa.className='';
   var si=document.getElementById('storyIntro');si.style.display='flex';
@@ -1889,15 +1913,15 @@ setTimeout(function(){showTransit(0,1);},200);
       </div>
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <input type="text" name="sid" id="rfSid" required placeholder="학번 (예: 30101)" inputmode="numeric"
-               style="flex:1;padding:8px;background:#031008;border:1px solid #2a5a3a;border-radius:6px;color:#88ffaa;font-size:13px">
+               style="flex:1.3;min-width:0;box-sizing:border-box;padding:8px;background:#031008;border:1px solid #2a5a3a;border-radius:6px;color:#88ffaa;font-size:13px">
         <input type="text" name="sname" id="rfName" required placeholder="이름"
-               style="flex:1;padding:8px;background:#031008;border:1px solid #2a5a3a;border-radius:6px;color:#88ffaa;font-size:13px">
+               style="flex:1;min-width:0;box-sizing:border-box;padding:8px;background:#031008;border:1px solid #2a5a3a;border-radius:6px;color:#88ffaa;font-size:13px">
       </div>
 
       <div style="font-size:14px;margin-bottom:10px;color:#fff;font-weight:bold">Q. 삼수선의 정리를 증명할 때, 나는 주로 어떻게 생각했나요?</div>
       <label class="rf-opt"><input type="radio" name="method" value="🔢 조건 정리형" required> 🔢 주어진 조건(PO⊥α 등)을 기호로 먼저 정리했어요</label>
       <label class="rf-opt"><input type="radio" name="method" value="🔁 화면 탐색형"> 🔁 3D 화면을 이리저리 돌려보며 수직 관계를 확인했어요</label>
-      <label class="rf-opt"><input type="radio" name="method" value="👁 직관 포착형"> 👁 직각 표시(□)가 생기는 위치를 보고 감을 잡았어요</label>
+      <label class="rf-opt"><input type="radio" name="method" value="👁 직관 포착형"> 👁 수직 기호(⊥)가 표시되는 위치를 보고 감을 잡았어요</label>
       <label class="rf-opt"><input type="radio" name="method" value="📋 단계 추적형"> 📋 STEP 안내를 차근차근 따라가며 증명했어요</label>
 
       <div style="margin-top:15px;font-size:14px;color:#fff">✏️ 더 설명하고 싶다면? <span style="color:#88aa99;font-size:12px">(선택)</span></div>
@@ -1925,6 +1949,10 @@ var SHEET_URL = 'https://script.google.com/macros/s/AKfycbwQUbktB_3XbtJJfd6UzzE7
 // ▲▲▲ 예: var SHEET_URL = 'https://script.google.com/macros/s/XXXX/exec'; ▲▲▲
 
 document.getElementById('trReflect').addEventListener('click', function(){
+  document.getElementById('reflectBox').style.display = 'flex';
+});
+// 상단 메뉴 성찰로그 버튼 (미션 다시보기 후에도 언제든 접근 가능)
+document.getElementById('mReflect').addEventListener('click', function(){
   document.getElementById('reflectBox').style.display = 'flex';
 });
 
