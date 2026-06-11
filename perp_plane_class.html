@@ -38,6 +38,24 @@
   .btn-warning:hover:not(:disabled) { background: #d99524; }
 
   #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+
+  /* ── 공간잇기 스토리 패널 (좌측) ── */
+  #story-panel { position: absolute; top: 56px; left: 10px; width: 292px; z-index: 10;
+    background: rgba(10, 16, 32, 0.94); border: 2px solid #1a2a50; border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6); overflow: hidden; }
+  #story-head { padding: 10px 12px; background: rgba(20,30,60,.55); cursor: pointer;
+    display: flex; align-items: center; gap: 8px; user-select: none; -webkit-user-select: none; }
+  #story-head .sh-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff6644; animation: stBlink 1.2s step-end infinite; flex-shrink: 0; }
+  @keyframes stBlink { 0%,100%{opacity:1} 50%{opacity:.15} }
+  #story-head .sh-title { font-size: 13px; font-weight: 900; color: #ffaa77; letter-spacing: .02em; }
+  #story-head .sh-fold { margin-left: auto; font-size: 11px; color: #5577aa; }
+  #story-body { padding: 11px 13px 13px; font-size: 12px; line-height: 1.72; color: #c8d8f0; word-break: keep-all; }
+  #story-body b { color: #ffbb88; }
+  #story-body em { color: #ffd34a; font-style: normal; font-weight: 700; }
+  .story-goal { margin-top: 10px; padding: 8px 10px; border: 1.5px dashed #2a8a5a; border-radius: 7px;
+    background: rgba(4,18,10,.6); font-size: 11.5px; line-height: 1.6; color: #9adcb8; }
+  .story-goal b { color: #66e8a8; }
+  #story-panel.folded #story-body { display: none; }
   #view-lock-notice { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); padding: 6px 14px; border-radius: 20px; font-size: 11px; color: #aaa; border: 1px solid #333; pointer-events: none; }
 
   /* 임무 완료 모달 창 */
@@ -277,7 +295,8 @@
     <div class="lab-step-card" data-lab-step="5">
       <strong style="color:#ff00ff;">5. 이등변삼각형 결론 및 완증</strong><br><br>
       최종적으로 솟아오른 <strong>삼각형 PCP'</strong>은 두 변의 길이가 같은 이등변삼각형입니다.<br><br>
-      이때 점 O는 밑변 PP'의 중점이므로 이등변삼각형의 성질에 의해 중선 <strong>선분 OC와 선분 PP'은 수직</strong>, 즉 <strong>직선 l과 직선 k는 수직</strong>이 완벽히 성립합니다.<br><br>
+      이때 점 O는 밑변 PP'의 중점이므로 이등변삼각형의 성질에 의해<br>
+      중선 <strong>선분 OC와 선분 PP'은 수직</strong>, 즉 <strong>직선 l과 직선 k는 수직</strong>이 완벽히 성립합니다.<br><br>
       평면 α 위의 임의의 모든 직선 k와 수직이므로 마침내<br>
       <strong style="color:#ff88ff; font-size:14px;">직선 l과 평면 α의 수직 증명 완료!</strong>
     </div>
@@ -292,6 +311,30 @@
   </div>
 </div>
 <div id="canvas-container"></div>
+
+<!-- 공간잇기 스토리 패널: 왜 '직선과 평면의 수직'을 배우는가 -->
+<div id="story-panel">
+  <div id="story-head" onclick="this.parentNode.classList.toggle('folded')">
+    <span class="sh-dot"></span>
+    <span class="sh-title">🏗️ 긴급 임무: 메인 기둥 복구</span>
+    <span class="sh-fold">접기 ▲▼</span>
+  </div>
+  <div id="story-body">
+    자기 폭풍의 충격으로 거주 돔을 떠받치는 <b>메인 서포트 기둥(l)</b>이 기울어졌다.
+    기둥이 단 1°만 기울어도 돔의 하중이 한쪽으로 쏠려 <em>72시간 내 붕괴</em>한다.
+    <br><br>
+    문제는, 화성에는 '수직'을 알려줄 기준이 없다는 것!
+    유일한 단서는 바닥 평면(α)에 깔린 <b>두 지지 레일 m, n</b>뿐.
+    <br><br>
+    기둥을 두 레일과 각각 직각으로 맞추면… 정말 <em>바닥 전체와 수직</em>이 될까?
+    <div class="story-goal">
+      🎯 <b>복구 조건</b><br>
+      직선 l ⊥ m 그리고 l ⊥ n (두 직선만 확인!)<br>
+      ⇒ <b>l ⊥ 평면 α</b> 임을 검증하면<br>
+      돔 하중이 고르게 분산되어 기지 구조 복구 완료!
+    </div>
+  </div>
+</div>
 
 <div id="ui-panel">
   <div class="step-title" id="step-title">📡 1단계: 지지대 m과 수직 맞추기</div>
