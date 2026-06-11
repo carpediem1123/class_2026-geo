@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>공간잇기 M01-1 — 직선과 평면의 수직</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: #05070f; font-family: 'Noto Sans KR', sans-serif; color: #fff; }
+  
+  /* 전술 제어 UI 패널 */
+  #ui-panel { position: absolute; top: 10px; right: 10px; width: 340px; background: rgba(10, 16, 32, 0.94); border: 2px solid #1a2a50; border-radius: 8px; padding: 15px; z-index: 10; box-shadow: 0 0 20px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px; }
+  .step-title { font-size: 14px; font-weight: bold; color: #00d4ff; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; border-bottom: 1px solid #1a2a50; padding-bottom: 6px; }
+  .guide-text { font-size: 12px; line-height: 1.4; color: #b0c4de; min-height: 45px; }
+  .status-box { background: #04060f; border: 1px solid #1a2a50; border-radius: 4px; padding: 10px; font-size: 11px; font-family: monospace; color: #00ff88; line-height: 1.5; }
+  
+  .control-group { margin-bottom: 5px; }
+  .control-group label { display: block; font-size: 11px; margin-bottom: 4px; color: #8a9cb5; font-weight: bold; }
+  
+  /* 슬라이더 컨트롤러 컴포넌트 */
+  .slider-container { display: flex; align-items: center; gap: 6px; }
+  .btn-step { width: 28px; height: 26px; background: #152238; border: 1px solid #2e436e; color: #00d4ff; font-weight: bold; font-size: 14px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+  .btn-step:hover { background: #1e3354; color: #00ff88; }
+  input[type=range] { flex: 1; cursor: pointer; height: 6px; background: #152238; border-radius: 3px; outline: none; }
+  input[type=range]:disabled { opacity: 0.2; cursor: not-allowed; }
+  
+  .btn-container { display: flex; flex-direction: column; gap: 8px; }
+  .btn-row { display: flex; gap: 8px; width: 100%; }
+  button { width: 100%; padding: 11px; background: #1e3a8a; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+  button:hover:not(:disabled) { background: #2563eb; box-shadow: 0 0 10px rgba(37,99,235,0.5); }
+  button:disabled { background: #1f2937; color: #4b5563; cursor: not-allowed; box-shadow: none; }
+  
+  .btn-danger { background: #7f1d1d; }
+  .btn-danger:hover:not(:disabled) { background: #b91c1c; }
+  .btn-success { background: #065f46; }
+  .btn-success:hover:not(:disabled) { background: #059669; }
+  .btn-warning { background: #b57c1e; }
+  .btn-warning:hover:not(:disabled) { background: #d99524; }
+
+  #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+  #view-lock-notice { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); padding: 6px 14px; border-radius: 20px; font-size: 11px; color: #aaa; border: 1px solid #333; pointer-events: none; }
+
+  /* 임무 완료 모달 창 */
+  .modal-overlay { position: absolute; inset: 0; background: rgba(3, 5, 15, 0.94); display: flex; justify-content: center; align-items: center; z-index: 100; display: none; opacity: 0; transition: opacity 0.4s ease; }
+  .modal-box { width: 620px; max-height: 95vh; background: #0b1126; border: 3px solid #00ff88; border-radius: 12px; padding: 22px; text-align: center; box-shadow: 0 0 30px rgba(0,255,136,0.3); animation: slideUp 0.4s ease; display: flex; flex-direction: column; gap: 12px; }
+  .modal-title { font-size: 20px; font-weight: 900; color: #00ff88; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(0,255,136,0.4); }
+  .modal-text { font-size: 12.5px; color: #b0c4de; line-height: 1.5; }
+  
+  .proof-board { display: none; text-align: left; background: #040714; border: 1px solid #1a2a50; border-radius: 6px; padding: 14px; overflow-y: auto; flex-grow: 1; }
+  .proof-board h4 { color: #ffaa00; margin-bottom: 6px; border-bottom: 1px dashed #1a2a50; padding-bottom: 4px; font-size: 13px; display: flex; justify-content: space-between; }
+  
+  .proof-container { display: flex; gap: 15px; align-items: center; margin-top: 5px; min-height: 170px; }
+  .proof-image-box { flex: 0 0 180px; height: 180px; background: #fff; padding: 6px; border-radius: 6px; border: 2px solid #1a2a50; display: flex; justify-content: center; align-items: center; }
+  .proof-image-box img { width: 100%; height: auto; display: block; object-fit: contain; }
+  .proof-steps { flex: 1; }
+  .proof-step { padding-left: 10px; border-left: 3px solid #00d4ff; font-size: 12px; line-height: 1.6; color: #e0e8f5; display: none; }
+  .proof-step.active { display: block; }
+  
+  .proof-nav { display: flex; justify-content: space-between; margin-top: 10px; gap: 10px; }
+  .proof-nav button { padding: 6px; font-size: 11px; }
+
+  @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* 수학실험실 탭 버튼 */
+  #lab-tab-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 20;
+    background: rgba(8, 4, 24, 0.92);
+    border: 2px solid #7744cc;
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: #bb88ff;
+    font-size: 12.5px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 0 12px rgba(119, 68, 204, 0.3);
+    white-space: nowrap;
+  }
+  #lab-tab-btn:hover { background: rgba(40, 20, 80, 0.95); border-color: #aa77ff; color: #ddaaff; box-shadow: 0 0 18px rgba(170, 119, 255, 0.4); }
+  #lab-tab-btn.active { background: rgba(60, 20, 120, 0.95); border-color: #cc99ff; color: #eeddff; }
+  .lab-tab-dot { width: 8px; height: 8px; border-radius: 50%; background: #7744cc; flex-shrink: 0; animation: labPulse 2s infinite; }
+  @keyframes labPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* 수학실험실 패널 (좌측 고정) */
+  #lab-panel {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 360px;
+    background: rgba(4, 2, 14, 0.96);
+    border-right: 2px solid #5533aa;
+    z-index: 15;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 4px 0 24px rgba(80, 40, 160, 0.35);
+    animation: labSlideIn 0.3s ease;
+  }
+  #lab-panel.open { display: flex; }
+  @keyframes labSlideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .lab-header {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #0a0420, #120630);
+    border-bottom: 2px solid #5533aa;
+    padding: 14px 16px 10px;
+  }
+  .lab-header-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: #cc99ff;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .lab-page-pill {
+    margin-left: auto;
+    font-size: 10px;
+    background: #2a1860;
+    border: 1px solid #5533aa;
+    border-radius: 20px;
+    padding: 2px 9px;
+    color: #aa88ee;
+  }
+  .lab-theorem-box {
+    background: rgba(80, 40, 160, 0.12);
+    border: 1px solid #3322aa;
+    border-left: 3px solid #7744cc;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #c0b0e8;
+    line-height: 1.6;
+  }
+  .lab-theorem-box strong { color: #ddbbff; }
+
+  .lab-steps-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    scrollbar-width: thin;
+    scrollbar-color: #3322aa transparent;
+  }
+  .lab-steps-scroll::-webkit-scrollbar { width: 4px; }
+  .lab-steps-scroll::-webkit-scrollbar-thumb { background: #3322aa; border-radius: 2px; }
+
+  .lab-step-card {
+    display: none;
+    background: #06030f;
+    border: 1px solid #2a1860;
+    border-radius: 6px;
+    padding: 14px 13px;
+    font-size: 12.5px;
+    color: #d0c8f0;
+    line-height: 1.75;
+    position: relative;
+  }
+  .lab-step-card.active { display: block; animation: fadeCard 0.3s ease; }
+  @keyframes fadeCard { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .lab-step-card[data-lab-step="1"] { border-left: 3px solid #00d4ff; }
+  .lab-step-card[data-lab-step="2"] { border-left: 3px solid #00d4ff; }
+  .lab-step-card[data-lab-step="3"] { border-left: 3px solid #ffaa00; }
+  .lab-step-card[data-lab-step="4"] { border-left: 3px solid #00ffcc; }
+  .lab-step-card[data-lab-step="5"] { border-left: 3px solid #ff00ff; }
+
+  .lab-progress-bar {
+    height: 3px;
+    background: #1a0a40;
+    border-radius: 2px;
+    margin: 10px 0 6px;
+    overflow: hidden;
+  }
+  .lab-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7744cc, #cc99ff);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .lab-step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .lab-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #2a1860;
+    border: 1px solid #4422aa;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .lab-dot.done { background: #5533aa; }
+  .lab-dot.active { background: #cc99ff; border-color: #cc99ff; box-shadow: 0 0 6px #cc99ff; }
+
+  .lab-footer {
+    flex-shrink: 0;
+    padding: 10px 14px 14px;
+    border-top: 1px solid #1a0a40;
+    background: rgba(4, 2, 14, 0.9);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .lab-nav-row { display: flex; gap: 8px; }
+  .lab-nav-row button { flex: 1; padding: 9px 6px; font-size: 12px; font-weight: bold; }
+  #btn-lab-close {
+    width: 100%;
+    padding: 9px;
+    background: #1a0830;
+    border: 1px solid #3a1a60;
+    color: #9977cc;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  #btn-lab-close:hover { background: #280a48; color: #cc99ff; border-color: #5533aa; }
+</style>
+<script src="three.min.js"></script>
+<script src="OrbitControls.js"></script>
+</head>
+<body>
+
+<button id="lab-tab-btn" onclick="toggleLabPanel()">
+  <div class="lab-tab-dot"></div>
+  🔬 수학실험실
+</button>
+
+<div id="lab-panel">
+  <div class="lab-header">
+    <div class="lab-header-title">
+      📐 기하학 심화 증명실
+      <span class="lab-page-pill" id="lab-page-indicator">1 / 5</span>
+    </div>
+    <div class="lab-theorem-box">
+      <strong>[정리]</strong> 직선 l이 평면 α 위의 교차하는 두 직선 m, n과 각각 수직이면, 직선 l은 평면 α와 수직이다.
+    </div>
+    <div class="lab-progress-bar"><div class="lab-progress-fill" id="lab-prog-fill" style="width:20%"></div></div>
+    <div class="lab-step-dots" id="lab-dots"></div>
+  </div>
+
+  <div class="lab-steps-scroll">
+    <div class="lab-step-card active" data-lab-step="1">
+      <strong style="color:#00d4ff;">1. 가설 작도 및 점 설정</strong><br><br>
+      교점 O를 지나며 평면 α 위에 놓인 임의의 또 다른 직선을 k라고 정의합니다.<br><br>
+      세 직선 m, n, k를 가로지르는 임의의 평면 선분을 작도하여 생기는 교점을 각각 <strong>A, B, C</strong>라고 지정합니다. 그 후 기둥 l 상에 선분 OP = 선분 OP'이 되도록 상하 대칭점 <strong>P, P'</strong>을 잡습니다.
+    </div>
+    <div class="lab-step-card" data-lab-step="2">
+      <strong style="color:#00d4ff;">2. 수직이등분선의 성질 추출</strong><br><br>
+      두 직선 m과 n은 기둥 선분 PP'을 한가운데서 직교 관통하므로 기하학적 정의에 의해 완벽한 수직이등분선입니다.<br><br>
+      따라서 양 끝단 대칭점까지의 거리가 같으므로 대응변 <strong>선분 AP = 선분 AP'</strong>과 <strong>선분 BP = 선분 BP'</strong>이 성립합니다.
+    </div>
+    <div class="lab-step-card" data-lab-step="3">
+      <strong style="color:#ffaa00;">3. 황금색 삼각형의 SSS 합동</strong><br><br>
+      방금 증명한 변들의 길이와 공통변 선분 AB에 의해 두 입체 대칭 삼각형<br>
+      <strong>삼각형 PAB와 삼각형 P'AB는 SSS 합동</strong>이 성립합니다.<br><br>
+      <span style="color:#ffaa00;">💡 캔버스를 드래그해 노란색 대칭면이 완전히 일치하는지 확인해 보세요.</span>
+    </div>
+    <div class="lab-step-card" data-lab-step="4">
+      <strong style="color:#00ffcc;">4. 청록색 삼각형의 SAS 합동</strong><br><br>
+      앞선 합동의 성질에 의해 사이 각도인 각 PAC = 각 P'AC 임이 밝혀집니다.<br><br>
+      그 결과, 선분 AC를 공통변으로 공유하는 두 삼각형<br>
+      <strong>삼각형 PAC와 삼각형 P'AC는 SAS 합동</strong>이 성립하며,<br>
+      이로 인해 <strong>선분 CP = 선분 CP'</strong>임이 유도됩니다.
+    </div>
+    <div class="lab-step-card" data-lab-step="5">
+      <strong style="color:#ff00ff;">5. 이등변삼각형 결론 및 완증</strong><br><br>
+      최종적으로 솟아오른 <strong>삼각형 PCP'</strong>은 두 변의 길이가 같은 이등변삼각형입니다.<br><br>
+      이때 점 O는 밑변 PP'의 중점이므로 이등변삼각형의 성질에 의해<br>
+      중선 <strong>선분 OC와 선분 PP'은 수직</strong>, 즉 <strong>직선 l과 직선 k는 수직</strong>이 완벽히 성립합니다.<br><br>
+      평면 α 위의 임의의 모든 직선 k와 수직이므로 마침내<br>
+      <strong style="color:#ff88ff; font-size:14px;">직선 l과 평면 α의 수직 증명 완료!</strong>
+    </div>
+  </div>
+
+  <div class="lab-footer">
+    <div class="lab-nav-row">
+      <button id="btn-lab-prev" class="btn-warning" disabled onclick="labNav(-1)">◀ 이전 단계</button>
+      <button id="btn-lab-next" class="btn-success" onclick="labNav(1)">다음 단계 ▶</button>
+    </div>
+    <button id="btn-lab-close" onclick="toggleLabPanel()">🚀 화성 관제소로 복귀</button>
+  </div>
+</div>
+<div id="canvas-container"></div>
+
+<div id="ui-panel">
+  <div class="step-title" id="step-title">📡 1단계: 지지대 m과 수직 맞추기</div>
+  <div class="guide-text" id="guide-text">현재 정면 시점에서 기둥 l이 녹색 지지대 m과 완벽한 직각(90°)을 이루도록 슬라이더를 조절하세요.</div>
+  
+  <div class="status-box" id="status-box">분석기 가동 중...</div>
+
+  <div id="controls" style="display: flex; flex-direction: column; gap: 8px;">
+    <div class="control-group" id="groupZ">
+      <label id="labelZ">기둥 회전 제어 (지지대 m 방향 정렬)</label>
+      <div class="slider-container">
+        <div class="btn-step" onclick="adjustSlider('sliderZ', -1)">-</div>
+        <input type="range" id="sliderZ" min="-1.0" max="1.0" step="0.01" value="-0.5">
+        <div class="btn-step" onclick="adjustSlider('sliderZ', 1)">+</div>
+      </div>
+    </div>
+    <div class="control-group" id="groupX" style="display:none;">
+      <label id="labelX">기둥 회전 제어 (지지대 n 방향 정렬)</label>
+      <div class="slider-container">
+        <div class="btn-step" onclick="adjustSlider('sliderX', -1)">-</div>
+        <input type="range" id="sliderX" min="-1.0" max="1.0" step="0.01" value="0.6">
+        <div class="btn-step" onclick="adjustSlider('sliderX', 1)">+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-container" id="btn-container-dynamic">
+    <button id="btn-action" disabled>조건 미달성</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mission-modal">
+  <div class="modal-box">
+    <div class="modal-title">MISSION ACCOMPLISHED</div>
+    <div class="modal-text">
+      화성 기지 설계를 위한 지면 수직 기준대 설치 임무를 성공적으로 완수했습니다.<br>
+      교과서 속 공간도형 정리가 실제 건축 공학에 구현되는 과정을 증명했습니다.
+    </div>
+    
+    <div class="btn-container">
+      <button class="btn-warning" onclick="toggleLabPanel(); modal.style.display='none'; modal.style.opacity='0';">🔬 수학실험실에서 교과서 증명 보기</button>
+      <button class="btn-success" onclick="goNext()">┄┄▶ 다음 개념 잇기: 삼수선의 정리</button>
+      <button onclick="goHub()">◀ 사령부로 복귀</button>
+    </div>
+    <script>
+    // 공간잇기 네비게이션: iframe(PC)·직접이동(iOS) 모두 지원
+    function goHub(){
+      try {
+        if(window.parent && window.parent !== window && window.parent.closeGame){ window.parent.closeGame(); return; }
+      } catch(e) {}
+      window.location.href = 'index.html';
+    }
+    function goNext(){
+      try {
+        if(window.parent && window.parent !== window && window.parent.openGame){
+          window.parent.openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리'); return;
+        }
+      } catch(e) {}
+      window.location.href = 'samsuseon.html';
+    }
+    </script>
+
+    <div class="proof-board" id="proof-board">
+      <h4>📐 교과서 기반 입체 증명 단계 <span id="proof-page-indicator">(1 / 5)</span></h4>
+      <p style="color:#aaa; font-size:11px; margin-bottom:5px; text-align: left;">정리: 직선 l이 평면 α 위의 만나는 두 직선 m, n과 각각 수직이면, l은 평면 α와 수직이다.</p>
+      
+      <div class="proof-container">
+        <div class="proof-image-box">
+          <img src="image_65e26e.png" alt="직선과 평면의 수직 증명 도판" onerror="this.style.display='none'; this.parentNode.innerText='[교과서 증명 도판]';">
+        </div>
+        
+        <div class="proof-steps">
+          <div class="proof-step active" data-step="1">
+            <strong>1. 작도 및 가정 설정:</strong><br>
+            교점 O를 지나고 두 직선 m, n 및 임의의 직선 k와 만나는 직선을 그어 교점을 각각 A, B, C라 합니다. 직선 l 위에 선분 OP = 선분 OP'인 대칭점 P, P'을 설정합니다.
+          </div>
+          <div class="proof-step" data-step="2">
+            <strong>2. 수직이등분선과 선분의 길이:</strong><br>
+            두 직선 m, n은 모두 선분 PP'의 수직이등분선이므로 성질에 의해 피라미드 형태의 대응 선분 길이인 선분 AP = 선분 AP', 선분 BP = 선분 BP'이 성립합니다.
+          </div>
+          <div class="proof-step" data-step="3">
+            <strong>3. 첫 번째 삼각형 합동 (삼각형 PAB와 삼각형 P'AB):</strong><br>
+            세 변의 길이가 각각 같으므로(SSS 합동) 두 삼각형은 합동입니다. 이에 대응각인 각 PAC = 각 P'AC가 성립함을 알 수 있습니다.
+          </div>
+          <div class="proof-step" data-step="4">
+            <strong>4. 두 번째 삼각형 합동 (삼각형 PAC와 삼각형 P'AC):</strong><br>
+            두 변 and 그 끼인각이 같으므로(SAS 합동) 두 삼각형 역시 합동입니다. 따라서 최종 대응변인 선분 CP = 선분 CP'이 성립하게 됩니다.
+          </div>
+          <div class="proof-step" data-step="5">
+            <strong>5. 이등변삼각형 결론 (l ⊥ k ➔ l ⊥ α):</strong><br>
+            삼각형 PCP'은 선분 CP = 선분 CP'인 이등변삼각형이고, 점 O는 밑변 PP'의 중점이므로 성질에 의해 선분 PP'과 선분 OC는 수직, 즉 직선 l과 직선 k는 수직임이 증명됩니다! 평면 위 모든 직선과 수직이므로 직선 l은 평면 α와 수직입니다.
+          </div>
+        </div>
+      </div>
+      
+      <div class="proof-nav">
+        <button class="btn-step" id="btn-proof-prev" style="width:auto; padding:0 12px;" disabled>이전</button>
+        <button class="btn-step" id="btn-proof-next" style="width:auto; padding:0 12px; color:#00ff88;">다음 단계</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- 1. 환경 및 시각 엔진 구성 ---
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+
+// 기본 화성 모드 배경색상 정의
+const bgColorMain = new THREE.Color(0x05070f);
+const bgColorLab = new THREE.Color(0xe2e8f0); 
+
+scene.background = bgColorMain;
+scene.fog = new THREE.FogExp2(0x05070f, 0.03);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+let targetCamPos = new THREE.Vector3(0, 3, 14); 
+camera.position.copy(targetCamPos);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enablePan = false;
+controls.target.set(0, 2.5, 0);
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffedd5, 1.0);
+dirLight.position.set(10, 20, 8);
+scene.add(dirLight);
+
+// --- 우주 별빛 파티클 시스템 ---
+const starsCount = 700;
+const starsGeo = new THREE.BufferGeometry();
+const starsPos = new Float32Array(starsCount * 3);
+for(let i=0; i<starsCount; i++) {
+  const u = Math.random();
+  const v = Math.random();
+  const theta = u * 2.0 * Math.PI;
+  const phi = Math.acos(2.0 * v - 1.0);
+  const r = 70 + Math.random() * 60;
+  starsPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+  starsPos[i*3+1] = Math.abs(r * Math.sin(phi) * Math.sin(theta)) + 2; 
+  starsPos[i*3+2] = r * Math.cos(phi);
+}
+starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+const starsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.35, transparent: true, opacity: 0.8 });
+const starfield = new THREE.Points(starsGeo, starsMat);
+scene.add(starfield);
+
+// --- 2. 화성 지형 생성 ---
+const terrainWidth = 32;
+const terrainGeo = new THREE.PlaneGeometry(terrainWidth, terrainWidth, 30, 30);
+const posAttr = terrainGeo.attributes.position;
+for (let i = 0; i < posAttr.count; i++) {
+  const x = posAttr.getX(i);
+  const y = posAttr.getY(i);
+  const dist = Math.sqrt(x*x + y*y);
+  let zHeight = 0;
+  if (dist > 2.5) { 
+    zHeight = (Math.sin(x * 0.4) * Math.cos(y * 0.4) * 0.5);
+  }
+  posAttr.setZ(i, zHeight);
+}
+terrainGeo.computeVertexNormals();
+const terrainMat = new THREE.MeshStandardMaterial({ color: 0xb1340e, roughness: 0.9, flatShading: true, side: THREE.DoubleSide });
+const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+terrain.rotation.x = -Math.PI / 2;
+scene.add(terrain);
+
+// --- 3. 3D 텍스트 레이블 시스템 (뎁스 보정 적용 완료) ---
+function createLabelTexture(text, color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.font = 'bold 44px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 32, 32);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.6, 0.6, 1);
+  
+  // 메쉬 뒤로 가려지거나 잘리지 않도록 깊이 버퍼 오버라이드 고정
+  sprite.material.depthTest = false;
+  sprite.material.depthWrite = false;
+  sprite.renderOrder = 9999;
+  
+  return sprite;
+}
+
+// --- 4. 지지대 및 기둥 구성 (정밀 위치 및 색상 완전 보정판) ---
+function createVisualSupport(color, dirVec, labelText) {
+  const group = new THREE.Group();
+  
+  const pipeGeo = new THREE.CylinderGeometry(0.06, 0.06, 24, 12);
+  pipeGeo.rotateZ(Math.PI / 2); 
+  const pipeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5, roughness: 0.5 });
+  const pipe = new THREE.Mesh(pipeGeo, pipeMat);
+  group.add(pipe);
+  
+  const neonGeo = new THREE.CylinderGeometry(0.04, 0.04, 24, 6);
+  neonGeo.rotateZ(Math.PI / 2);
+  const neonMat = new THREE.MeshBasicMaterial({ color: color });
+  const neon = new THREE.Mesh(neonGeo, neonMat);
+  neon.position.y = 0.05; 
+  group.add(neon);
+
+  const defaultDir = new THREE.Vector3(1, 0, 0);
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(defaultDir, dirVec.clone().normalize());
+  group.setRotationFromQuaternion(quaternion);
+  group.position.y = 0.02; 
+
+  const label = createLabelTexture(labelText, '#ffffff');
+  const labelPos = dirVec.clone().normalize().multiplyScalar(4.5);
+  label.position.set(labelPos.x, 0.6, labelPos.z);
+  
+  const inverseQ = quaternion.clone().invert();
+  label.position.applyQuaternion(inverseQ); 
+  group.add(label);
+  
+  return group;
+}
+
+function createLaserLine(color, dirVec) {
+  const points = [new THREE.Vector3().copy(dirVec).multiplyScalar(-12), new THREE.Vector3().copy(dirVec).multiplyScalar(12)];
+  const geo = new THREE.BufferGeometry().setFromPoints(points);
+  const mat = new THREE.LineBasicMaterial({ color: color, linewidth: 3 });
+  const line = new THREE.Line(geo, mat);
+  line.position.y = 0.08; 
+  return line;
+}
+
+const dirM = new THREE.Vector3(1, 0, 0); 
+const angleOblique = Math.PI / 3; 
+const dirN = new THREE.Vector3(Math.cos(angleOblique), 0, Math.sin(angleOblique)).normalize();
+
+const lineM = createVisualSupport(0x00ff66, dirM, 'm'); 
+const lineN = createVisualSupport(0x00d4ff, dirN, 'n'); 
+const lineG = createLaserLine(0xffff00, new THREE.Vector3(1, 0, 0)); 
+
+scene.add(lineM);
+scene.add(lineN);
+scene.add(lineG);
+
+lineN.visible = false;
+lineG.visible = false;
+
+const antennaGroup = new THREE.Group();
+const antennaMesh = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.07, 0.11, 5, 16).translate(0, 2.5, 0),
+  new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.6, roughness: 0.2 })
+);
+antennaGroup.add(antennaMesh);
+const mainLabel = createLabelTexture('l', '#00ff88');
+mainLabel.position.set(0, 5.3, 0);
+antennaGroup.add(mainLabel);
+scene.add(antennaGroup);
+
+// --- 5. 상태 및 UI 제어 인터랙션 변수 정의 ---
+let state = 'STEP1'; 
+let wobbleTime = 0;
+let scanAngle = 0;
+let finishTimer = 0;
+let autoRotateAngle = 0;
+
+const sliderX = document.getElementById('sliderX');
+const sliderZ = document.getElementById('sliderZ');
+const statusBox = document.getElementById('status-box');
+const guideText = document.getElementById('guide-text');
+const stepTitle = document.getElementById('step-title');
+const modal = document.getElementById('mission-modal');
+const dynamicBtnContainer = document.getElementById('btn-container-dynamic');
+
+let proofMeshGroup = new THREE.Group();
+scene.add(proofMeshGroup);
+
+window.adjustSlider = function(id, direction) {
+  const input = document.getElementById(id);
+  if(input.disabled) return;
+  let val = parseFloat(input.value);
+  let step = parseFloat(input.step) || 0.01;
+  val += direction * step;
+  if(val > parseFloat(input.max)) val = parseFloat(input.max);
+  if(val < parseFloat(input.min)) val = parseFloat(input.min);
+  input.value = val;
+};
+
+antennaGroup.rotation.z = 0.5;
+antennaGroup.rotation.x = 0.0;
+
+function updateLogic() {
+  if (state !== 'STEP3_COMPLETE_SHOW' && state !== 'STEP4' && state !== 'STEP_SUMMARY' && state !== 'PROOF_INTERACTION_MODE') {
+    camera.position.lerp(targetCamPos, 0.04);
+    controls.enabled = false; 
+  } else if (state === 'STEP3_COMPLETE_SHOW') {
+    // 3단계 완료 애니메이션 시점 제어
+    autoRotateAngle += 0.008; 
+    camera.position.x = 15 * Math.sin(autoRotateAngle);
+    camera.position.z = 15 * Math.cos(autoRotateAngle);
+    camera.position.y = 3.5; 
+    camera.lookAt(0, 2.5, 0);
+    controls.enabled = false;
+  } else if (state === 'STEP4' || state === 'STEP_SUMMARY' || state === 'PROOF_INTERACTION_MODE') {
+    controls.enabled = true;
+  }
+
+  const currentX = parseFloat(sliderX.value);
+  const currentZ = parseFloat(sliderZ.value);
+
+  if (state === 'STEP1') {
+    antennaGroup.rotation.z = -currentZ;
+    antennaGroup.rotation.x = currentX; 
+
+    const btnAction = document.getElementById('btn-action');
+    if (Math.abs(currentZ) < 0.02) {
+      statusBox.innerHTML = `📐 [정면 분석 결과]: 기둥 l ⊥ 지지대 m<br>➔ 정면 관점 사잇각: 90° (수직 조건 일시 충족)`;
+      statusBox.style.color = "#00ff88";
+      if (btnAction) {
+        btnAction.disabled = false;
+        btnAction.innerText = "다른 관점에서 검증하기";
+        btnAction.className = "btn-success";
+      }
+    } else {
+      statusBox.innerHTML = `❌ [정면 분석 결과]: 수직 정렬 이탈<br>➔ 지지대 m과 직각이 되도록 슬라이더를 맞추십시오.`;
+      statusBox.style.color = "#ff4455";
+      if (btnAction) {
+        btnAction.disabled = true;
+        btnAction.innerText = "조건 미달성";
+        btnAction.className = "";
+      }
+    }
+  }
+  else if (state === 'STEP2_VIEW') {
+    statusBox.innerHTML = `❓ 다른 측면에서 관측 중입니다.<br>기둥(l)이 정말로 지면 및 지지대와 수직입니까?`;
+    statusBox.style.color = "#ffaa00";
+  }
+  else if (state === 'STEP2_WOBBLE') {
+    wobbleTime += 0.05;
+    antennaGroup.rotation.z = 0; 
+    antennaGroup.rotation.x = currentX + Math.sin(wobbleTime) * 0.4; 
+
+    statusBox.innerHTML = `⚡ [구조 분석] 하나의 직선(m)과 수직인 기둥은 힌지 축처럼 작용하여 앞뒤로 회전하며 흔들립니다. 즉, 고정되지 않습니다.`;
+    statusBox.style.color = "#ff4455";
+  }
+  else if (state === 'STEP3') {
+    antennaGroup.rotation.x = currentX;
+    antennaGroup.rotation.z = -currentZ;
+
+    const antDir = new THREE.Vector3(0, 1, 0).applyEuler(antennaGroup.rotation).normalize();
+    const dotM = Math.abs(antDir.dot(dirM));
+    const dotN = Math.abs(antDir.dot(dirN));
+    const btnAction = document.getElementById('btn-action');
+
+    if (dotM < 0.02 && dotN < 0.02) {
+      statusBox.innerHTML = `✔ [정렬 완료]: 평면 고정축 대칭 고정 성공!<br>➔ 기둥(l) ⊥ 지지대(m) [녹색]<br>➔ 기둥(l) ⊥ 지지대(n) [청색]`;
+      statusBox.style.color = "#00ff88";
+      if (btnAction) {
+        btnAction.disabled = false;
+        btnAction.innerText = "전방위 수직 교차 시점 자동 검증";
+        btnAction.className = "btn-success";
+      }
+    } else {
+      statusBox.innerHTML = `⚠️ [두 직선과 수직]<br>➔ m(녹색 오차): ${dotM.toFixed(3)}<br>➔ n(청색 오차): ${dotN.toFixed(3)}`;
+      statusBox.style.color = "#ffa500";
+      if (btnAction) {
+        btnAction.disabled = true;
+        btnAction.innerText = "조건 미달성";
+        btnAction.className = "";
+      }
+    }
+  }
+  else if (state === 'STEP3_COMPLETE_SHOW') {
+    finishTimer++;
+    if(finishTimer > 160) {
+       state = 'STEP3_READY_LASER';
+       stepTitle.innerText = "🛡️ 4단계: 평면의 수직 최종 스캔 검증";
+       guideText.innerText = "최종 검증 단계입니다. 버튼을 눌러 평면 위를 무한 회전하는 가상 광선 g선 레이저를 가동하세요.";
+       dynamicBtnContainer.innerHTML = `<button id="btn-action" class="btn-success">최종 전방위 교차 레이저 스캔 가동</button>`;
+    }
+  }
+  else if (state === 'STEP4') {
+    scanAngle += 0.04;
+    lineG.rotation.y = scanAngle;
+    antennaGroup.rotation.set(0,0,0); 
+
+    statusBox.innerHTML = `🛡️ [수학적 정리 실시간 입증]<br>만나는 두 직선과 수직인 기둥은 평면 위의 모든 직선(g)과 직교합니다.<br>➔ 스캔각: ${(Math.round(scanAngle*(180/Math.PI))%360)}° | 공간 내적: 0.0000`;
+    statusBox.style.color = "#00ffff";
+
+    finishTimer += 1;
+    if(finishTimer > 180) { 
+      buildSummaryPhase(); 
+    }
+  }
+}
+
+window.handleStep2Choice = function(isPerp) {
+  if (isPerp) {
+    alert("🛸 분석 경고: 정면 시각의 왜곡입니다. 측면에서 보니 기둥이 확연히 앞으로 기울어져 고정되지 못했습니다!");
+  } else {
+    state = 'STEP2_WOBBLE';
+    guideText.innerText = "정답입니다. 한 직선과만 수직이면 공간상에서 기둥이 고정되지 못하고 앞뒤축을 따라 흔들리게 됩니다.";
+    dynamicBtnContainer.innerHTML = `<button id="btn-action" class="btn-success">3단계: 교차 지지대 n 추가 설치</button>`;
+  }
+};
+
+dynamicBtnContainer.addEventListener('click', (e) => {
+  const target = e.target;
+  if (!target || target.disabled) return;
+
+  if (target.id === 'btn-action') {
+    if (state === 'STEP1') {
+      state = 'STEP2_VIEW';
+      targetCamPos.set(11, 4, 7); 
+      stepTitle.innerText = "📡 2단계: 측면 시점 교차 검증";
+      guideText.innerText = "카메라를 90도 회전했습니다. 정면에서 수직처럼 보이던 기둥이 완벽하게 지면과 수직을 유지하고 있습니까?";
+      document.getElementById('sliderZ').disabled = true;
+      document.getElementById('sliderX').disabled = true;
+      
+      dynamicBtnContainer.innerHTML = `
+        <div class="btn-row">
+          <button class="btn-danger" onclick="handleStep2Choice(true)">예 (수직임)</button>
+          <button class="btn-success" onclick="handleStep2Choice(false)">아니오 (기울어져 있음)</button>
+        </div>
+      `;
+    } 
+    else if (state === 'STEP2_WOBBLE') {
+      state = 'STEP3';
+      lineN.visible = true; 
+      wobbleTime = 0;
+      targetCamPos.set(11.0, 3.5, -6.5); 
+      
+      document.getElementById('groupX').style.display = 'block'; 
+      document.getElementById('sliderZ').disabled = false;
+      document.getElementById('sliderX').disabled = false;
+      stepTitle.innerText = "📡 3단계: 두 지지대와 동시에 수직 맞추기";
+      guideText.innerText = "지지대 n이 가로 형태로 시야에 정렬되었습니다. 두 지지대 m(녹색)과 n(청색) 모두와 동시에 완벽한 수직이 되도록 정밀 제어하세요.";
+      
+      dynamicBtnContainer.innerHTML = `<button id="btn-action" disabled>조건 미달성</button>`;
+    }
+    else if (state === 'STEP3') {
+      state = 'STEP3_COMPLETE_SHOW';
+      finishTimer = 0;
+      autoRotateAngle = Math.atan2(camera.position.x, camera.position.z);
+      document.getElementById('sliderZ').disabled = true;
+      document.getElementById('sliderX').disabled = true;
+      statusBox.innerHTML = `⚙️ 전방위 수직 일치 상태 자동 분석 락 가동...`;
+    }
+    else if (state === 'STEP3_READY_LASER') {
+      state = 'STEP4';
+      lineG.visible = true;
+      finishTimer = 0;
+      // [보정 완료] 4단계 진입 시 카메라의 현재 원형 트래킹 위치를 제어 장치에 동기화하여 갑작스러운 줌인/위치 튕김 현상 방지
+      controls.target.set(0, 2.5, 0);
+      targetCamPos.copy(camera.position); 
+      controls.enabled = true;
+      document.getElementById('controls').style.display = 'none';
+      dynamicBtnContainer.innerHTML = '';
+      guideText.innerText = "기둥이 완벽히 수직 고정되었습니다. 무한히 회전하는 가상 광선 g선이 실시간으로 직각을 그리는지 감상하세요.";
+    }
+  } 
+  else if (target.id === 'btn-quiz-submit') {
+    const answer = document.getElementById('quiz-select').value;
+    if(answer === 'correct') {
+      state = 'FINISHED';
+      modal.style.display = 'flex';
+      setTimeout(() => { modal.style.opacity = '1'; }, 50);
+    } else {
+      alert("⚠️ 개념 정의 오류: 시뮬레이션에서 기둥과 지지대가 이룬 각도를 다시 한번 생각해보세요!");
+    }
+  }
+});
+
+function buildSummaryPhase() {
+  state = 'STEP_SUMMARY';
+  dynamicBtnContainer.style.display = 'block';
+  stepTitle.innerText = "📝 핵심 기하학 개념 최종 정리";
+  guideText.innerText = "탐구를 통해 완성된 기하학적 정리를 요약 문장으로 완성하고 설계 승인을 신청하세요.";
+  
+  statusBox.innerHTML = `
+    <div style="font-family:inherit; font-size:12px; color:#fff; line-height:1.7;">
+      직선 l이 평면 α 위의 만나는 두 직선 m, n과 각각 
+      <select id="quiz-select" style="background:#152238; color:#00ff88; border:1px solid #2e436e; font-weight:bold; padding:2px; border-radius:3px; outline:none;">
+        <option value="wrong">평행</option>
+        <option value="wrong">꼬인위치</option>
+        <option value="correct">수직</option>
+      </select> 일 때, <br>
+      직선 l은 평면 α와 두 직선을 이루는 평면과 수직이 된다.
+    </div>
+  `;
+  dynamicBtnContainer.innerHTML = `<button id="btn-quiz-submit" class="btn-success">개념 검증 및 기지 최종 승인</button>`;
+}
+
+// --- 6. 대화형 입체 합동 모듈 ---
+let currentProofStep = 1;
+const totalProofSteps = 5;
+
+const proofStepsEls = document.querySelectorAll('.proof-step');
+const btnProofPrev = document.getElementById('btn-proof-prev');
+const btnProofNext = document.getElementById('btn-proof-next');
+const proofPageIndicator = document.getElementById('proof-page-indicator');
+
+const pO = new THREE.Vector3(0, 0, 0);
+const pP = new THREE.Vector3(0, 3.2, 0);   
+const pP_ = new THREE.Vector3(0, -3.2, 0); 
+const pA = new THREE.Vector3(3.5, 0, 0); 
+const pB = new THREE.Vector3(1.2, 0, 2.8); 
+const pC = new THREE.Vector3().lerpVectors(pA, pB, 0.42); 
+
+function makeProofNode(pos, name, colorHex = '#000000') {
+  const group = new THREE.Group();
+  
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0x222222 })
+  );
+  sphere.position.copy(pos);
+  group.add(sphere);
+  
+  const sprite = createLabelTexture(name, colorHex); 
+  
+  if (name === 'O') {
+    sprite.position.copy(pos).add(new THREE.Vector3(0.4, 0.2, 0.4));
+  } else if (name === 'P') {
+    sprite.position.copy(pos).add(new THREE.Vector3(0, 0.5, 0));
+  } else if (name === "P'") {
+    sprite.position.copy(pos).add(new THREE.Vector3(0, -0.5, 0));
+  } else {
+    sprite.position.copy(pos).add(new THREE.Vector3(0, 0.5, 0));
+  }
+  
+  group.add(sprite);
+  return group;
+}
+
+function makeProofLine(v1, v2, colorHex, isDashed=false) {
+  const geom = new THREE.BufferGeometry().setFromPoints([v1, v2]);
+  let mat;
+  if(isDashed) {
+    mat = new THREE.LineDashedMaterial({ color: colorHex, dashSize: 0.4, gapSize: 0.2, linewidth: 3 });
+  } else {
+    mat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 3.5 });
+  }
+  const line = new THREE.Line(geom, mat);
+  if(isDashed) line.computeLineDistances();
+  return line;
+}
+
+function drawProofTriangle(v1, v2, v3, colorHex) {
+  const geom = new THREE.BufferGeometry();
+  const vertices = new Float32Array([
+    v1.x, v1.y, v1.z,  v2.x, v2.y, v2.z,  v3.x, v3.y, v3.z,
+    v1.x, v1.y, v1.z,  v3.x, v3.y, v3.z,  v2.x, v2.y, v2.z
+  ]);
+  geom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  geom.computeVertexNormals();
+  
+  const mat = new THREE.MeshStandardMaterial({ 
+    color: colorHex, 
+    transparent: true, 
+    opacity: 0.65,       
+    side: THREE.DoubleSide,
+    roughness: 0.4,
+    metalness: 0.1
+  });
+  return new THREE.Mesh(geom, mat);
+}
+
+function makeRightAngleMarker(vecDir, colorHex) {
+  const marker = new THREE.Group();
+  const size = 0.35;
+  const p1 = new THREE.Vector3(size, 0, 0);
+  const p2 = new THREE.Vector3(size, size, 0);
+  const p3 = new THREE.Vector3(0, size, 0);
+  
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([pO, p1, p2, p3]),
+    new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2.5 })
+  );
+  
+  const angle = Math.atan2(vecDir.z, vecDir.x);
+  line.rotation.y = -angle;
+  marker.add(line);
+  return marker;
+}
+
+function updateProofGeometryEngine(stepNum) {
+  while(proofMeshGroup.children.length > 0){
+    proofMeshGroup.remove(proofMeshGroup.children[0]);
+  }
+  
+  lineM.visible = false; lineN.visible = false; lineG.visible = false;
+  antennaGroup.visible = false; terrain.visible = false;
+
+  const alphaPlane = new THREE.Mesh(
+    new THREE.CylinderGeometry(6.0, 6.0, 0.02, 32),
+    new THREE.MeshStandardMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.4, side: THREE.DoubleSide })
+  );
+  alphaPlane.position.y = -0.01;
+  proofMeshGroup.add(alphaPlane);
+
+  const alphaLabel = createLabelTexture('α', '#1e40af');
+  alphaLabel.position.set(-4.5, 0.1, -4.5);
+  proofMeshGroup.add(alphaLabel);
+
+  proofMeshGroup.add(makeProofLine(new THREE.Vector3(0, -4.5, 0), new THREE.Vector3(0, 4.5, 0), 0x334155)); 
+  const labelL = createLabelTexture('l', '#00ff88');
+  labelL.position.set(0, 4.8, 0);
+  proofMeshGroup.add(labelL);
+
+  const vecM = pA.clone().normalize();
+  proofMeshGroup.add(makeProofLine(vecM.clone().multiplyScalar(-5.5), vecM.clone().multiplyScalar(5.5), 0x059669)); 
+  const labelM = createLabelTexture('m', '#059669');
+  labelM.position.copy(vecM).multiplyScalar(5.0).setY(0.25); 
+  proofMeshGroup.add(labelM);
+
+  const vecN = pB.clone().normalize();
+  proofMeshGroup.add(makeProofLine(vecN.clone().multiplyScalar(-5.5), vecN.clone().multiplyScalar(5.5), 0x0284c7)); 
+  const labelN = createLabelTexture('n', '#0284c7');
+  labelN.position.copy(vecN).multiplyScalar(5.0).setY(0.25); 
+  proofMeshGroup.add(labelN);
+
+  const vecK = pC.clone().normalize();
+  proofMeshGroup.add(makeProofLine(vecK.clone().multiplyScalar(-5.5), vecK.clone().multiplyScalar(5.5), 0xd97706, true)); 
+  const labelK = createLabelTexture('k', '#d97706');
+  labelK.position.copy(vecK).multiplyScalar(5.2).setY(0.25); 
+  proofMeshGroup.add(labelK);
+
+  if (stepNum >= 1) {
+    proofMeshGroup.add(makeProofNode(pO, 'O', '#111111')); 
+    proofMeshGroup.add(makeProofNode(pP, 'P', '#111111'));
+    proofMeshGroup.add(makeProofNode(pP_, "P'", '#111111'));
+    proofMeshGroup.add(makeProofNode(pA, 'A', '#111111'));
+    proofMeshGroup.add(makeProofNode(pB, 'B', '#111111'));
+    proofMeshGroup.add(makeProofNode(pC, 'C', '#111111'));
+    
+    proofMeshGroup.add(makeProofLine(pA, pB, 0x475569)); 
+  }
+
+  if (stepNum === 2) {
+    proofMeshGroup.add(makeProofLine(pP, pA, 0xd946ef));  
+    proofMeshGroup.add(makeProofLine(pP_, pA, 0xd946ef));
+    proofMeshGroup.add(makeProofLine(pP, pB, 0x0ea5e9));  
+    proofMeshGroup.add(makeProofLine(pP_, pB, 0x0ea5e9));
+  }
+
+  if (stepNum === 3) {
+    const triPAB = drawProofTriangle(pP, pA, pB, 0xf59e0b);   
+    const triP_AB = drawProofTriangle(pP_, pA, pB, 0xb45309);  
+    proofMeshGroup.add(triPAB, triP_AB);
+    
+    proofMeshGroup.add(makeProofLine(pP, pA, 0xd97706), makeProofLine(pP, pB, 0xd97706));
+    proofMeshGroup.add(makeProofLine(pP_, pA, 0xb45309), makeProofLine(pP_, pB, 0xb45309));
+  }
+
+  if (stepNum === 4) {
+    const triPAC = drawProofTriangle(pP, pA, pC, 0x06b6d4);   
+    const triP_AC = drawProofTriangle(pP_, pA, pC, 0x0369a1);  
+    proofMeshGroup.add(triPAC, triP_AC);
+
+    proofMeshGroup.add(makeProofLine(pP, pC, 0x0891b2), makeProofLine(pP_, pC, 0x0369a1));
+  }
+
+  if (stepNum === 5) {
+    const triPCP_ = drawProofTriangle(pP, pC, pP_, 0xec4899); 
+    proofMeshGroup.add(triPCP_);
+
+    proofMeshGroup.add(makeProofLine(pO, pC, 0xbe185d));
+    proofMeshGroup.add(makeRightAngleMarker(pC, '#be185d'));
+  }
+}
+
+function updateProofUI() {
+  proofStepsEls.forEach(el => el.classList.remove('active'));
+  document.querySelector(`.proof-step[data-step="${currentProofStep}"]`).classList.add('active');
+  
+  proofPageIndicator.innerText = `(${currentProofStep} / ${totalProofSteps})`;
+  
+  btnProofPrev.disabled = (currentProofStep === 1);
+  btnProofNext.disabled = false;
+  
+  if(currentProofStep === totalProofSteps) {
+    btnProofNext.innerText = "탐구 마스터";
+    btnProofNext.style.background = "#065f46";
+  } else {
+    btnProofNext.innerText = "다음 단계";
+    btnProofNext.style.background = "";
+  }
+  
+  updateProofGeometryEngine(currentProofStep);
+}
+
+btnProofPrev.addEventListener('click', () => {
+  if(currentProofStep > 1) {
+    currentProofStep--;
+    updateProofUI();
+  }
+});
+
+btnProofNext.addEventListener('click', () => {
+  if(currentProofStep < totalProofSteps) {
+    currentProofStep++;
+    updateProofUI();
+  } else {
+    alert("축하합니다! 공간도형 핵심 정리 증명 과정을 마스터하셨습니다.");
+  }
+});
+
+// --- 7. 수학실험실 패널 제어 시스템 ---
+let labOpen = false;
+let currentLabStep = 1;
+const totalLabSteps = 5;
+
+(function initLabDots() {
+  const dotsEl = document.getElementById('lab-dots');
+  for (let i = 1; i <= totalLabSteps; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'lab-dot' + (i === 1 ? ' active' : '');
+    dot.setAttribute('data-step', i);
+    dot.addEventListener('click', function() { goLabStep(parseInt(this.getAttribute('data-step'))); });
+    dotsEl.appendChild(dot);
+  }
+})();
+
+function goLabStep(n) {
+  currentLabStep = Math.max(1, Math.min(totalLabSteps, n));
+  
+  document.querySelectorAll('.lab-step-card').forEach(function(el) {
+    el.classList.toggle('active', parseInt(el.getAttribute('data-lab-step')) === currentLabStep);
+  });
+
+  document.querySelectorAll('.lab-dot').forEach(function(dot) {
+    var s = parseInt(dot.getAttribute('data-step'));
+    dot.className = 'lab-dot' + (s < currentLabStep ? ' done' : s === currentLabStep ? ' active' : '');
+  });
+
+  document.getElementById('lab-prog-fill').style.width = (currentLabStep / totalLabSteps * 100) + '%';
+  document.getElementById('lab-page-indicator').textContent = currentLabStep + ' / ' + totalLabSteps;
+
+  document.getElementById('btn-lab-prev').disabled = currentLabStep === 1;
+  const nextBtn = document.getElementById('btn-lab-next');
+  if (currentLabStep === totalLabSteps) {
+    nextBtn.textContent = '증명 완료!';
+    nextBtn.style.background = '#1a4a2a';
+    nextBtn.style.color = '#44ff88';
+    nextBtn.disabled = true;
+  } else {
+    nextBtn.textContent = '다음 단계 ▶';
+    nextBtn.style.background = '';
+    nextBtn.style.color = '';
+    nextBtn.disabled = false;
+  }
+
+  updateProofGeometryEngine(currentLabStep);
+}
+
+function labNav(dir) {
+  goLabStep(currentLabStep + dir);
+}
+
+function toggleLabPanel() {
+  let panel = document.getElementById('lab-panel');
+  let tabBtn = document.getElementById('lab-tab-btn');
+  labOpen = !labOpen;
+
+  if (labOpen) {
+    panel.classList.add('open');
+    tabBtn.classList.add('active');
+    tabBtn.querySelector('.lab-tab-dot').style.background = '#cc99ff';
+    
+    scene.background = bgColorLab;
+    scene.fog = null; 
+    
+    state = 'PROOF_INTERACTION_MODE';
+    targetCamPos.set(6.5, 4.0, 7.5);
+    camera.position.copy(targetCamPos);
+    controls.target.set(0, 0, 0);
+    goLabStep(currentLabStep);
+  } else {
+    panel.classList.remove('open');
+    tabBtn.classList.remove('active');
+    tabBtn.querySelector('.lab-tab-dot').style.background = '#7744cc';
+    
+    scene.background = bgColorMain;
+    scene.fog = new THREE.FogExp2(0x05070f, 0.03);
+    
+    state = 'STEP_SUMMARY';
+    lineM.visible = true; lineN.visible = true; lineG.visible = true;
+    antennaGroup.visible = true; terrain.visible = true;
+    while (proofMeshGroup.children.length > 0) {
+      proofMeshGroup.remove(proofMeshGroup.children[0]);
+    }
+    // 복귀 시 줌인 현상 및 타겟 오정렬 방지 보정
+    targetCamPos.set(0, 3, 14);
+    camera.position.copy(targetCamPos);
+    controls.target.set(0, 2.5, 0);
+  }
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// --- 8. 애니메이션 루프 및 실행 초기화 ---
+function animate() {
+  requestAnimationFrame(animate);
+  updateLogic();
+  
+  if (state !== 'PROOF_INTERACTION_MODE') {
+    starfield.rotation.y += 0.0001;
+  }
+  
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+</body>
+</html>
