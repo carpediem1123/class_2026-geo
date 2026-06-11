@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a1020">
 <!-- GitHub Pages: 이 파일을 /docs/jeongsaeyeong.html 또는 루트에 두면 됩니다 -->
 <!-- 삼수선 모듈 병합 시: index.html에서 iframe 또는 JS import로 분리 로드 권장 -->
-<title>정사영 탐구 — 화성 Arcturus</title>
+<title>공간잇기 M02 — 정사영 탐구</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
@@ -28,6 +28,10 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 .tab{background:#0a1428;border:2px solid #1e3060;border-radius:8px;color:#5577aa;
     padding:7px 13px;font-size:13px;font-weight:bold;cursor:pointer;flex-shrink:0}
 .tab.on{background:#1a2e60;border-color:#5588dd;color:#ccdeff}
+.tab.done{border-color:#ffcc44 !important;color:#ffee88 !important}
+.tab.locked{opacity:.4;cursor:not-allowed;filter:saturate(.5)}
+@keyframes blinkBtn{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,170,68,.55)}50%{opacity:.5;box-shadow:0 0 18px 7px rgba(255,170,68,.4)}}
+.lbtn.blink{animation:blinkBtn 1s ease-in-out infinite}
 .hb{background:#162040;border:1.5px solid #2a4070;border-radius:7px;color:#99bbdd;
     padding:6px 11px;font-size:12px;cursor:pointer;flex-shrink:0}
 .hb:hover{border-color:#5577bb;color:#ccdeff}
@@ -120,6 +124,15 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 .mhint{font-size:13px;color:#77bb99;line-height:1.7;background:#060e10;
     border:1px solid #1a3a22;border-radius:6px;padding:8px 11px;
     margin:0 13px 6px;flex-shrink:0;white-space:pre-line}
+.msl-box{margin:0 13px 6px;background:#06150c;border:1px solid #1d4a2e;border-radius:8px;padding:9px 10px;flex-shrink:0}
+.msl-row{display:flex;align-items:center;gap:8px}
+.msl-row .thsl{flex:1;min-width:0}
+.msl-btn{width:36px;height:36px;flex-shrink:0;border-radius:8px;border:1px solid #2a5a3a;
+    background:#0a2818;color:#44ffaa;font-size:20px;font-weight:bold;cursor:pointer;line-height:1;
+    display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none}
+.msl-btn:active{background:#0f3a22}
+.msl-val{text-align:center;font-size:12px;color:#88bb99;margin-top:7px}
+.msl-val span{color:#44ffaa;font-weight:bold;font-size:14px}
 .mdn{background:#062010;border:2px solid #00aa44;border-radius:8px;
     padding:6px 12px;text-align:center;margin:0 13px 4px;flex-shrink:0;display:none}
 .mdn-t{font-size:13px;color:#44ff88;font-weight:bold}
@@ -210,6 +223,58 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 #lp3inner{display:none;flex-direction:column;align-items:center;justify-content:center;
     flex:1;gap:12px;padding:16px;text-align:center;background:#160000}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.85}}
+
+/* ── 심화 패널 ── */
+/* ── 심화 패널 전체화면 고도화 ── */
+#advPanel {
+  position: fixed;   /* 화면 전체에 독점 배치 */
+  top: 0;
+  left: 0;
+  width: 100vw;      /* 가로 100% 꽉 채움 */
+  height: 100vh;     /* 세로 100% 꽉 채움 */
+  background: #0a1020;
+  z-index: 9999;     /* 메인화면 3D 및 패널보다 무조건 위 */
+  display: none;     /* 평소에는 숨김 */
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 전체화면 내부에 iframe을 빈틈없이 채우는 설정 */
+#advPanel iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* 기본 탐구 모드로 안전하게 돌아갈 수 있는 고정 UI 버튼 */
+#advCloseBtn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 10000;    /* iframe보다 위에 배치 */
+  padding: 10px 18px;
+  background: rgba(13, 28, 56, 0.9);
+  color: #88ccff;
+  border: 1.5px solid #2a4070;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
+}
+#advCloseBtn:hover {
+  background: #1e3563;
+  color: #ffffff;
+  border-color: #5588ff;
+}
+
+/* 기존 우측 좁은 공간에서 쓰이던 불필요한 퀴즈 UI 레이아웃 요소들은 완전히 숨기거나 제거 */
+.adv-tabs, .adv-scroll, .adv-card, .adv-choices, .adv-ans-box {
+  display: none !important;
+}
+
+
 </style>
 </head>
 <body>
@@ -217,6 +282,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
   <div id="hd">
     <span class="ti">☀️ 정사영 탐구</span>
     <button class="tab on" id="tab1">📐 개념탐구</button>
+    <button id="tab3" class="tab">⚡ 공간잇기(空間-IT-gi) </button>
     <button class="tab" id="tab2">🚀 미션탐구</button>
     <div style="width:1px;height:24px;background:#1e3060;margin:0 2px;flex-shrink:0"></div>
     <button class="hb on" id="bM">🪐 Mars</button>
@@ -226,6 +292,11 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
     <button class="hb" id="bHub" onclick="window.location.href='index.html'" style="display:none">◀ 사령부</button>
   </div>
   <div id="bd">
+  <!-- ══ 심화문제 iframe ══ -->
+<div id="advPanel">
+  <iframe src="about:blank"></iframe>
+</div>  <!-- /advPanel -->
+
     <div id="lp">
       <div id="lp3inner">
         <div style="font-size:32px;animation:blink 1s ease-in-out infinite">🚨</div>
@@ -276,7 +347,24 @@ S'/S 값을 보며 다음 중 [?]에
               <div class="fm">S' = S · cos θ</div>
               <div class="fs">패널-지면 이면각이 θ일 때</div>
             </div>
-            <button class="gobtn" id="goMission">🚀 미션 탐구로 →</button>
+
+            <!-- ══ 수선의 발 카드 ══ -->
+            <div class="iq-card show" id="footCard" style="display:block;margin:6px 13px">
+              <div class="iq-tt" style="color:#ffaa44;letter-spacing:1px">📌 핵심 개념 — 정사영과 수선의 발</div>
+              <div class="iq-bd" style="font-size:12.5px;line-height:1.85;margin-bottom:10px">도형 S 위의 <b style="color:#44ffaa">모든 점</b>에서 평면 α로 수직을 내립니다. 이때, 수선의 발들로 이루어진 도형이 바로 <b style="color:#cc88ff">S′(정사영)</b>!</div>
+              <button class="gobtn" id="footAnimBtn"
+                style="background:#0a1f18;border-color:#22aa66;color:#44ffaa;
+                       font-size:13px;padding:9px;margin:0 0 8px">
+                ▶ 수선의 발 애니메이션 보기
+              </button>
+              <div id="footAnimMsg" style="display:none;font-size:12px;color:#88ffaa;
+                   background:#041208;border:1px solid #115522;border-radius:6px;
+                   padding:7px 10px;line-height:1.75;white-space:pre-line;margin-bottom:6px">수선의 발을 수직으로 떨어뜨립니다...</div>
+            </div>
+            <!-- ══ /수선의 발 카드 ══ -->
+
+            <button class="gobtn" id="goMission">🌌 공간잇기로 →</button>
+            <button class="gobtn" id="goMission2" style="display:none;background:#1a3a10;border-color:#55cc44;color:#aaffaa">🚀 미션탐구로 →</button>
           </div>
         </div>
 
@@ -389,28 +477,38 @@ S' = 100 [?] [?] [?°] = 200
           <!-- 미션 영역 -->
           <div id="missionArea" style="display:none;flex-direction:column">
             <!-- 전력 상태 게이지 -->
-            <div class="mgoal" style="background:#0a0818;border-color:#2a4070">
-              <div class="mgk" style="color:#8899bb">생명유지장치 전력 상태</div>
+            <div class="mgoal" style="background:#0a0818;border-color:#2a4070;padding:10px 12px">
+              <div class="mgk" style="color:#8899bb">⚡ 생명유지장치 전력</div>
               <div class="mgv" style="color:#ff6666" id="powerLevel">18%</div>
-              <div class="mgs" style="color:#445566">최소 필요 전력: 75%</div>
+              <div class="mgs" style="color:#445566">복구 필요 전력 · 75%</div>
             </div>
-            
-            <div class="mgoal">
-              <div class="mgk">🚨 긴급 미션</div>
-              <div class="mgv" id="goalV" style="font-size:20px">패널을 45°로 맞추세요!</div>
-              <div class="mgs">빛과 수직 → 최대 전력 흡수</div>
-            </div>
-            <div class="mhint" id="missionHint">⚠️ 위 슬라이더를 조작하여
-패널 각도를 정확히 <strong style="color:#ffdd44">45°</strong>로 맞추세요!
 
-공식: S' = S × cos θ
-θ=45° → 빛과 패널이 수직!
-→ 정사영 면적 최대화!
-→ 생명유지장치 전력 복구!</div>
-            <div class="mdn" id="m1done" style="background:#062010;border-color:#00aa44">
-              <div class="mdn-t">✅ 각도 45° 달성! 전력 복구 성공!</div>
+            <!-- 미션 안내 (완료 시 함께 사라짐) -->
+            <div id="missionBrief">
+              <div class="mgoal">
+                <div class="mgk">🚨 긴급 미션</div>
+                <div class="mgv" id="goalV" style="font-size:19px">패널을 45°로 맞추기</div>
+                <div class="mgs">슬라이더를 움직여 각도를 조절하세요</div>
+              </div>
+              <div class="mhint" id="missionHint">빛과 패널이 <strong style="color:#ffdd44">수직(45°)</strong>일 때 정사영 면적이 최대가 되어 전력 흡수가 극대화됩니다.
+<span style="color:#557766">S′ = S × cos θ</span></div>
+
+              <!-- 미션 전용 슬라이더 + 미세조정 버튼 -->
+              <div class="msl-box">
+                <div class="msl-row">
+                  <button type="button" class="msl-btn" id="mslMinus" aria-label="1도 감소">−</button>
+                  <input type="range" class="thsl" id="mSl" min="0" max="90" step="1" value="0">
+                  <button type="button" class="msl-btn" id="mslPlus" aria-label="1도 증가">+</button>
+                </div>
+                <div class="msl-val">현재 각도 <span id="mSlVal">0°</span></div>
+              </div>
             </div>
-            <button class="lbtn" id="lBtn" onclick="triggerLaunch()">⚡ 생명유지장치 가동!</button>
+
+            <!-- 완료 상태 -->
+            <div class="mdn" id="m1done">
+              <div class="mdn-t">✅ 45° 달성 · 전력 복구 성공!</div>
+            </div>
+            <button class="lbtn" id="lBtn" onclick="openAI()">📝 미션 성찰로그</button>
             <button class="gobtn" id="retryBtn"
                 style="background:#0a0f20;border-color:#2a3a66;color:#6688aa;font-size:11px;padding:7px">
               ↺ 처음부터
@@ -446,7 +544,7 @@ S' = 100 [?] [?] [?°] = 200
         <div class="mwin-box">
           <div class="mwin-ttl" id="mwinT">MISSION ACCOMPLISHED</div>
           <div class="mwin-body" id="mwinB"></div>
-          <button class="mwin-ok" id="mwinOk">확인 →</button>
+          <button class="mwin-ok" id="mwinOk">⚡ 생명유지장치 가동!</button>
         </div>
       </div>
       <div class="ovbase" id="launchOv">
@@ -457,10 +555,9 @@ S' = 100 [?] [?] [?°] = 200
         <div style="font-size:19px;color:#88aaff;font-weight:bold;margin:10px 0" id="energyPercent">18%</div>
         <div class="l-cnt" id="lCnt" style="display:none;font-size:18px;color:#88aaff">시스템 점검 중...</div>
         <div class="l-body" id="lBody"></div>
-        <button class="l-ok" id="lOkBtn" style="display:none">⚡ 전력 복구 완료!</button>
+        <button class="l-ok" id="lOkBtn" style="display:none">💡 전력기지 점등!</button>
       </div>
-      <style>
-      @keyframes flyUp {
+      <style>      @keyframes flyUp {
         0% { transform: translateY(100px) scale(0.5); opacity:0; }
         20% { opacity:1; }
         100% { transform: translateY(-400px) scale(1.5); opacity:0; }
@@ -487,21 +584,47 @@ E = cos(θ)
                   id="energyInfoClose">닫기</button>
         </div>
       </div>
-      <div class="ovbase" id="aibox">
-        <div class="ai-panel">
-          <div class="ai-hdr">
-            <div class="ai-dot"></div>
-            <div class="ai-ht">AI 에너지 공학 어드바이저</div>
-            <div style="margin-left:auto;font-size:10px;color:#44aa66">KOSA-1</div>
-          </div>
-          <div class="ai-bdy"><div class="ai-txt" id="aiText"></div></div>
-          <div class="ai-inp">
-            <textarea class="ai-ta" id="aiInput"
-                placeholder="공식을 포함하여 일반화된 문장을 작성하세요."></textarea>
-            <button class="ai-sub" id="aiSub">🔬 AI에게 에너지 규정 검인받기</button>
-          </div>
+<div class="ovbase" id="aibox">
+  <div class="ai-panel">
+    <div class="ai-hdr">
+      <div class="ai-dot"></div>
+      <div class="ai-ht">공간잇기 ┄ 성찰로그 📡</div>
+      <div style="margin-left:auto;font-size:10px;color:#44aa66">MODULE 02</div>
+    </div>
+    <div class="ai-bdy"><div class="ai-txt" id="aiText"></div></div>
+    
+    <div class="ai-inp">
+      <form id="reflectionForm" style="text-align:left; padding:10px;">
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <input type="text" name="sid" id="rfSid" required placeholder="학번 (예: 30101)" inputmode="numeric"
+                 style="flex:1; padding:8px; background:#031008; border:1px solid #2a5a3a; border-radius:6px; color:#88ffaa; font-size:13px;">
+          <input type="text" name="sname" id="rfName" required placeholder="이름"
+                 style="flex:1; padding:8px; background:#031008; border:1px solid #2a5a3a; border-radius:6px; color:#88ffaa; font-size:13px;">
         </div>
-      </div>
+
+        <div style="font-size:14px; margin-bottom:10px; color:#fff; font-weight:bold;">Q. 최적 각도를 어떻게 결정했나요?</div>
+        <label class="rf-opt"><input type="radio" name="method" value="🔢 공식 우선" required> 🔢 S·cosθ 공식을 먼저 떠올렸어요</label>
+        <label class="rf-opt"><input type="radio" name="method" value="🔁 시행착오 탐색"> 🔁 슬라이더를 여러 번 움직여보며 찾았어요</label>
+        <label class="rf-opt"><input type="radio" name="method" value="👁 그래프 직관"> 👁 그래프를 보고 감각적으로 정했어요</label>
+        <label class="rf-opt"><input type="radio" name="method" value="📋 조건 분석"> 📋 문제의 조건(지형·면적)을 먼저 읽었어요</label>
+
+        <div style="margin-top:15px; font-size:14px; color:#fff;">✏️ 더 설명하고 싶다면? <span style="color:#88aa99; font-size:12px;">(선택)</span></div>
+        <textarea id="aiInput" name="extra" placeholder="내가 각도를 정한 과정을 자유롭게 적어보세요"
+                  style="width:100%; box-sizing:border-box; margin-top:5px; height:60px; padding:8px;
+                         background:#031008; border:1px solid #2a5a3a; border-radius:6px; color:#88ffaa; font-size:13px; resize:vertical;"></textarea>
+
+        <button type="submit" id="rfSubmit" class="ai-sub" style="margin-top:15px; width:100%;">성찰로그 기록하고 미션 완료</button>
+        <div id="rfStatus" style="margin-top:8px; font-size:12px; color:#88aa99; text-align:center; min-height:14px;"></div>
+      </form>
+      <style>
+        .rf-opt{display:block; padding:7px 10px; margin:5px 0; background:#06150c; border:1px solid #1d4a2e;
+                border-radius:8px; color:#cfeede; font-size:13px; cursor:pointer; transition:all .15s;}
+        .rf-opt:has(input:checked){border-color:#44ffaa; background:#0a2818; box-shadow:0 0 8px rgba(68,255,170,.25);}
+        .rf-opt input{margin-right:6px; accent-color:#44ffaa;}
+      </style>
+    </div>
+  </div>
+</div>
       <div id="hud">
         <div class="hr"><span class="hk">θ =</span><span class="hv" style="color:#aaccff" id="hudT">0°</span></div>
         <div class="hr"><span class="hk">S =</span><span class="hv" style="color:#66aaff">100</span></div>
@@ -516,18 +639,9 @@ E = cos(θ)
     </div>
   </div>
 </div>
+<script src="three.min.js"></script>
 <script>
-// Three.js를 동적으로 로드 — iOS Safari의 defer 타이밍 버그 우회
-(function(){
-  var s=document.createElement('script');
-  s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-  s.onload=function(){setTimeout(boot,60);};
-  s.onerror=function(){document.getElementById('ld').textContent='⚠️ 네트워크 오류';};
-  document.head.appendChild(s);
-})();
-</script>
-<script>
-
+boot();
 function boot(){
 const PI=Math.PI,DEG=PI/180,R15=15*DEG;
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
@@ -777,7 +891,12 @@ function mkSp(txt,col,fw=64,fh=36,fs=24){
 }
 const lbA=mkSp('α','#ffaa44',44,30,22);lbA.position.set(-5,.5,4.5);
 const lbS=mkSp('S','#66aaff',40,30,22);
-const lbSp=mkSp("S'",'#cc66ff',50,30,22);
+const lbSp=(function(){
+  var c=document.createElement('canvas');c.width=60;c.height=34;
+  var ctx=c.getContext('2d');ctx.font='bold 26px monospace';ctx.fillStyle='#cc66ff';ctx.fillText("S'",4,26);
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:true,depthWrite:false}));
+  sp.scale.set(1.2,.68,1);scene.add(sp);return sp;
+})();
 const lbSh=mkSp('그림자','#ffaa44',80,28,16);
 
 /* ═══ 바위 그룹 (경사면 따라감) ═══════════════════════════ */
@@ -929,7 +1048,7 @@ function updScene(t){
     const panCen=pv.BL.clone().add(pv.TR).multiplyScalar(.5);
     lbS.position.copy(panCen).add(V3(.3,.3,0));
     const prCen=prv.BL.clone().add(prv.TR).multiplyScalar(.5);
-    lbSp.position.copy(prCen).add(V3(0,.25,0));
+    lbSp.position.set(prCen.x, 0.12, prCen.z); // 바닥(y≈0)에 고정 → 위에서 보면 안 보임
     lbSh.visible=false;
   }else{
     const pv=p2PV(t),sv=p2ShadV(t);
@@ -950,7 +1069,7 @@ function updScene(t){
     // else{coreMat.color.set(0x223344);coreMat.emissive.set(0x000000);coreMat.emissiveIntensity=0;}
   }
   panelM.material=marsMode?matSolar:matGeo;
-  lbS.visible=!marsMode;lbSp.visible=(phase===1&&!marsMode);
+  lbS.visible=!marsMode;lbSp.visible=(phase===1); // S'는 marsMode 무관하게 Phase1에서 항상 표시
   updUI(t);draw2D(t);
 }
 function setT(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
@@ -958,6 +1077,7 @@ function updUI(t){
   const deg=Math.round(t/DEG);
   document.querySelectorAll('.thsl').forEach(s=>s.value=deg);
   setT('vt',deg+'°');
+  setT('mSlVal',deg+'°');
   setT('hudT',deg+'°');
   setT('vtAngInput',deg+'°');
   if(phase===1){
@@ -974,12 +1094,13 @@ function updUI(t){
 function checkMission(deg){
   if(!missionDone&&Math.abs(deg-45)<=2){
     missionDone=true;
+    markStageDone(2);
     
     // 완료 배지 표시
     document.getElementById('m1done').style.display='block';
     
-    // 힌트 메시지 숨기기
-    document.getElementById('missionHint').style.display='none';
+    // 미션 안내(목표+힌트) 숨기기
+    document.getElementById('missionBrief').style.display='none';
     
     // 전력 게이지 업데이트 (18% → 100%)
     let percent = 18;
@@ -996,26 +1117,17 @@ function checkMission(deg){
       }
     }, 50);
     
-    // 전력기지 불 켜기 (자동)
-    setTimeout(() => {
-      activatePowerSystems();
-      
-      // 생명유지장치 가동 버튼 표시
-      setTimeout(() => {
-        document.getElementById('lBtn').style.display='block';
-      }, 1500);
-    }, 800);
-    
-    // 축하 팝업
+    // 축하 팝업 (이 팝업의 '생명유지장치 가동!' 버튼으로 다음 단계 진행)
     setTimeout(()=>showMWin(),1200);
   }
 }
 function showMWin(){
   setT('mwinT','🎉 45° 달성! 전력 복구 성공! ✅');
-  setT('mwinB',`θ=45°: 빛과 패널이 수직!\n정사영 면적 최대화 달성!\n\n⚡ 전력기지 가동 중...`);
+  setT('mwinB',`θ=45°: 빛과 패널이 수직!\n정사영 면적 최대화 달성!\n\n아래 버튼으로 생명유지장치를 가동하세요!`);
   document.getElementById('mwin').style.display='flex';
   document.getElementById('mwinOk').onclick=()=>{
     document.getElementById('mwin').style.display='none';
+    triggerLaunch();
   };
 }
 
@@ -1037,12 +1149,6 @@ window.triggerLaunch=function(){
     if(percent <= 100){
       document.getElementById('energyBar').style.width=percent+'%';
       document.getElementById('energyPercent').textContent=percent+'%';
-      document.getElementById('powerLevel').textContent=percent+'%';
-      
-      // 전력이 75% 이상이 되면 색상 변경
-      if(percent >= 75){
-        document.getElementById('powerLevel').style.color='#44ff88';
-      }
     }
   },80);
   
@@ -1050,8 +1156,6 @@ window.triggerLaunch=function(){
     clearInterval(chargeInterval);
     document.getElementById('energyBar').style.width='100%';
     document.getElementById('energyPercent').textContent='100% 충전 완료!';
-    document.getElementById('powerLevel').textContent='100%';
-    document.getElementById('powerLevel').style.color='#44ff88';
     
     // 2단계: 시스템 가동 (2초)
     setTimeout(()=>{
@@ -1059,25 +1163,30 @@ window.triggerLaunch=function(){
       document.getElementById('lCnt').style.display='block';
       document.getElementById('lCnt').textContent='시스템 점검 중...';
       
-      // 3단계: 전력기지 불 켜기 애니메이션
+      // 3단계: 충전 완료 → 점등 버튼 안내
       setTimeout(()=>{
-        document.getElementById('lCnt').textContent='✅ 모든 시스템 정상 가동!';
+        document.getElementById('lCnt').textContent='✅ 충전 완료! 전력기지를 점등하세요.';
         document.getElementById('lCnt').style.color='#44ff88';
         
-        // 착륙선에 불 켜지는 효과 (Three.js 오브젝트 조명 강화)
-        activatePowerSystems();
-        
         setTimeout(()=>{
-          setT('lBody','⚡ 생명유지장치 복구 완료! 🎉\n\n정사영 공식 S\'=S×cos60° 로\n최적 패널 각도 45° 발견!\n전력기지 모든 시스템 정상 가동!');
-          document.getElementById('lOkBtn').style.display='block';
-        },1500);
+          setT('lBody','⚡ 생명유지장치 충전 완료! 🎉\n\n아래 버튼을 눌러 전력기지에 불을 켜세요!');
+          const ok=document.getElementById('lOkBtn');
+          ok.textContent='💡 전력기지 점등!';
+          ok.style.display='block';
+        },1200);
       },1500);
     },2000);
   },2500);
 };
 document.getElementById('lOkBtn').addEventListener('click',()=>{
-  document.getElementById('launchOv').style.display='none';
-  setTimeout(openAI,600);
+  activatePowerSystems();                                  // 전력기지 점등
+  document.getElementById('launchOv').style.display='none'; // 오버레이 닫아 불 켜진 모습 확인
+  // 불이 켜진 모습을 충분히 감상할 시간(약 2.6초)을 준 뒤, 성찰로그 버튼이 깜빡이게
+  setTimeout(()=>{
+    const b=document.getElementById('lBtn');
+    b.style.display='block';
+    b.classList.add('blink');
+  }, 2600);
 });
 
 // 전력기지 불 켜기 함수 - 창문과 안테나 표시등 점등
@@ -1138,47 +1247,83 @@ function animLaunch(){
 }
 
 /* ═══ AI ══════════════════════════════════════════════════ */
-const AI_TEXT=`에너지 설계자님, 완벽합니다! ⚡
+const AI_TEXT=`점 P의 평면 α 위로의 정사영이란, 점 P에서 평면 α 위에 내린 수선의 발 P'이다.`;
 
-생명유지장치 전력 복구 성공!
+// 타이핑 효과 (한 글자씩 출력)
+function typeEffect(el, text, speed){
+  if(!el) return;
+  el.textContent = '';
+  let i = 0;
+  (function tick(){
+    if(i < text.length){
+      el.textContent += text.charAt(i++);
+      setTimeout(tick, speed || 20);
+    }
+  })();
+}
 
-이번 탐구에서 발견한 것:
-
-개념탐구 (수직광):
-• θ=0°→90°로 올릴수록: 먼저 커지다가 줄어요!
-• S'/S = cosθ (정사영 공식!)
-
-미션탐구 (경사면+비스듬한 태양):
-• 패널을 세울수록 그림자가 커짐! (예상과 달랐나요?)
-• θ=45°에서 그림자 최대 → 빛과 패널이 수직!
-
-핵심 발견:
-빛과 수직이 되는 각도(θ=45°)에서
-정사영 넓이 최대화 → 에너지 흡수 최대!
-
-이것이 바로 정사영의 본질:
-'어느 면이 빛과 정면으로 마주하느냐'에 따라
-S' = S × cosθ (θ: 이면각) 가 결정됩니다.
-
-당신은 이 공식으로 생명유지장치를 구했습니다!
-
-이 공식을 한 문장으로 일반화해 주세요.`;
 function openAI(){
-  document.getElementById('aibox').style.display='flex';
-  typeEffect(document.getElementById('aiText'),AI_TEXT,16);
+  const box = document.getElementById('aibox');
+  if(!box) return;
+  const b=document.getElementById('lBtn'); if(b) b.classList.remove('blink');
+  box.style.display='flex';
+  try { typeEffect(document.getElementById('aiText'), AI_TEXT, 50); } catch(err){ console.warn(err); }
 }
-function typeEffect(el,txt,spd){
-  el.innerHTML='<span class="ai-cur"></span>';let i=0;
-  const iv=setInterval(()=>{
-    if(i<txt.length)el.innerHTML=txt.slice(0,++i)+'<span class="ai-cur"></span>';
-    else{clearInterval(iv);el.innerHTML=txt;}
-  },spd);
-}
-document.getElementById('aiSub').addEventListener('click',()=>{
-  if(!document.getElementById('aiInput').value.trim()){alert('문장을 작성해주세요!');return;}
-  document.getElementById('aibox').style.display='none';
-  alert('✅ 에너지 규정이 제출됐습니다!\n\n훌륭한 수학적 발견이에요!');
-});
+window.openAI = openAI;  // boot() 내부 정의이므로 inline onclick용 전역 노출 (성찰로그 버튼 수정)
+
+// ▼▼▼ 선생님 설정: 구글 Apps Script 웹앱 URL을 따옴표 안에 붙여넣으세요 ▼▼▼
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwQUbktB_3XbtJJfd6UzzE7uHZCJU7UtpJotIk2CLzyWVc2E5FFqbcSoFmN8U54osS3Sw/exec';
+// ▲▲▲ 예: const SHEET_URL = 'https://script.google.com/macros/s/XXXX/exec'; ▲▲▲
+
+// 폼 제출 이벤트 처리 (구글 시트 연동)
+document.getElementById('reflectionForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const sid    = document.getElementById('rfSid').value.trim();
+  const sname  = document.getElementById('rfName').value.trim();
+  const method = new FormData(this).get('method');
+  const extra  = document.getElementById('aiInput').value.trim();
+
+  const btn    = document.getElementById('rfSubmit');
+  const status = document.getElementById('rfStatus');
+
+  // 전송할 데이터 구성
+  const params = new URLSearchParams();
+  params.append('module', 'M2-정사영');
+  params.append('sid', sid);
+  params.append('sname', sname);
+  params.append('method', method);
+  params.append('extra', extra);
+
+  const finish = () => {
+    document.getElementById('aibox').style.display='none';
+    alert('✅ 성찰로그가 기록되었습니다!\n\n' + sname + ' 설계자님, 수학적 사고가 한층 성장했습니다!');
+  };
+
+  if (!SHEET_URL) {
+    // URL 미설정 시: 콘솔 기록 후 정상 종료 (수업 흐름 방해 금지)
+    console.warn('SHEET_URL이 설정되지 않았습니다. 응답:', { sid, sname, method, extra });
+    finish();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '전송 중...';
+  status.textContent = '⏳ 성찰로그를 기록하고 있습니다...';
+
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString()
+  })
+  .then(finish)
+  .catch(() => {
+    btn.disabled = false;
+    btn.textContent = '성찰로그 기록하고 미션 완료';
+    status.textContent = '⚠️ 전송에 실패했습니다. 인터넷 연결을 확인하고 다시 눌러주세요.';
+  });
+})
 
 /* ═══ 2D TOP VIEW ══════════════════════════════════════════ */
 function drawTop(t){
@@ -1452,6 +1597,8 @@ if (ep === 2) {
     launchDone=false;launchAnim=0;launchAnimating=false;
     document.getElementById('lBtn').style.display='none';
     document.getElementById('m1done').style.display='none';
+    document.getElementById('missionBrief').style.display='block';
+    const pl=document.getElementById('powerLevel');pl.textContent='18%';pl.style.color='#ff6666';
     document.getElementById('missionArea').style.display='flex';
     document.getElementById('missionArea').style.flexDirection='column';
     powerStationG.visible=false;
@@ -1706,12 +1853,149 @@ document.querySelectorAll('.qbtn').forEach(btn=>{
       this.classList.add('correct');msg.className='qmsg qok';
       msg.textContent='✅ 정답! S\' = S × cosθ\n패널-지면 이면각이 θ일 때!';
       setTimeout(()=>{document.getElementById('formulaReveal').style.display='block';
-        document.getElementById('quizWrap').style.opacity='.5';},600);
+        document.getElementById('quizWrap').style.opacity='.5';
+        markStageDone(1);},600);
     }else{
       this.classList.add('wrong');msg.className='qmsg qno';msg.textContent=hintMap[val];
     }
   });
 });
+
+/* ═══ 수선의 발 애니메이션 (개념탐구) ════════════════════════ */
+(function(){
+  var footObjs = [];   // 씬에 추가된 임시 오브젝트
+  var footDone = false;
+  var MSG_STEPS = [
+    '패널(S) 위의 점 P를 봅니다.',
+    'P에서 바닥 평면 α로 수직을 내립니다.',
+    'P의 수선의 발 → P′\nS 위 모든 점에 이 과정을 반복하면...',
+    '수선의 발들을 모은 도형 = S′(정사영)!'
+  ];
+
+  function clearFootObjs() {
+    footObjs.forEach(function(o) {
+      scene.remove(o);
+      if (o.geometry) o.geometry.dispose();
+    });
+    footObjs = [];
+  }
+
+  function addFootObj(o) { scene.add(o); footObjs.push(o); }
+
+  function runFootAnim() {
+    // Phase 1 씬 확인 (수평지면, 패널 보임)
+    if (phase !== 1) { setPhase(1); }
+    panelM.visible=true; projM.visible=true;
+    lbS.visible=false; // S 레이블은 Mars 모드에서 숨김
+    // θ=45°로 패널 세우기
+    theta = 45 * Math.PI / 180;
+    document.querySelectorAll('.thsl').forEach(function(s){ s.value = 45; });
+    updScene(theta);
+    clearFootObjs();
+
+    var msgEl = document.getElementById('footAnimMsg');
+    msgEl.style.display = 'block';
+
+    var step = 0;
+    function nextStep() {
+      if (step >= MSG_STEPS.length) return;
+      msgEl.textContent = MSG_STEPS[step];
+
+      if (step === 1) {
+        // 수직 점선: 패널 꼭짓점 TL에서 바닥으로
+        var pv = p1PV(theta);
+        var top = pv.TL.clone();
+        var bot = new THREE.Vector3(top.x, 0, top.z);
+
+        // 점 P 마커 + 레이블 (패널 위에 나타남)
+        var pDotG = new THREE.SphereGeometry(0.15, 12, 12);
+        var pDotM = new THREE.MeshStandardMaterial({ color:0xff66aa, emissive:0xff66aa, emissiveIntensity:.9 });
+        var pDot = new THREE.Mesh(pDotG, pDotM);
+        pDot.position.copy(top);
+        addFootObj(pDot);
+        var pc = document.createElement('canvas'); pc.width=60; pc.height=36;
+        var pctx = pc.getContext('2d');
+        pctx.font = 'bold 26px Courier New'; pctx.fillStyle = '#ff88bb'; pctx.fillText('P', 4, 28);
+        var psp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(pc), transparent:true, depthTest:false }));
+        psp.scale.set(1.0, .6, 1);
+        psp.position.set(top.x - .4, top.y + .35, top.z);
+        addFootObj(psp);
+
+        // 점선 애니메이션: 0 → bot 방향으로 성장
+        var progress = { t: 0 };
+        var lineG = new THREE.BufferGeometry();
+        var pos = new Float32Array(6);
+        lineG.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        var lineMat = new THREE.LineDashedMaterial({ color: 0x44ffaa, dashSize: .18, gapSize: .10 });
+        var dropLine = new THREE.Line(lineG, lineMat);
+        addFootObj(dropLine);
+
+        var startT = Date.now();
+        var dur = 900;
+        (function grow() {
+          var p = Math.min((Date.now() - startT) / dur, 1);
+          var cur = new THREE.Vector3().lerpVectors(top, bot, p);
+          pos[0]=top.x; pos[1]=top.y; pos[2]=top.z;
+          pos[3]=cur.x; pos[4]=cur.y; pos[5]=cur.z;
+          lineG.attributes.position.needsUpdate = true;
+          dropLine.computeLineDistances();
+          if (p < 1) requestAnimationFrame(grow);
+          else {
+            // 수선의 발 점 표시
+            var dotG = new THREE.SphereGeometry(0.15, 12, 12);
+            var dotM = new THREE.MeshStandardMaterial({ color:0x44ffaa, emissive:0x44ffaa, emissiveIntensity:.9 });
+            var dot = new THREE.Mesh(dotG, dotM);
+            dot.position.copy(bot);
+            addFootObj(dot);
+            // 레이블 P′ (수선의 발)
+            var lc = document.createElement('canvas'); lc.width=72; lc.height=36;
+            var lctx = lc.getContext('2d');
+            lctx.font = 'bold 26px Courier New'; lctx.fillStyle = '#44ffaa'; lctx.fillText("P′", 4, 28);
+            var lsp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(lc), transparent:true, depthTest:false }));
+            lsp.scale.set(1.2, .6, 1);
+            lsp.position.set(bot.x - .4, bot.y + .3, bot.z);
+            addFootObj(lsp);
+            setTimeout(function(){ step++; nextStep(); }, 800);
+          }
+        })();
+        return; // grow가 비동기이므로 여기서 return
+
+      } else if (step === 2) {
+        // 바닥에 수선의 발 P′ 표시는 이미 됨 (step1에서)
+        setTimeout(function(){ step++; nextStep(); }, 1400);
+        return;
+
+      } else if (step === 3) {
+        // 정사영 사각형 표시 (Phase 1의 projM)
+        projM.visible = true;
+        setTimeout(function(){
+          // 완료 메시지
+          msgEl.textContent = '✅ S 위 모든 점의 수선의 발 → S′(정사영)\nS′ = S × cosθ  (θ: 이면각)';
+          footDone = true;
+          document.getElementById('footAnimBtn').textContent = '↺ 다시 보기';
+        }, 600);
+        return;
+      }
+
+      step++;
+      nextStep();
+    }
+
+    // 시작
+    setTimeout(function(){ nextStep(); step++; nextStep(); }, 400);
+  }
+
+  document.getElementById('footAnimBtn').addEventListener('click', function() {
+    if (footDone) {
+      footDone = false;
+      clearFootObjs();
+      document.getElementById('footAnimMsg').style.display = 'none';
+      this.textContent = '▶ 수선의 발 애니메이션 보기';
+      return;
+    }
+    runFootAnim();
+  });
+})();
 
 /* ═══ 이벤트 ══════════════════════════════════════════════ */
 // 에너지 효율 팝업
@@ -1748,6 +2032,19 @@ cvs.addEventListener('wheel',function(e){e.preventDefault();CAM.r=TMU.clamp(CAM.
 document.querySelectorAll('.thsl').forEach(s=>{
   s.addEventListener('input',function(){theta=parseInt(this.value)*DEG;updScene(theta);});
 });
+
+// 미션 슬라이더 미세조정(-/+) 버튼: 1°씩 정밀 조정
+function nudgeTheta(delta){
+  let deg = Math.round(theta/DEG) + delta;
+  deg = Math.max(0, Math.min(90, deg));
+  theta = deg*DEG;
+  updScene(theta);
+}
+(function(){
+  const m=document.getElementById('mslMinus'), p=document.getElementById('mslPlus');
+  if(m) m.addEventListener('click',()=>nudgeTheta(-1));
+  if(p) p.addEventListener('click',()=>nudgeTheta(1));
+})();
 document.getElementById('bM').addEventListener('click',()=>setMode(true));
 document.getElementById('bG').addEventListener('click',()=>setMode(false));
 document.getElementById('bL').addEventListener('click',function(){
@@ -1756,9 +2053,9 @@ document.getElementById('bL').addEventListener('click',function(){
   this.textContent=lightOn?'☀️ 광선 ON':'☀️ 광선';
   this.className='hb'+(lightOn?' gon':'');
 });
-document.getElementById('tab1').addEventListener('click',()=>setPhase(1));
-document.getElementById('tab2').addEventListener('click',()=>setPhase(3));
-document.getElementById('goMission').addEventListener('click',()=>setPhase(3));
+document.getElementById('goMission').addEventListener('click',()=>{
+  document.getElementById('tab3').click();   // 개념탐구 → 공간잇기로 이동
+});
 document.getElementById('acceptBtn').addEventListener('click',()=>{
   // Phase 2 탐구 모드 시작
   shadowVisible=false;iqStep=0;predAns=null;selOp=null;selFn=null;selAng=null;
@@ -1862,7 +2159,9 @@ function tryStart(n){
     var tm=0;
     (function loop(){
       requestAnimationFrame(loop);clock=tm+=.016;
-      updCam();animLight(tm);animLaunch();rdr.render(scene,cam);
+      updCam();animLight(tm);animLaunch();
+      if(!window._advOpen) updScene(theta); // 심화탭에서는 updScene 차단
+      rdr.render(scene,cam);
     })();
   }else if(n>0){
     setTimeout(function(){tryStart(n-1);},120);
@@ -1871,6 +2170,91 @@ function tryStart(n){
   }
 }
 setTimeout(function(){tryStart(15);},100);
+
+/* ═══ iframe 통신 & 탭 연결 ════════════════════════════════ */
+function openAdvIframe(){
+  window._advOpen = true;
+  var frame = document.querySelector('#advPanel iframe');
+  if(frame) {
+    // indexOf === -1 비교를 명확하게 명시하여 무한 중첩 로드 버그를 완벽하게 차단합니다.
+    if(!frame.src || frame.src === "" || frame.src === "about:blank" || frame.src.indexOf("jeongsayeong_adv.html") === -1) {
+      frame.src = "jeongsayeong_adv.html";
+    }
+  }
+  document.getElementById('advPanel').style.display = 'flex';
+}
+
+function closeAdvIframe(){
+  window._advOpen = false;
+  // 주소를 날리지 않아야 학생들이 이리저리 돌려본 3D 조작 결과가 그대로 보존됩니다!
+  document.getElementById('advPanel').style.display = 'none';
+
+  var t1 = document.getElementById('tab1');
+  var t3 = document.getElementById('tab3');
+  if(t1) t1.className = 'tab on';
+  if(t3) t3.className = 'tab';
+}
+// 심화(공간잇기) iframe 메시지 수신: 닫기 + 완수 신호 통합 처리
+window.addEventListener('message', function(e){
+  if(!e.data) return;
+  if(e.data.type === 'closeAdv') closeAdvIframe();
+  if(e.data.type === 'advComplete'){
+    markStageDone(3);
+    lockMissionTab(false);
+    // 개념탐구 좌측 하단에 '미션탐구로 →' 버튼 등장
+    var gm2 = document.getElementById('goMission2');
+    if(gm2) gm2.style.display = 'block';
+  }
+});
+document.getElementById('goMission2').addEventListener('click', function(){
+  document.getElementById('tab2').click();   // 개념탐구 → 미션탐구로 이동
+});
+
+function unlockAdvTab(){
+  var t=document.getElementById('tab3');
+  t.disabled=false; t.style.opacity='1'; t.style.cursor='pointer';
+  t.style.borderColor='#ffcc44'; t.style.color='#ffee88';
+}
+document.getElementById('tab3').addEventListener('click',function(){
+  if(this.disabled)return;
+  document.getElementById('tab1').className='tab';
+  document.getElementById('tab2').className='tab';
+  this.className='tab on';
+  openAdvIframe();
+});
+document.getElementById('tab1').addEventListener('click',function(){
+  closeAdvIframe();
+  setPhase(1);
+});
+document.getElementById('tab2').addEventListener('click',function(){
+  if(this.disabled)return;
+  closeAdvIframe();
+  setPhase(3);
+});
+document.getElementById('mwinOk').addEventListener('click',function(){
+  document.getElementById('mwin').style.display='none';
+});
+
+/* ── 단계 완수 표시(노란 테두리·글자) & 미션탐구 탭 잠금 ── */
+function markStageDone(stage){
+  const id = stage===1?'tab1':(stage===2?'tab2':'tab3');
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.borderColor='#ffcc44';   // 노란 테두리
+  el.style.color='#ffee88';         // 노란 글자
+}
+function lockMissionTab(lock){
+  const t2=document.getElementById('tab2');
+  if(!t2) return;
+  t2.disabled=lock;
+  t2.style.opacity = lock?'0.4':'1';
+  t2.style.cursor  = lock?'not-allowed':'pointer';
+  t2.style.filter  = lock?'saturate(.5)':'';
+}
+// 시작 시: 공간잇기 완수 전까지 미션탐구 잠금
+lockMissionTab(true);
+
+
 // iOS 직접 이동 모드: 사령부 복귀 버튼 표시
 (function(){
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -1882,5 +2266,6 @@ setTimeout(function(){tryStart(15);},100);
 })();
 }
 </script>
+
 </body>
 </html>
