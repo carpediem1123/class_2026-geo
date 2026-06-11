@@ -32,6 +32,8 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 .tab.locked{opacity:.4;cursor:not-allowed;filter:saturate(.5)}
 @keyframes blinkBtn{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,170,68,.55)}50%{opacity:.5;box-shadow:0 0 18px 7px rgba(255,170,68,.4)}}
 .lbtn.blink{animation:blinkBtn 1s ease-in-out infinite}
+@keyframes blinkRed{0%,100%{border-color:#ff4444;box-shadow:0 0 0 0 rgba(255,68,68,.5)}50%{border-color:#ffaa88;box-shadow:0 0 14px 5px rgba(255,68,68,.35)}}
+.gobtn.blink-red{animation:blinkRed 1s ease-in-out infinite}
 .hb{background:#162040;border:1.5px solid #2a4070;border-radius:7px;color:#99bbdd;
     padding:6px 11px;font-size:12px;cursor:pointer;flex-shrink:0}
 .hb:hover{border-color:#5577bb;color:#ccdeff}
@@ -199,12 +201,12 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
     animation:neonDot 1.2s ease-in-out infinite}
 @keyframes neonDot{0%,100%{opacity:1;box-shadow:0 0 6px #00ff66}50%{opacity:.4}}
 .ai-ht{font-size:13px;color:#00ff88;font-weight:bold}
-.ai-bdy{flex:1;padding:14px 16px;overflow-y:auto;min-height:0}
+.ai-bdy{flex:0 1 auto;max-height:30%;padding:12px 16px;overflow-y:auto;min-height:54px}
 .ai-txt{font-size:13px;color:#88ffaa;line-height:1.85;white-space:pre-wrap;min-height:80px}
 .ai-cur{display:inline-block;width:2px;height:15px;background:#00ff88;
     animation:cur .6s ease-in-out infinite;vertical-align:text-bottom}
 @keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
-.ai-inp{padding:11px 16px;border-top:1px solid #00aa44;flex-shrink:0}
+.ai-inp{padding:11px 16px;border-top:1px solid #00aa44;flex:1;min-height:0;overflow-y:auto}
 .ai-ta{width:100%;background:#031008;border:1.5px solid #007733;border-radius:7px;
     color:#88ffaa;padding:9px 12px;font-size:13px;font-family:inherit;
     resize:none;line-height:1.65;outline:none;height:78px}
@@ -280,9 +282,9 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 <body>
 <div id="app">
   <div id="hd">
-    <span class="ti">☀️ 정사영 탐구</span>
+    <span class="ti">🛰 공간잇기 · 정사영</span>
     <button class="tab on" id="tab1">📐 개념탐구</button>
-    <button id="tab3" class="tab">⚡ 공간잇기(空間-IT-gi) </button>
+    <button id="tab3" class="tab">⚡ 공간잇기(空間-IT-gi)</button>
     <button class="tab" id="tab2">🚀 미션탐구</button>
     <div style="width:1px;height:24px;background:#1e3060;margin:0 2px;flex-shrink:0"></div>
     <button class="hb on" id="bM">🪐 Mars</button>
@@ -824,7 +826,7 @@ const plA=R15-PI/2;
 const gnd1=new THREE.Mesh(new THREE.PlaneGeometry(24,24,16,16),
   new THREE.MeshStandardMaterial({color:0x223344,roughness:.8}));
 gnd1.rotation.x=-PI/2;scene.add(gnd1);
-const grid1=new THREE.GridHelper(22,22,0x334455,0x1a2a33);scene.add(grid1);
+const grid1=new THREE.GridHelper(22,22,0x7799cc,0x44608c);scene.add(grid1);
 // Phase 2: 15° 기울어진 지면 (Mars 배경용)
 const gnd2=new THREE.Mesh(new THREE.PlaneGeometry(26,26,18,18),
   new THREE.MeshStandardMaterial({map:makeMarsT(),side:THREE.DoubleSide,roughness:.9}));
@@ -1854,7 +1856,8 @@ document.querySelectorAll('.qbtn').forEach(btn=>{
       msg.textContent='✅ 정답! S\' = S × cosθ\n패널-지면 이면각이 θ일 때!';
       setTimeout(()=>{document.getElementById('formulaReveal').style.display='block';
         document.getElementById('quizWrap').style.opacity='.5';
-        markStageDone(1);},600);
+        markStageDone(1);
+        var gm=document.getElementById('goMission');if(gm)gm.classList.add('blink-red');},600);
     }else{
       this.classList.add('wrong');msg.className='qmsg qno';msg.textContent=hintMap[val];
     }
@@ -2053,8 +2056,9 @@ document.getElementById('bL').addEventListener('click',function(){
   this.textContent=lightOn?'☀️ 광선 ON':'☀️ 광선';
   this.className='hb'+(lightOn?' gon':'');
 });
-document.getElementById('goMission').addEventListener('click',()=>{
-  document.getElementById('tab3').click();   // 개념탐구 → 공간잇기로 이동
+document.getElementById('goMission').addEventListener('click',function(){
+  this.classList.remove('blink-red');
+  document.getElementById('tab3').click();   // 개념잇기 → 입체잇기로 이동
 });
 document.getElementById('acceptBtn').addEventListener('click',()=>{
   // Phase 2 탐구 모드 시작
@@ -2203,11 +2207,12 @@ window.addEventListener('message', function(e){
     lockMissionTab(false);
     // 개념탐구 좌측 하단에 '미션탐구로 →' 버튼 등장
     var gm2 = document.getElementById('goMission2');
-    if(gm2) gm2.style.display = 'block';
+    if(gm2){ gm2.style.display = 'block'; gm2.classList.add('blink-red'); }
   }
 });
 document.getElementById('goMission2').addEventListener('click', function(){
-  document.getElementById('tab2').click();   // 개념탐구 → 미션탐구로 이동
+  this.classList.remove('blink-red');
+  document.getElementById('tab2').click();   // 개념잇기 → 미션잇기로 이동
 });
 
 function unlockAdvTab(){
