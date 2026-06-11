@@ -319,7 +319,7 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
   </div>
   <!-- 헤더 -->
   <div id="hd">
-    <span class="ti">🛸 화성 KOSA-1 — 삼수선 임무</span>
+    <span class="ti">🛰 공간잇기 · 삼수선 <span style="font-size:9.5px;color:#557799;letter-spacing:.04em;font-weight:400">점┄평면┄직선, 수선으로 잇다</span></span>
     <button class="mt ac" id="m1">🚨 M1</button>
     <button class="mt lk" id="m2">🔒 M2</button>
     <button class="mt lk" id="m3">🔒 M3</button>
@@ -631,6 +631,46 @@ var mvLSOH=function(a,b){
   lsOH.line.quaternion.copy(quat);
 };
 var lsPO=mkLS(0x5599ff);
+// ── 공간잇기 보조선: 수직을 찾아가는 점선 가이드 ──
+var guideLn=mkLS(0x44ffaa);
+guideLn.mat.dashSize=.22;guideLn.mat.gapSize=.16;guideLn.mat.opacity=.85;
+guideLn.line.visible=false;
+var guideDot=new THREE.Mesh(new THREE.SphereGeometry(.1,10,10),
+  new THREE.MeshStandardMaterial({color:0x44ffaa,emissive:0x44ffaa,emissiveIntensity:.9,transparent:true,opacity:.9}));
+guideDot.visible=false;scene.add(guideDot);
+var hideGuide=function(){guideLn.line.visible=false;guideDot.visible=false;};
+var updGuide=function(cs2,pos,ok){
+  if(!cs2||!cs2.cond||ok||ST.done.indexOf(ST.step)>=0){hideGuide();return;}
+  var a=null,b=null;
+  if(cs2.cond==='ph'){
+    // P에서 직선 l로 내린 수선: P → 수선의 발 (M2 S2, M3 S1)
+    a=pos.P;b=L0.clone().addScaledVector(LD,pos.P.clone().sub(L0).dot(LD));
+  }else if(cs2.cond==='oh'&&ST.mis===1){
+    // O에서 직선 l로 내린 수선: O → 수선의 발 (M1 S2)
+    a=pos.O;b=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD));
+  }else if(cs2.cond==='oh'&&ST.mis===3){
+    // H에서 평면 α 위 l에 수직인 자리: H → O가 와야 할 곳 (M3 S2)
+    a=pos.H;b=ptA(ST.uO,pos.H.z);
+  }else if(cs2.cond==='all3'){
+    // PO⊥OH가 되는 O의 자리: P → O가 와야 할 곳 (M3 S5, 탈레스 원리)
+    var C=E2.clone().multiplyScalar(ST.vO);
+    var s=E1.dot(pos.P.clone().sub(C))+E1.dot(pos.H.clone().sub(C));
+    var q=pos.P.clone().sub(C).dot(pos.H.clone().sub(C));
+    var disc=s*s-4*q;
+    if(disc<0){hideGuide();return;}
+    var r1=(s+Math.sqrt(disc))/2,r2=(s-Math.sqrt(disc))/2;
+    var u=Math.abs(r1-ST.uO)<Math.abs(r2-ST.uO)?r1:r2;
+    if(u<-5||u>5)u=(r1>=-5&&r1<=5)?r1:r2;
+    a=pos.P;b=ptA(u,ST.vO);
+  }
+  if(!a||!b){hideGuide();return;}
+  mvLS(guideLn,a,b);
+  guideLn.line.visible=true;
+  guideDot.position.copy(b);guideDot.visible=true;
+  var t=Date.now()*.004;  // 은은한 펄스 — "이어질 자리"가 숨쉬듯 깜빡임
+  guideLn.mat.opacity=.5+.32*Math.sin(t);
+  guideDot.material.opacity=.55+.35*Math.sin(t);
+};
 lsPO.line.frustumCulled=false;
 // OH 레일/지지대: 굵은 파이프 표현 (TubeGeometry)
 var lsOH=(function(){
@@ -1548,6 +1588,9 @@ var updScene=function(){
     else if(cs2.cond==='ph')ok=Math.abs(90-pos.aPHl)<=0.5;
     else if(cs2.cond==='all3')ok=(Math.abs(90-pos.aPHl)<=0.5&&Math.abs(90-pos.aOHl)<=0.5&&Math.abs(90-pos.aPOOH)<=0.5);
     
+    // 공간잇기 보조선: 수직이 이어질 자리를 점선으로 안내
+    updGuide(cs2,pos,ok);
+    
     // 점선 → 실선 전환
     if(ST.mis===1&&cs2.cond==='oh'){
       setLineDashed(lsOH,!ok);
@@ -1556,11 +1599,13 @@ var updScene=function(){
     }else if(ST.mis===3){
       if(ST.step===1)setLineDashed(lsPH,Math.abs(90-pos.aPHl)>1);
       if(ST.step===2){setLineDashed(lsPH,Math.abs(90-pos.aPHl)>1);setLineDashed(lsOH,Math.abs(90-pos.aOHl)>1);}
-      if(ST.step===4){setLineDashed(lsPH,Math.abs(90-pos.aPHl)>1);setLineDashed(lsOH,Math.abs(90-pos.aOHl)>1);}
+      if(ST.step===5){setLineDashed(lsPH,Math.abs(90-pos.aPHl)>1);setLineDashed(lsOH,Math.abs(90-pos.aOHl)>1);}
     }
     
     var btn=document.getElementById('cb'+ST.step);
     if(btn&&!btn.classList.contains('fi')){btn.className='cb'+(ok?' rd':'');btn.disabled=!ok;}
+  }else{
+    hideGuide();
   }
   document.getElementById('vZ').textContent=ST.pH.toFixed(2);document.getElementById('vH').textContent=ST.tH.toFixed(2);
   document.getElementById('vU').textContent=ST.uO.toFixed(2);document.getElementById('vV').textContent=ST.vO.toFixed(2);
