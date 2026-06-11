@@ -289,7 +289,7 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
 </head>
 <body>
 <!-- 부팅 로딩 오버레이: 3D 초기화 동안 화성 화면 깜빡임 차단 -->
-<div id="bootLoading" style="position:fixed;inset:0;z-index:99999;background:#050a14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s">
+<div id="bootLoading" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#050a14;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .6s">
   <div style="font-size:34px">🛰</div>
   <div style="font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:900;color:#88f0e0;letter-spacing:.04em">삼수선의 정리로 기지 복구 중</div>
   <div style="font-family:monospace;font-size:12px;color:#4a8a9a;letter-spacing:.12em">통신시설 복구 모듈 로딩 ┄┄┄</div>
@@ -412,21 +412,21 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
             <button class="sb" data-sid="sZ" data-dir="1">+</button>
           </div>
         </div>
-        <div class="cr" id="rH" style="display:none"><div class="cr-label">H 위치 <span class="cv" id="vH">-2.0</span></div>
+        <div class="cr" id="rH"><div class="cr-label">H 위치 <span class="cv" id="vH">-2.0</span></div>
           <div class="cr-row">
             <button class="sb" data-sid="sH" data-dir="-1">−</button>
             <input type="range" id="sH" min="-7" max="7" step="0.05" value="-2">
             <button class="sb" data-sid="sH" data-dir="1">+</button>
           </div>
         </div>
-        <div class="cr" id="rV" style="display:none"><div class="cr-label">O(v) <span class="cv" id="vV">2.0</span></div>
+        <div class="cr" id="rV"><div class="cr-label">O(v) <span class="cv" id="vV">2.0</span></div>
           <div class="cr-row">
             <button class="sb" data-sid="sV" data-dir="-1">−</button>
             <input type="range" id="sV" min="-5" max="5" step="0.05" value="2">
             <button class="sb" data-sid="sV" data-dir="1">+</button>
           </div>
         </div>
-        <div class="cr" id="rU" style="display:none"><div class="cr-label">O(u) <span class="cv" id="vU">1.0</span></div>
+        <div class="cr" id="rU"><div class="cr-label">O(u) <span class="cv" id="vU">1.0</span></div>
           <div class="cr-row">
             <button class="sb" data-sid="sU" data-dir="-1">−</button>
             <input type="range" id="sU" min="-5" max="5" step="0.05" value="1">
@@ -1094,8 +1094,12 @@ var activateMission=function(){
 
 // 인트로 화면 표시
 var showIntro=function(mis){
+  // 로딩 오버레이: 장면·미션창이 준비된 뒤(0.7초) 부드럽게 걷어냄 — 화성 화면이 겹쳐 보이지 않게
   var bl=document.getElementById('bootLoading');
-  if(bl){bl.style.opacity='0';setTimeout(function(){if(bl.parentNode)bl.parentNode.removeChild(bl);},550);}
+  if(bl){setTimeout(function(){
+    bl.style.opacity='0';
+    setTimeout(function(){if(bl.parentNode)bl.parentNode.removeChild(bl);},650);
+  },700);}
   var q=QD[mis];
   var sp=document.getElementById('storyPanel');
   var si=document.getElementById('storyIntro');
@@ -1262,6 +1266,7 @@ var updHUD=function(a,b,c,d){
 };
 // ── 단계 연동 슬라이더 가시성: 해당 단계에서 필요한 조작만 노출 ──
 var updSliders=function(){
+  try{
   var rH=document.getElementById('rH'),rV=document.getElementById('rV'),rU=document.getElementById('rU');
   var sh=document.getElementById('sliderHint');
   var showH=false,showV=false,showU=false;
@@ -1278,6 +1283,7 @@ var updSliders=function(){
   if(rV)rV.style.display=showV?'flex':'none';
   if(rU)rU.style.display=showU?'flex':'none';
   if(sh)sh.style.display=(ST.mis===3&&showV)?'block':'none';
+  }catch(e){/* 실패 시 슬라이더는 기본 표시 상태 유지 — 진행 차단 방지 */}
 };
 var buildUI=function(){updTabs();setupHUD();buildSteps();updProgress();};
 var buildSteps=function(){
@@ -1589,7 +1595,7 @@ var updScene=function(){
     else if(cs2.cond==='all3')ok=(Math.abs(90-pos.aPHl)<=0.5&&Math.abs(90-pos.aOHl)<=0.5&&Math.abs(90-pos.aPOOH)<=0.5);
     
     // 공간잇기 보조선: 수직이 이어질 자리를 점선으로 안내
-    updGuide(cs2,pos,ok);
+    try{updGuide(cs2,pos,ok);}catch(e){}
     
     // 점선 → 실선 전환
     if(ST.mis===1&&cs2.cond==='oh'){
@@ -1605,7 +1611,7 @@ var updScene=function(){
     var btn=document.getElementById('cb'+ST.step);
     if(btn&&!btn.classList.contains('fi')){btn.className='cb'+(ok?' rd':'');btn.disabled=!ok;}
   }else{
-    hideGuide();
+    try{hideGuide();}catch(e){}
   }
   document.getElementById('vZ').textContent=ST.pH.toFixed(2);document.getElementById('vH').textContent=ST.tH.toFixed(2);
   document.getElementById('vU').textContent=ST.uO.toFixed(2);document.getElementById('vV').textContent=ST.vO.toFixed(2);
@@ -1945,7 +1951,7 @@ setTimeout(function(){showTransit(0,1);},200);
 </script>
 
 <!-- ═══ 공간잇기 성찰로그 (모듈1: 수직관계 → 삼수선) ═══ -->
-<div id="reflectBox" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(2,8,16,.88);align-items:center;justify-content:center;padding:16px">
+<div id="reflectBox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:rgba(2,8,16,.88);align-items:center;justify-content:center;padding:16px">
   <div style="width:100%;max-width:420px;max-height:92vh;overflow-y:auto;background:#041208;border:1.5px dashed #2a8a5a;border-radius:14px;box-shadow:0 0 40px rgba(40,200,120,.18)">
     <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px dashed #1d5a3a">
       <div style="width:8px;height:8px;border-radius:50%;background:#44ffaa;animation:blink 1.2s step-end infinite"></div>
