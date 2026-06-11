@@ -83,8 +83,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
   text-align:center;font-family:'Share Tech Mono',monospace;font-size:13px;
   letter-spacing:.06em;font-weight:bold;border:none;cursor:pointer;
   transition:all .18s;display:block;width:calc(100% - 36px)}
-.btn-gap{flex-shrink:0;text-align:center;font-size:11px;letter-spacing:3px;
-  padding:3px 0;font-family:'Share Tech Mono',monospace}
+.btn-row{flex-shrink:0;display:flex;gap:10px;margin:0 18px 16px}
+.btn-row .mod-btn{flex:1;margin:0;width:auto;padding:9px 6px;line-height:1.35}
+.btn-sub{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10.5px;
+  font-weight:700;letter-spacing:0;opacity:.85;margin-top:2px}
 .mod-last{margin-bottom:16px}
 
 /* ═ 모듈1 — 주황-적색 테마 (수직의 세계) ═ */
@@ -204,9 +206,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
           </div>
         </div>
       </div>
-      <button class="mod-btn" onclick="openGame('perp_plane_class.html','MODULE 01-1 — 직선과 평면의 수직')">▶ 1단계 접속 — 직선과 평면의 수직</button>
-      <div class="btn-gap">┊┊┊</div>
-      <button class="mod-btn mod-last" onclick="openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리')">▶ 2단계 접속 — 삼수선의 정리</button>
+      <div class="btn-row">
+        <button class="mod-btn" onclick="openGame('perp_plane_class.html','MODULE 01-1 — 직선과 평면의 수직')">▶ 1단계 접속<span class="btn-sub">직선과 평면의 수직</span></button>
+        <button class="mod-btn" onclick="openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리')">▶ 2단계 접속<span class="btn-sub">삼수선의 정리</span></button>
+      </div>
     </div>
 
     <!-- MODULE 02: 정사영 -->
@@ -240,7 +243,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
           <span class="m-num">F03</span>
           <div class="m-info">
             <div class="m-name">🚀 미션탐구 — 최적 각도 제어</div>
-            <div class="m-detail">전력 최대화 각도 산출 → 생명유지장치 복구 → 성찰로그 기록</div>
+            <div class="m-detail">전력 최대화 각도 산출 → 생명유지장치 복구</div>
+          </div>
+        </div>
+        <div class="mission">
+          <span class="m-num">📝</span>
+          <div class="m-info">
+            <div class="m-name">미션 성찰로그</div>
+            <div class="m-detail">미션 완수 후 성찰로그 기록 → 모듈2 임무 완료</div>
           </div>
         </div>
       </div>
