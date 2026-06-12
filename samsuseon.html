@@ -353,10 +353,10 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
           <div id="storyActive">
             <div class="sa-badge" id="saBadge">M01</div>
             <div class="sa-info">
-              <div class="sa-title" id="saTitle"></div>
+              <div class="sa-title" id="saTitle" style="cursor:pointer" title="누르면 스토리 접기/펴기"></div>
               <div class="sa-story" id="saStory"></div>
             </div>
-
+            <div id="saFold" style="position:absolute;top:6px;right:8px;font-size:9px;color:#664422;cursor:pointer;user-select:none;-webkit-user-select:none">접기 ▲▼</div>
           </div>
         </div>
 
@@ -1988,6 +1988,21 @@ var SHEET_URL = 'https://script.google.com/macros/s/AKfycbwQUbktB_3XbtJJfd6UzzE7
 document.getElementById('trReflect').addEventListener('click', function(){
   document.getElementById('reflectBox').style.display = 'flex';
 });
+// 좌측 미션 스토리 접기/펴기 (작은 화면 공간 확보)
+(function(){
+  var sa=document.getElementById('storyActive');
+  if(sa){ sa.style.position='relative';
+    var toggle=function(){ var st=document.getElementById('saStory');
+      var fd=document.getElementById('saFold');
+      var hidden = st.style.display==='none';
+      st.style.display = hidden?'':'none';
+      if(fd) fd.textContent = hidden?'접기 ▲▼':'펴기 ▼▲';
+    };
+    var t1=document.getElementById('saTitle'), t2=document.getElementById('saFold');
+    if(t1) t1.addEventListener('click',toggle);
+    if(t2) t2.addEventListener('click',toggle);
+  }
+})();
 // 상단 메뉴 성찰로그 버튼 (미션 다시보기 후에도 언제든 접근 가능)
 document.getElementById('mReflect').addEventListener('click', function(){
   document.getElementById('reflectBox').style.display = 'flex';
