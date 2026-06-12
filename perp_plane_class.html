@@ -164,6 +164,7 @@
 
   .lab-steps-scroll {
     flex: 1;
+    min-height: 0; /* 내용이 길어도 패널 높이를 넘기지 않고 내부에서만 스크롤되도록 보정 — lab-footer 겹침/잘림 방지 */
     overflow-y: auto;
     padding: 12px 14px;
     scrollbar-width: thin;
