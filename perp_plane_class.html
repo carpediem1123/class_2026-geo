@@ -1113,6 +1113,8 @@ function toggleLabPanel() {
     panel.classList.add('open');
     tabBtn.classList.add('active');
     tabBtn.querySelector('.lab-tab-dot').style.background = '#cc99ff';
+    // 패널이 열리면 좌상단 탭 버튼이 .lab-header 제목과 겹치므로 숨김 (닫기는 패널 하단의 '화성 관제소 복귀' 버튼 사용)
+    tabBtn.style.display = 'none';
     // 수학실험실 진입 → 화성 조작 패널·스토리 숨김
     var up=document.getElementById('ui-panel'); if(up) up.style.display='none';
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='none';
@@ -1129,6 +1131,7 @@ function toggleLabPanel() {
     panel.classList.remove('open');
     tabBtn.classList.remove('active');
     tabBtn.querySelector('.lab-tab-dot').style.background = '#7744cc';
+    tabBtn.style.display = 'flex';
     // 화성 관제소 복귀 → 조작 패널·스토리 다시 표시
     var up=document.getElementById('ui-panel'); if(up) up.style.display='flex';
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='block';
