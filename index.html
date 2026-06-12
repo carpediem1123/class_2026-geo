@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a1628">
-<title>공간잇기(空間-IT-gi) — KOSA-1 사령부</title>
+<title>공간잇기 — KOSA-1 사령부</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -145,8 +145,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
   <!-- 헤더 -->
   <div id="hd">
     <div class="hd-left">
-      <div class="hd-title">🛰 공간잇기(空間-IT-gi) <span class="dashes">┄┄┄</span> KOSA-1 사령부</div>
-      <div class="hd-sub">SPACE CONNECTION (空間+IT+GEO) · 점선으로 개념을 잇다 · MARS POLAR BASE α-7</div>
+      <div class="hd-title">🛰 공간잇기 <span class="dashes">┄┄┄</span> KOSA-1 사령부</div>
+      <div class="hd-sub">SPACE CONNECTION 공간잇기(空間+IT+GEO) · 점선으로 개념을 잇다 · MARS POLAR BASE α-7</div>
     </div>
     <div class="hd-right">
       <div class="status-chip chip-r"><span class="dot dot-r"></span>구조 시스템 OFFLINE</div>
@@ -270,11 +270,15 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 </div>
 
 <script>
+// ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
+var BUILD = '20260612a';
+
 // iOS Safari 감지
 var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 function openGame(file, title) {
+  file = file + '?v=' + BUILD;   // 캐시 우회 — 항상 최신 모듈 로드
   if (isIOS) {
     // iOS: 같은 탭에서 직접 이동 (WebGL iframe 제한 우회)
     sessionStorage.setItem('kosa_return', '1');
