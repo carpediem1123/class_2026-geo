@@ -623,14 +623,10 @@ var mvLSOH=function(a,b){
   lsOH.line.quaternion.copy(quat);
 };
 var lsPO=mkLS(0x5599ff);
-// ── 공간잇기 보조선: 수직을 찾아가는 점선 가이드 ──
-var guideLn=mkLS(0x44ffaa);
-guideLn.mat.dashSize=.22;guideLn.mat.gapSize=.16;guideLn.mat.opacity=.85;
-guideLn.line.visible=false;
-var guideDot=new THREE.Mesh(new THREE.SphereGeometry(.1,10,10),
-  new THREE.MeshStandardMaterial({color:0x44ffaa,emissive:0x44ffaa,emissiveIntensity:.9,transparent:true,opacity:.9}));
-guideDot.visible=false;scene.add(guideDot);
-// ── 개념잇기 애니메이션: 직선 l의 점선 복제본이 평행이동하여 O를 지나며 PO⊥l을 보여줌 ──
+
+// ── 개념잇기: 직선 l 평행이동 애니메이션 (PO⊥l 직관 확인) ──
+// PO⊥α의 정의는 "평면 위 모든 직선과 수직" — l이 O를 지나지 않아도
+// 평행이동하면 이루는 각이 보존되므로 PO⊥l 임을 눈으로 보여준다.
 var ghostLn=mkLS(0xffcc44);
 ghostLn.mat.dashSize=.28;ghostLn.mat.gapSize=.18;ghostLn.line.visible=false;
 var ghostMark=(function(){
@@ -640,7 +636,7 @@ var ghostMark=(function(){
   var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
   sp.scale.set(1.5,1.0,1);sp.visible=false;scene.add(sp);return sp;
 })();
-var ghostAnim=null;  // {t0, F, off, half}
+var ghostAnim=null;  // {t0, F, off, half, O}
 var playGhostL=function(){
   var pos=getPos();
   var F=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD)); // O의 l 위 수선의 발
@@ -650,56 +646,22 @@ var playGhostL=function(){
 var stepGhostAnim=function(){
   if(!ghostAnim)return;
   var el=(Date.now()-ghostAnim.t0)/1000;
-  var slideT=Math.min(1,el/1.4);                       // 0~1.4초: 평행이동
-  var e=slideT<.5?2*slideT*slideT:1-Math.pow(-2*slideT+2,2)/2; // ease
-  var C=ghostAnim.F.clone().addScaledVector(ghostAnim.off,e);  // 현재 복제선이 지나는 점
+  var slideT=Math.min(1,el/1.4);                                 // 0~1.4초: 평행이동
+  var e=slideT<.5?2*slideT*slideT:1-Math.pow(-2*slideT+2,2)/2;   // ease-in-out
+  var C=ghostAnim.F.clone().addScaledVector(ghostAnim.off,e);
   mvLS(ghostLn,C.clone().addScaledVector(LD,-ghostAnim.half),C.clone().addScaledVector(LD,ghostAnim.half));
   ghostLn.line.visible=true;
-  if(slideT>=1){                                       // 도착: O 위에서 ⊥ 마커
+  if(slideT>=1){                                                  // 도착: O 위에 ⊥ 90° 마커
     ghostMark.position.copy(ghostAnim.O.clone().addScaledVector(LD,.7).add(V3(0,.45,0)));
     ghostMark.visible=true;
   }
-  if(el>3.4){                                          // 1.4 이동 + 2.0 표시 후 페이드
+  if(el>3.4){                                                     // 2초 표시 후 0.7초 페이드
     var f=Math.max(0,1-(el-3.4)/.7);
     ghostLn.mat.opacity=.95*f;ghostMark.material.opacity=f;
     if(f<=0){ghostLn.line.visible=false;ghostMark.visible=false;ghostAnim=null;}
   }
 };
-var hideGuide=function(){guideLn.line.visible=false;guideDot.visible=false;};
-var hintUntil=0;  // 힌트 버튼을 누른 시점부터 6초간만 가이드 표시
-var updGuide=function(cs2,pos,ok){
-  if(!cs2||!cs2.cond||ok||ST.done.indexOf(ST.step)>=0){hideGuide();return;}
-  if(Date.now()>hintUntil){hideGuide();return;}  // 평소엔 숨김 — 탐구 우선
-  var a=null,b=null;
-  if(cs2.cond==='ph'){
-    // P에서 직선 l로 내린 수선: P → 수선의 발 (M2 S2, M3 S1)
-    a=pos.P;b=L0.clone().addScaledVector(LD,pos.P.clone().sub(L0).dot(LD));
-  }else if(cs2.cond==='oh'&&ST.mis===1){
-    // O에서 직선 l로 내린 수선: O → 수선의 발 (M1 S2)
-    a=pos.O;b=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD));
-  }else if(cs2.cond==='oh'&&ST.mis===3){
-    // H에서 평면 α 위 l에 수직인 자리: H → O가 와야 할 곳 (M3 S2)
-    a=pos.H;b=ptA(ST.uO,pos.H.z);
-  }else if(cs2.cond==='all3'){
-    // PO⊥OH가 되는 O의 자리: P → O가 와야 할 곳 (M3 S5, 탈레스 원리)
-    var C=E2.clone().multiplyScalar(ST.vO);
-    var s=E1.dot(pos.P.clone().sub(C))+E1.dot(pos.H.clone().sub(C));
-    var q=pos.P.clone().sub(C).dot(pos.H.clone().sub(C));
-    var disc=s*s-4*q;
-    if(disc<0){hideGuide();return;}
-    var r1=(s+Math.sqrt(disc))/2,r2=(s-Math.sqrt(disc))/2;
-    var u=Math.abs(r1-ST.uO)<Math.abs(r2-ST.uO)?r1:r2;
-    if(u<-5||u>5)u=(r1>=-5&&r1<=5)?r1:r2;
-    a=pos.P;b=ptA(u,ST.vO);
-  }
-  if(!a||!b){hideGuide();return;}
-  mvLS(guideLn,a,b);
-  guideLn.line.visible=true;
-  guideDot.position.copy(b);guideDot.visible=true;
-  var t=Date.now()*.004;  // 은은한 펄스 — "이어질 자리"가 숨쉬듯 깜빡임
-  guideLn.mat.opacity=.5+.32*Math.sin(t);
-  guideDot.material.opacity=.55+.35*Math.sin(t);
-};
+
 lsPO.line.frustumCulled=false;
 // OH 레일/지지대: 굵은 파이프 표현 (TubeGeometry)
 var lsOH=(function(){
@@ -911,7 +873,7 @@ var MC={
   },  2:{betaMsg:'PO와 PH가 결정하는 β 등장!\nPO⊥l, PH⊥l → β⊥l\nOH = PH-PO ∈ β',
      hud:[['PO⊥α','po'],['PH⊥l','ph'],['OH⊥l','oh'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'PO⊥α 확인→ PO⊥l 자동 성립!',btn:'PO⊥l 확인!',auto:1},
+      {l:'STEP 1',d:'PO⊥α 확인→ PO⊥l 자동 성립!\n👀 l이 평행이동하며 직접 보여줍니다',btn:'PO⊥l 확인!',auto:1,ghostL:1},
       {l:'STEP 2',d:'PH가 직선l과 수직이 되도록 조정하세요.',btn:'PH⊥l 달성!',cond:'ph'},
       {l:'STEP 3',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3,revOHdim2bright:1},
       {l:'STEP 4',d:'OH ∈ β 이므로 ∴ OH⊥l 자동 성립!\n삼수선의 정리 ② ✓',btn:'🎉 정리② 발견!',auto:1,revOH:1},
@@ -923,7 +885,7 @@ var MC={
       {l:'STEP 1',d:'[기어1] 전력선과 수직\nH를 조정하여 PH⊥l 을 달성하세요.',btn:'기어① 맞물림(PH⊥l)!',cond:'ph'},
       {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh'},
       {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l\n(β : PH와 OH가 결정하는 평면)',btn:'기어 평면 확인!',auto:1,beta:1},
-      {l:'STEP 4',d:'β 위의 한 직선 PO 확인\nPO ∈ β 이고 β⊥l 이므로\n∴ PO⊥l 자동 성립!',btn:'PO⊥l 확인!',auto:1,hlPO:1},
+      {l:'STEP 4',d:'β 위의 한 직선 PO 확인\nPO ∈ β 이고 β⊥l 이므로\n∴ PO⊥l 자동 성립!\n👀 l이 평행이동하며 직접 보여줍니다',btn:'PO⊥l 확인!',auto:1,hlPO:1,ghostL:1},
       {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
       {l:'STEP 6',d:'3개 기어 완전 맞물림!\n기둥이 완벽하게 수직 고정됨\n PO⊥l, PO⊥OH → PO⊥α 자동 성립!\n(α: OH, l에 의하여 결정된 평면)\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
     ]}
@@ -1324,14 +1286,6 @@ var buildSteps=function(){
       if(!done&&!s.auto)b.disabled=true;
       (function(id){b.onclick=done?null:function(){doConfirm(id);};})(idx);
       dv.appendChild(b);
-      // 조작 단계 한정: 힌트 버튼 (누르면 6초간 점선 가이드 표시)
-      if(active&&!done&&s.cond){
-        var hb=document.createElement('button');
-        hb.textContent='💡 힌트 보기';
-        hb.style.cssText='margin-top:5px;width:100%;padding:5px;background:none;border:1px dashed #3a5a4a;border-radius:5px;color:#558877;font-size:10px;cursor:pointer;font-family:inherit';
-        hb.onclick=function(){hintUntil=Date.now()+6000;this.textContent='💡 점선이 수직이 이어질 자리를 보여줍니다…';var self=this;setTimeout(function(){self.textContent='💡 힌트 보기';},6000);};
-        dv.appendChild(hb);
-      }
     }
     el.appendChild(dv);
   });
@@ -1627,9 +1581,6 @@ var updScene=function(){
     else if(cs2.cond==='ph')ok=Math.abs(90-pos.aPHl)<=0.5;
     else if(cs2.cond==='all3')ok=(Math.abs(90-pos.aPHl)<=0.5&&Math.abs(90-pos.aOHl)<=0.5&&Math.abs(90-pos.aPOOH)<=0.5);
     
-    // 공간잇기 보조선: 수직이 이어질 자리를 점선으로 안내
-    try{updGuide(cs2,pos,ok);}catch(e){}
-    
     // 점선 → 실선 전환
     if(ST.mis===1&&cs2.cond==='oh'){
       setLineDashed(lsOH,!ok);
@@ -1643,8 +1594,6 @@ var updScene=function(){
     
     var btn=document.getElementById('cb'+ST.step);
     if(btn&&!btn.classList.contains('fi')){btn.className='cb'+(ok?' rd':'');btn.disabled=!ok;}
-  }else{
-    try{hideGuide();}catch(e){}
   }
   document.getElementById('vZ').textContent=ST.pH.toFixed(2);document.getElementById('vH').textContent=ST.tH.toFixed(2);
   document.getElementById('vU').textContent=ST.uO.toFixed(2);document.getElementById('vV').textContent=ST.vO.toFixed(2);
