@@ -84,6 +84,8 @@
     position: absolute;
     top: 10px;
     left: 10px;
+    width: auto;          /* 전역 button{width:100%} 무력화 — 바처럼 늘어나던 문제 */
+    max-width: 180px;
     z-index: 20;
     background: rgba(8, 4, 24, 0.92);
     border: 2px solid #7744cc;
@@ -385,7 +387,7 @@
       try {
         if(window.parent && window.parent !== window && window.parent.closeGame){ window.parent.closeGame(); return; }
       } catch(e) {}
-      window.location.href = 'index.html';
+      window.location.href = 'index.html?v=20260612a';
     }
     function goNext(){
       try {
@@ -393,7 +395,7 @@
           window.parent.openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리'); return;
         }
       } catch(e) {}
-      window.location.href = 'samsuseon.html';
+      window.location.href = 'samsuseon.html?v=20260612a';
     }
     </script>
 
@@ -1110,6 +1112,9 @@ function toggleLabPanel() {
     panel.classList.add('open');
     tabBtn.classList.add('active');
     tabBtn.querySelector('.lab-tab-dot').style.background = '#cc99ff';
+    // 수학실험실 진입 → 화성 조작 패널·스토리 숨김
+    var up=document.getElementById('ui-panel'); if(up) up.style.display='none';
+    var sp=document.getElementById('story-panel'); if(sp) sp.style.display='none';
     
     scene.background = bgColorLab;
     scene.fog = null; 
@@ -1123,6 +1128,9 @@ function toggleLabPanel() {
     panel.classList.remove('open');
     tabBtn.classList.remove('active');
     tabBtn.querySelector('.lab-tab-dot').style.background = '#7744cc';
+    // 화성 관제소 복귀 → 조작 패널·스토리 다시 표시
+    var up=document.getElementById('ui-panel'); if(up) up.style.display='flex';
+    var sp=document.getElementById('story-panel'); if(sp) sp.style.display='block';
     
     scene.background = bgColorMain;
     scene.fog = new THREE.FogExp2(0x05070f, 0.03);
