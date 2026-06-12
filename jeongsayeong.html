@@ -1865,6 +1865,7 @@ document.querySelectorAll('.qbtn').forEach(btn=>{
 });
 
 /* ═══ 수선의 발 애니메이션 (개념탐구) ════════════════════════ */
+var resetFootAnim = function(){};  // 클로저 내부에서 실제 구현으로 교체됨
 (function(){
   var footObjs = [];   // 씬에 추가된 임시 오브젝트
   var footDone = false;
@@ -1882,6 +1883,16 @@ document.querySelectorAll('.qbtn').forEach(btn=>{
     });
     footObjs = [];
   }
+
+  // 탭/페이즈 전환 시 애니메이션 잔상 완전 제거 (외부에서 호출)
+  resetFootAnim = function() {
+    footDone = false;
+    clearFootObjs();
+    var msgEl = document.getElementById('footAnimMsg');
+    if (msgEl) msgEl.style.display = 'none';
+    var btn = document.getElementById('footAnimBtn');
+    if (btn) btn.textContent = '▶ 수선의 발 애니메이션 보기';
+  };
 
   function addFootObj(o) { scene.add(o); footObjs.push(o); }
 
@@ -2182,7 +2193,7 @@ function openAdvIframe(){
   if(frame) {
     // indexOf === -1 비교를 명확하게 명시하여 무한 중첩 로드 버그를 완벽하게 차단합니다.
     if(!frame.src || frame.src === "" || frame.src === "about:blank" || frame.src.indexOf("jeongsayeong_adv.html") === -1) {
-      frame.src = "jeongsayeong_adv.html";
+      frame.src = "jeongsayeong_adv.html?v=20260612a";
     }
   }
   document.getElementById('advPanel').style.display = 'flex';
@@ -2225,15 +2236,18 @@ document.getElementById('tab3').addEventListener('click',function(){
   document.getElementById('tab1').className='tab';
   document.getElementById('tab2').className='tab';
   this.className='tab on';
+  resetFootAnim();  // P·P′ 애니메이션 잔상 제거
   openAdvIframe();
 });
 document.getElementById('tab1').addEventListener('click',function(){
   closeAdvIframe();
+  resetFootAnim();  // 개념탐구 재진입 시에도 깨끗한 상태로
   setPhase(1);
 });
 document.getElementById('tab2').addEventListener('click',function(){
   if(this.disabled)return;
   closeAdvIframe();
+  resetFootAnim();  // P·P′ 애니메이션 잔상 제거
   setPhase(3);
 });
 document.getElementById('mwinOk').addEventListener('click',function(){
