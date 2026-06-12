@@ -196,8 +196,8 @@ body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;ove
 .tr-close:hover{color:#aaffcc}
 
 
-#rp{width:280px;flex-shrink:0;background:#111e2e;border-left:2px solid #1e3248;
-  display:flex;flex-direction:column;min-height:0}
+/* (중복 #rp 규칙 제거됨 — 위쪽 #rp 규칙의 overflow-y:auto가 이 규칙에 덮여 사라져서
+   step 진행 시 새로 나타나는 슬라이더(H, O(v), O(u))가 패널 밖으로 잘려 안 보이던 문제 수정) */
 .sv{background:#0c0c1e;border-radius:6px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #1a1a33}
 .sv.ac{border-left-color:#ff9944;background:#110800}
 .sv.dn{border-left-color:#00cc55;background:#041008}
