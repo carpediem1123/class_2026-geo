@@ -630,9 +630,46 @@ guideLn.line.visible=false;
 var guideDot=new THREE.Mesh(new THREE.SphereGeometry(.1,10,10),
   new THREE.MeshStandardMaterial({color:0x44ffaa,emissive:0x44ffaa,emissiveIntensity:.9,transparent:true,opacity:.9}));
 guideDot.visible=false;scene.add(guideDot);
+// ── 개념잇기 애니메이션: 직선 l의 점선 복제본이 평행이동하여 O를 지나며 PO⊥l을 보여줌 ──
+var ghostLn=mkLS(0xffcc44);
+ghostLn.mat.dashSize=.28;ghostLn.mat.gapSize=.18;ghostLn.line.visible=false;
+var ghostMark=(function(){
+  var c=document.createElement('canvas');c.width=96;c.height=64;
+  var x=c.getContext('2d');x.font='bold 40px Courier New';x.fillStyle='#ffdd55';x.fillText('⊥',6,46);
+  x.font='bold 17px Courier New';x.fillText('90°',46,30);
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  sp.scale.set(1.5,1.0,1);sp.visible=false;scene.add(sp);return sp;
+})();
+var ghostAnim=null;  // {t0, F, off, half}
+var playGhostL=function(){
+  var pos=getPos();
+  var F=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD)); // O의 l 위 수선의 발
+  ghostAnim={t0:Date.now(),F:F,off:pos.O.clone().sub(F),half:9,O:pos.O.clone()};
+  ghostLn.mat.opacity=.95;ghostMark.material.opacity=1;
+};
+var stepGhostAnim=function(){
+  if(!ghostAnim)return;
+  var el=(Date.now()-ghostAnim.t0)/1000;
+  var slideT=Math.min(1,el/1.4);                       // 0~1.4초: 평행이동
+  var e=slideT<.5?2*slideT*slideT:1-Math.pow(-2*slideT+2,2)/2; // ease
+  var C=ghostAnim.F.clone().addScaledVector(ghostAnim.off,e);  // 현재 복제선이 지나는 점
+  mvLS(ghostLn,C.clone().addScaledVector(LD,-ghostAnim.half),C.clone().addScaledVector(LD,ghostAnim.half));
+  ghostLn.line.visible=true;
+  if(slideT>=1){                                       // 도착: O 위에서 ⊥ 마커
+    ghostMark.position.copy(ghostAnim.O.clone().addScaledVector(LD,.7).add(V3(0,.45,0)));
+    ghostMark.visible=true;
+  }
+  if(el>3.4){                                          // 1.4 이동 + 2.0 표시 후 페이드
+    var f=Math.max(0,1-(el-3.4)/.7);
+    ghostLn.mat.opacity=.95*f;ghostMark.material.opacity=f;
+    if(f<=0){ghostLn.line.visible=false;ghostMark.visible=false;ghostAnim=null;}
+  }
+};
 var hideGuide=function(){guideLn.line.visible=false;guideDot.visible=false;};
+var hintUntil=0;  // 힌트 버튼을 누른 시점부터 6초간만 가이드 표시
 var updGuide=function(cs2,pos,ok){
   if(!cs2||!cs2.cond||ok||ST.done.indexOf(ST.step)>=0){hideGuide();return;}
+  if(Date.now()>hintUntil){hideGuide();return;}  // 평소엔 숨김 — 탐구 우선
   var a=null,b=null;
   if(cs2.cond==='ph'){
     // P에서 직선 l로 내린 수선: P → 수선의 발 (M2 S2, M3 S1)
@@ -864,7 +901,7 @@ var MC={
   1:{betaMsg:'PO와 OH가 결정하는 β 등장!\nPO⊥l, OH⊥l → β⊥l\nPH = PO+OH ∈ β',
      hud:[['PO⊥α','po'],['OH⊥l','oh'],['PH⊥l','ph'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'PO⊥α 확인 → PO⊥l 자동 성립!\n(l은 α 위의 직선)',btn:'PO⊥l 확인!',auto:1},
+      {l:'STEP 1',d:'PO⊥α 확인 → PO⊥l 자동 성립!\n(l은 α 위의 직선)',btn:'PO⊥l 확인!',auto:1,ghostL:1},
       {l:'STEP 2',d:'H를 조정하여 OH⊥l 달성하세요.',btn:'OH⊥l 달성!',cond:'oh'},
       {l:'STEP 3',d:'레일을 설치하세요.\n(OH 케이블 고정)',btn:'🔧 레일 설치!',auto:1,installOH:1},
       {l:'STEP 4',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3},
@@ -1287,6 +1324,14 @@ var buildSteps=function(){
       if(!done&&!s.auto)b.disabled=true;
       (function(id){b.onclick=done?null:function(){doConfirm(id);};})(idx);
       dv.appendChild(b);
+      // 조작 단계 한정: 힌트 버튼 (누르면 6초간 점선 가이드 표시)
+      if(active&&!done&&s.cond){
+        var hb=document.createElement('button');
+        hb.textContent='💡 힌트 보기';
+        hb.style.cssText='margin-top:5px;width:100%;padding:5px;background:none;border:1px dashed #3a5a4a;border-radius:5px;color:#558877;font-size:10px;cursor:pointer;font-family:inherit';
+        hb.onclick=function(){hintUntil=Date.now()+6000;this.textContent='💡 점선이 수직이 이어질 자리를 보여줍니다…';var self=this;setTimeout(function(){self.textContent='💡 힌트 보기';},6000);};
+        dv.appendChild(hb);
+      }
     }
     el.appendChild(dv);
   });
@@ -1393,6 +1438,7 @@ var doConfirm=function(idx){
     }
   }
   if(s.final){ST.missionDone=true;ST.cleared[ST.mis-1]=true;if(ST.mis<3)ST.unlocked[ST.mis]=true;saveMissionState(ST.mis);updTabs();updProgress();}
+  if(s.ghostL){try{playGhostL();}catch(e){}}  // 개념잇기: l 평행이동 애니메이션
   if(idx<MC[ST.mis].steps.length)ST.step=idx+1;
   buildSteps();updProgress();
 };
@@ -1573,6 +1619,7 @@ var updScene=function(){
   betaMat.opacity=betaOpa*.52;betaEdgeMat.opacity=betaOpa;betaLbl.material.opacity=Math.min(1,betaOpa*1.4);
   if(betaOpa>.01){var bn=getBetaN(P,O,H);if(bn){var cen=P.clone().add(O).add(H).multiplyScalar(1/3);betaMsh.position.copy(cen);betaMsh.quaternion.setFromUnitVectors(V3(0,0,1),bn);betaEdge.position.copy(cen);betaEdge.quaternion.copy(betaMsh.quaternion);betaLbl.position.copy(cen.clone().addScaledVector(bn,.95));}}
   updHUD(pos.aPOa,pos.aOHl,pos.aPHl,pos.aPOOH);
+  try{stepGhostAnim();}catch(e){}  // 평행이동 애니메이션 프레임 진행
   var cs2=MC[ST.mis].steps[ST.step-1];
   if(cs2&&cs2.cond&&ST.done.indexOf(ST.step)<0){
     var ok=false;
