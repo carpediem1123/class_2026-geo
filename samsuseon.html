@@ -1574,6 +1574,7 @@ var updScene=function(){
   if(betaOpa>.01){var bn=getBetaN(P,O,H);if(bn){var cen=P.clone().add(O).add(H).multiplyScalar(1/3);betaMsh.position.copy(cen);betaMsh.quaternion.setFromUnitVectors(V3(0,0,1),bn);betaEdge.position.copy(cen);betaEdge.quaternion.copy(betaMsh.quaternion);betaLbl.position.copy(cen.clone().addScaledVector(bn,.95));}}
   updHUD(pos.aPOa,pos.aOHl,pos.aPHl,pos.aPOOH);
   try{stepGhostAnim();}catch(e){}  // 평행이동 애니메이션 프레임 진행
+  try{updSliders();}catch(e){}     // 슬라이더 가시성 매 프레임 동기화 — 일회성 오류가 나도 다음 프레임에 자가 복구
   var cs2=MC[ST.mis].steps[ST.step-1];
   if(cs2&&cs2.cond&&ST.done.indexOf(ST.step)<0){
     var ok=false;
@@ -2049,6 +2050,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260612d</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260612e</div>
 </body>
 </html>
