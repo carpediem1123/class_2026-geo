@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#040410">
 <title>공간잇기 M01-2 — 삼수선의 정리</title>
 <style>
+@keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)}}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;overflow:hidden;
@@ -637,6 +638,40 @@ var ghostMark=(function(){
   sp.scale.set(1.5,1.0,1);sp.visible=false;scene.add(sp);return sp;
 })();
 var ghostAnim=null;  // {t0, F, off, half, O}
+
+// ── STEP 5 PH 점선 그리기 (P에서 H 방향으로 점선이 천천히 그어짐) ──
+var drawPHAnim=null;  // {t0, P, H, line, mat}
+var playDrawPH=function(){
+  try{
+    var pos=getPos();
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([pos.P.x,pos.P.y,pos.P.z, pos.P.x,pos.P.y,pos.P.z]),3));
+    var m=new THREE.LineDashedMaterial({color:0xbb99ff,dashSize:0.16,gapSize:0.12,transparent:true,opacity:1});
+    var ln=new THREE.Line(g,m); ln.computeLineDistances(); scene.add(ln);
+    drawPHAnim={t0:Date.now(), P:pos.P.clone(), H:pos.H.clone(), line:ln, mat:m};
+  }catch(e){}
+};
+var stepDrawPH=function(){
+  if(!drawPHAnim) return;
+  var t=(Date.now()-drawPHAnim.t0)/1800;  // 1.8초에 걸쳐 천천히 그려짐
+  if(t<1){
+    var k=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    var P=drawPHAnim.P, H=drawPHAnim.H;
+    var tip=P.clone().lerp(H,k);
+    var arr=drawPHAnim.line.geometry.attributes.position.array;
+    arr[0]=P.x;arr[1]=P.y;arr[2]=P.z; arr[3]=tip.x;arr[4]=tip.y;arr[5]=tip.z;
+    drawPHAnim.line.geometry.attributes.position.needsUpdate=true;
+    drawPHAnim.line.computeLineDistances();
+  }else if(t<2.4){
+    // 1초 표시 후 페이드
+    drawPHAnim.mat.opacity=Math.max(0,1-(t-1.4)/1);
+  }else{
+    scene.remove(drawPHAnim.line);
+    drawPHAnim.line.geometry.dispose();
+    drawPHAnim=null;
+  }
+};
+
 var playGhostL=function(target){
   // target: 'O'(기본, STEP 1·M3 STEP 4) | 'PH'(M1 STEP 5 힌트) | 'OH'(M2 STEP 4 힌트)
   var pos=getPos();
@@ -876,23 +911,24 @@ var QD={
 
 // ══ 미션 데이터 ══
 var MC={
-  1:{betaMsg:'PO와 OH가 결정하는 β 등장!\nPO⊥l, OH⊥l → β⊥l\nPH = PO+OH ∈ β',
+  1:{betaMsg:'PO와 OH가 결정하는 평면 β 등장!\nPO⊥l, OH⊥l → β⊥l 확인',
      hud:[['PO⊥α','po'],['OH⊥l','oh'],['PH⊥l','ph'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'🔍 발견: PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PO⊥l 발견!',auto:1,hintPOl:1},
+      {l:'STEP 1',d:'PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,choice:'POl',hintPOl:1},
       {l:'STEP 2',d:'H를 조정하여 OH⊥l 달성하세요.',btn:'OH⊥l 달성!',cond:'oh'},
       {l:'STEP 3',d:'레일을 설치하세요.\n(OH 케이블 고정)',btn:'🔧 레일 설치!',auto:1,installOH:1},
       {l:'STEP 4',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3},
-      {l:'STEP 5',d:'🔍 발견: PH와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PH⊥l 발견!',auto:1,revPH:1,hintPH:1},
-{ l: 'STEP 6', d: '통신 회선 연결 완료.\n데이터 송신을 시작합니다.', btn: '📡 통신 송출 시작!', auto: 1, commStart: 1, final: 1 }, 
+      {l:'STEP 5',d:'평면 β 위의 직선인 PH와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,revPH:1,choice:'PHl',hintPH:1},
+      {l:'STEP 6',d:'정리 ① 확인 완료!\nPH⊥l 이 발견되었습니다.\n이제 안전한 PH 통신 케이블을 설치합니다.',btn:'🔧 PH 케이블 설치!',auto:1,installPH:1},
+      {l:'STEP 7',d:'통신 회선 연결 완료.\n데이터 송신을 시작합니다.',btn:'📡 통신 송출 시작!',auto:1,commStart:1,final:1},
     ]
-  },  2:{betaMsg:'PO와 PH가 결정하는 β 등장!\nPO⊥l, PH⊥l → β⊥l\nOH = PH-PO ∈ β',
+  },  2:{betaMsg:'PO와 PH가 결정하는 평면 β 등장!\nPO⊥l, PH⊥l → β⊥l 확인',
      hud:[['PO⊥α','po'],['PH⊥l','ph'],['OH⊥l','oh'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'🔍 발견: PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PO⊥l 발견!',auto:1,hintPOl:1},
+      {l:'STEP 1',d:'PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,choice:'POl',hintPOl:1},
       {l:'STEP 2',d:'PH가 직선l과 수직이 되도록 조정하세요.',btn:'PH⊥l 달성!',cond:'ph'},
       {l:'STEP 3',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3,revOHdim2bright:1},
-      {l:'STEP 4',d:'🔍 발견: OH와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 OH⊥l 발견!',auto:1,revOH:1,hintOH:1},
+      {l:'STEP 4',d:'평면 β 위의 직선인 OH와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,revOH:1,choice:'OHl',hintOH:1},
       {l:'STEP 5',d:'통신장비 보수 완료!\n신호를 발사하세요.',btn:'📡 신호 발사!',auto:1,commStart:1}
     ]},
   3:{betaMsg:'PH와 OH가 결정하는 β 등장!\nPH⊥l, OH⊥l → β⊥l\nPO ⊥ β 면 내의 모든 직선 → PO⊥α!',
@@ -901,7 +937,7 @@ var MC={
       {l:'STEP 1',d:'[기어1] 전력선과 수직\nH를 조정하여 PH⊥l 을 달성하세요.',btn:'기어① 맞물림(PH⊥l)!',cond:'ph'},
       {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh'},
       {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l\n(β : PH와 OH가 결정하는 평면)',btn:'기어 평면 확인!',auto:1,beta:1},
-      {l:'STEP 4',d:'🔍 발견: PO ∈ β 이고 β⊥l 일 때, PO와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PO⊥l 발견!',auto:1,hlPO:1,hintPOl:1},
+      {l:'STEP 4',d:'PO ∈ β 이고 β⊥l 일 때, PO와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,hlPO:1,choice:'POl',hintPOl:1},
       {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
       {l:'STEP 6',d:'3개 기어 완전 맞물림!\n기둥이 완벽하게 수직 고정됨\n PO⊥l, PO⊥OH → PO⊥α 자동 성립!\n(α: OH, l에 의하여 결정된 평면)\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
     ]}
@@ -1298,19 +1334,65 @@ var buildSteps=function(){
     dv.className='sv'+(done?' dn':active?' ac':locked?' lk':'');
     dv.innerHTML='<div class="sl">'+(done?'✅ ':active?'▶ ':'')+s.l+'</div><div class="sd">'+desc+'</div>';
     if(active||done){
+      // 객관식 발견 단계는 정답 클릭 시에만 doConfirm 호출 (버튼명에 답 노출 X)
       var b=document.createElement('button');
       b.id='cb'+idx;b.className='cb'+(done?' fi':s.auto?' rd':'');
       b.textContent=done?'✓ 완료':s.btn;
-      if(!done&&!s.auto)b.disabled=true;
+      if(!done && !s.auto) b.disabled=true;
+      if(!done && s.choice) b.style.display='none'; // 객관식 단계: 버튼은 정답 후 자동 진행하므로 숨김
       (function(id){b.onclick=done?null:function(){doConfirm(id);};})(idx);
       dv.appendChild(b);
-      // 🔗 공간잇기 힌트 버튼 (발견형 단계)
+
+      // 🔍 객관식 선택지 (정답 노출 없는 발견 단계)
+      if(active && !done && s.choice){
+        var qWrap=document.createElement('div');
+        qWrap.style.cssText='margin-top:8px;display:flex;flex-direction:column;gap:6px';
+        var opts=[{k:'수직',sym:'⊥',ok:true},{k:'평행',sym:'∥',ok:false},{k:'그냥 만남',sym:'×',ok:false}];
+        // 보기 순서 셔플 (정답 위치가 매번 같지 않게)
+        opts.sort(function(){return Math.random()-.5;});
+        opts.forEach(function(o){
+          var ob=document.createElement('button');
+          ob.textContent=o.sym+' '+o.k;
+          ob.style.cssText='padding:9px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s';
+          (function(id,ok,btn){
+            btn.onclick=function(){
+              if(ok){
+                btn.style.background='#0a3020';btn.style.borderColor='#44ffaa';btn.style.color='#aaffdd';
+                // 정답 → 다음 단계 진행
+                setTimeout(function(){doConfirm(id);},500);
+              }else{
+                btn.style.background='#3a0a0a';btn.style.borderColor='#ff6644';btn.style.color='#ffaa88';
+                btn.style.animation='shake .4s';
+                setTimeout(function(){btn.style.background='#0c1822';btn.style.borderColor='#2a4060';btn.style.color='#bbd0e0';btn.style.animation='';},800);
+                // 오답 안내
+                var msg=document.getElementById('wrongMsg_'+id);
+                if(!msg){
+                  msg=document.createElement('div');msg.id='wrongMsg_'+id;
+                  msg.style.cssText='margin-top:4px;font-size:11px;color:#ff9977;text-align:center';
+                  msg.textContent='다시 생각해 보세요. 막히면 아래 힌트 버튼을 활용!';
+                  qWrap.appendChild(msg);
+                }
+              }
+            };
+          })(idx,o.ok,ob);
+          qWrap.appendChild(ob);
+        });
+        dv.appendChild(qWrap);
+      }
+
+      // 🔗 공간잇기 힌트 버튼
       if(active && !done && (s.hintPH || s.hintOH || s.hintPOl)){
         var hb=document.createElement('button');
-        hb.textContent='🔗 공간잇기 힌트 — 평행이동으로 확인';
+        hb.textContent='🔗 공간잇기 힌트';
         hb.style.cssText='margin-top:6px;width:100%;padding:8px;background:#1a1a2e;border:1.5px dashed #8866cc;border-radius:6px;color:#bb99ff;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.02em';
-        var tgt = s.hintPH?'PH':(s.hintOH?'OH':'O'); // hintPOl일 때는 'O' 타깃 (기존 STEP1 애니메이션 재활용)
-        hb.onclick=function(){ try{ playGhostL(tgt); }catch(e){} this.disabled=true;this.style.opacity='.4';this.textContent='👁 평행이동 중...'; var self=this; setTimeout(function(){self.style.opacity='1';self.disabled=false;self.textContent='🔗 공간잇기 힌트 — 다시 보기';},4500); };
+        var tgt = s.hintPH?'PH':(s.hintOH?'OH':'O');
+        hb.onclick=function(){
+          try{ playGhostL(tgt); }catch(e){}
+          // STEP 5처럼 PH 힌트는 P→H 점선 그리기도 함께 (천천히 그어지는 애니메이션)
+          if(s.hintPH){ try{ playDrawPH(); }catch(e){} }
+          this.disabled=true;this.style.opacity='.4';this.textContent='👁 평행이동 중...';
+          var self=this; setTimeout(function(){self.style.opacity='1';self.disabled=false;self.textContent='🔗 공간잇기 힌트 — 다시 보기';},4500);
+        };
         dv.appendChild(hb);
       }
     }
@@ -1613,6 +1695,7 @@ var updScene=function(){
   if(betaOpa>.01){var bn=getBetaN(P,O,H);if(bn){var cen=P.clone().add(O).add(H).multiplyScalar(1/3);betaMsh.position.copy(cen);betaMsh.quaternion.setFromUnitVectors(V3(0,0,1),bn);betaEdge.position.copy(cen);betaEdge.quaternion.copy(betaMsh.quaternion);betaLbl.position.copy(cen.clone().addScaledVector(bn,.95));}}
   updHUD(pos.aPOa,pos.aOHl,pos.aPHl,pos.aPOOH);
   try{stepGhostAnim();}catch(e){}  // 평행이동 애니메이션 프레임 진행
+  try{stepDrawPH();}catch(e){}     // PH 점선 그리기 애니메이션
   try{updSliders();}catch(e){}     // 슬라이더 가시성 매 프레임 동기화 — 일회성 오류가 나도 다음 프레임에 자가 복구
   var cs2=MC[ST.mis].steps[ST.step-1];
   if(cs2&&cs2.cond&&ST.done.indexOf(ST.step)<0){
@@ -2089,6 +2172,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613e</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613f</div>
 </body>
 </html>
