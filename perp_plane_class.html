@@ -110,7 +110,6 @@
 
   /* 수학실험실 패널 (좌측 고정) */
   #lab-panel {
-    padding-top: 54px;  /* 수학실험실 버튼이 머리글을 가리지 않도록 (버튼은 열림 시 숨겨지지만 이중 보험) */
     position: absolute;
     top: 0; left: 0; bottom: 0;
     width: 360px;
@@ -248,6 +247,9 @@
     transition: all 0.2s;
   }
   #btn-lab-close:hover { background: #280a48; color: #cc99ff; border-color: #5533aa; }
+  @keyframes blinkReturn { 0%,100% { border-color: #ff44aa; box-shadow: 0 0 0 0 rgba(255,68,170,.5); color: #ffaadd; }
+                           50% { border-color: #ffaadd; box-shadow: 0 0 16px 5px rgba(255,68,170,.35); color: #fff; } }
+  #btn-lab-close.blink-return { animation: blinkReturn 1s ease-in-out infinite; }
 </style>
 <script src="three.min.js"></script>
 <script src="OrbitControls.js"></script>
@@ -262,11 +264,13 @@
 <div id="lab-panel">
   <div class="lab-header">
     <div class="lab-header-title">
-      📐 기하학 심화 증명실
+      📐 수학실험실 — 직선⊥평면의 정의와 정리
       <span class="lab-page-pill" id="lab-page-indicator">1 / 5</span>
     </div>
     <div class="lab-theorem-box">
-      <strong>[정리]</strong> 직선 l이 평면 α 위의 교차하는 두 직선 m, n과 각각 수직이면, 직선 l은 평면 α와 수직이다.
+      <strong style="color:#cc99ff">[정의]</strong> 직선 l ⊥ 평면 α &nbsp;⟺&nbsp; l이 α 위의 <strong>모든</strong> 직선과 수직<br>
+      <strong style="color:#cc99ff">[정리]</strong> l이 α 위의 교차하는 <strong>두</strong> 직선 m, n과 수직 &nbsp;⟺&nbsp; l ⊥ α<br>
+      <span style="color:#9988bb;font-size:11px">→ 정리는 <strong>필요충분조건</strong>! 단 두 직선만 확인하면 '모든 직선과의 수직'이 보장됩니다.</span>
     </div>
     <div class="lab-progress-bar"><div class="lab-progress-fill" id="lab-prog-fill" style="width:20%"></div></div>
     <div class="lab-step-dots" id="lab-dots"></div>
@@ -687,7 +691,7 @@ function updateLogic() {
     antennaGroup.rotation.z = 0; 
     antennaGroup.rotation.x = currentX + Math.sin(wobbleTime) * 0.4; 
 
-    statusBox.innerHTML = `⚡ [구조 분석] 하나의 직선(m)과 수직인 기둥은 힌지 축처럼 작용하여 앞뒤로 회전하며 흔들립니다. 즉, 고정되지 않습니다.`;
+    statusBox.innerHTML = `⚡ [구조 분석] 흔들림 감지 — 교차 지지대가 필요합니다!`;
     statusBox.style.color = "#ff4455";
   }
   else if (state === 'STEP3') {
@@ -746,7 +750,7 @@ window.handleStep2Choice = function(isPerp) {
     alert("🛸 분석 경고: 정면 시각의 왜곡입니다. 측면에서 보니 기둥이 확연히 앞으로 기울어져 고정되지 못했습니다!");
   } else {
     state = 'STEP2_WOBBLE';
-    guideText.innerText = "정답입니다. 한 직선과만 수직이면 공간상에서 기둥이 고정되지 못하고 앞뒤축을 따라 흔들리게 됩니다.";
+    guideText.innerText = "정답입니다! 한 직선(m)과만 수직인 기둥은 힌지처럼 m을 축으로 앞뒤로 흔들립니다 — 아직 고정되지 않았어요.";
     dynamicBtnContainer.innerHTML = `<button id="btn-action" class="btn-success">3단계: 교차 지지대 n 추가 설치</button>`;
   }
 };
@@ -1087,10 +1091,10 @@ function goLabStep(n) {
   document.getElementById('btn-lab-prev').disabled = currentLabStep === 1;
   const nextBtn = document.getElementById('btn-lab-next');
   if (currentLabStep === totalLabSteps) {
-    nextBtn.textContent = '증명 완료!';
+    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : '증명 완료!';
     nextBtn.style.background = '#1a4a2a';
     nextBtn.style.color = '#44ff88';
-    nextBtn.disabled = true;
+    nextBtn.disabled = proofCompleted;   // 마지막 단계: 클릭 가능 → 증명 완료 연출
   } else {
     nextBtn.textContent = '다음 단계 ▶';
     nextBtn.style.background = '';
@@ -1102,7 +1106,40 @@ function goLabStep(n) {
 }
 
 function labNav(dir) {
+  // 마지막 단계에서 '증명 완료!' 클릭 → k ⊥ PO(l) 깜빡임 + 복귀 버튼 유도
+  if (dir === 1 && currentLabStep === totalLabSteps && !proofCompleted) { completeProof(); return; }
   goLabStep(currentLabStep + dir);
+}
+
+let proofCompleted = false;
+function completeProof() {
+  proofCompleted = true;
+  try {
+    // ⊥ 기호: 교점 O에서 직선 l(y축)과 k(pC 방향) 사이 직각 표시
+    const vecK = pC.clone().normalize();
+    const e = 0.55;
+    const cornerGeom = new THREE.BufferGeometry().setFromPoints([
+      pO.clone().addScaledVector(vecK, e),
+      pO.clone().addScaledVector(vecK, e).add(new THREE.Vector3(0, e, 0)),
+      pO.clone().add(new THREE.Vector3(0, e, 0))
+    ]);
+    const cornerLine = new THREE.Line(cornerGeom, new THREE.LineBasicMaterial({ color: 0xff44aa, linewidth: 2 }));
+    const perpLabel = createLabelTexture('⊥', '#ff44aa');
+    perpLabel.position.copy(pO).add(new THREE.Vector3(0.9, 1.1, 0));
+    perpLabel.scale.multiplyScalar(1.3);
+    proofMeshGroup.add(cornerLine); proofMeshGroup.add(perpLabel);
+    // 깜빡임: 0.35초 간격 10회 토글 후 켜진 상태 유지
+    let n = 0;
+    const tk = setInterval(() => {
+      n++; const on = n % 2 === 1;
+      cornerLine.visible = on; perpLabel.visible = on;
+      if (n >= 11) { clearInterval(tk); cornerLine.visible = true; perpLabel.visible = true; }
+    }, 350);
+  } catch (err) { console.warn(err); }
+  // 다음 작업 유도: 복귀 버튼 깜빡임
+  const closeBtn = document.getElementById('btn-lab-close');
+  if (closeBtn) closeBtn.classList.add('blink-return');
+  goLabStep(totalLabSteps);  // 버튼 상태 갱신 (✅ 증명 완료!)
 }
 
 function toggleLabPanel() {
@@ -1174,6 +1211,6 @@ function animate() {
 
 animate();
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260612e</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613a</div>
 </body>
 </html>
