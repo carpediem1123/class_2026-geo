@@ -879,7 +879,7 @@ var MC={
   1:{betaMsg:'PO와 OH가 결정하는 β 등장!\nPO⊥l, OH⊥l → β⊥l\nPH = PO+OH ∈ β',
      hud:[['PO⊥α','po'],['OH⊥l','oh'],['PH⊥l','ph'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'🔗 공간잇기: l을 평행이동해 PO와 수직임을 확인!\n(l은 α 위의 모든 직선 중 하나)',btn:'🔗 공간잇기 실행',auto:1,ghostL:1},
+      {l:'STEP 1',d:'🔍 발견: PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PO⊥l 발견!',auto:1,hintPOl:1},
       {l:'STEP 2',d:'H를 조정하여 OH⊥l 달성하세요.',btn:'OH⊥l 달성!',cond:'oh'},
       {l:'STEP 3',d:'레일을 설치하세요.\n(OH 케이블 고정)',btn:'🔧 레일 설치!',auto:1,installOH:1},
       {l:'STEP 4',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3},
@@ -889,7 +889,7 @@ var MC={
   },  2:{betaMsg:'PO와 PH가 결정하는 β 등장!\nPO⊥l, PH⊥l → β⊥l\nOH = PH-PO ∈ β',
      hud:[['PO⊥α','po'],['PH⊥l','ph'],['OH⊥l','oh'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'🔗 공간잇기: l을 평행이동해 PO와 수직임을 확인!\n(l은 α 위의 모든 직선 중 하나)',btn:'🔗 공간잇기 실행',auto:1,ghostL:1},
+      {l:'STEP 1',d:'🔍 발견: PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PO⊥l 발견!',auto:1,hintPOl:1},
       {l:'STEP 2',d:'PH가 직선l과 수직이 되도록 조정하세요.',btn:'PH⊥l 달성!',cond:'ph'},
       {l:'STEP 3',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3,revOHdim2bright:1},
       {l:'STEP 4',d:'🔍 발견: OH와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 OH⊥l 발견!',auto:1,revOH:1,hintOH:1},
@@ -901,7 +901,7 @@ var MC={
       {l:'STEP 1',d:'[기어1] 전력선과 수직\nH를 조정하여 PH⊥l 을 달성하세요.',btn:'기어① 맞물림(PH⊥l)!',cond:'ph'},
       {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh'},
       {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l\n(β : PH와 OH가 결정하는 평면)',btn:'기어 평면 확인!',auto:1,beta:1},
-      {l:'STEP 4',d:'🔗 공간잇기: PO ∈ β 이고 β⊥l\nl을 평행이동해 PO와 수직임을 확인!',btn:'🔗 공간잇기 실행',auto:1,hlPO:1,ghostL:1},
+      {l:'STEP 4',d:'🔍 발견: PO ∈ β 이고 β⊥l 일 때, PO와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PO⊥l 발견!',auto:1,hlPO:1,hintPOl:1},
       {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
       {l:'STEP 6',d:'3개 기어 완전 맞물림!\n기둥이 완벽하게 수직 고정됨\n PO⊥l, PO⊥OH → PO⊥α 자동 성립!\n(α: OH, l에 의하여 결정된 평면)\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
     ]}
@@ -1304,12 +1304,13 @@ var buildSteps=function(){
       if(!done&&!s.auto)b.disabled=true;
       (function(id){b.onclick=done?null:function(){doConfirm(id);};})(idx);
       dv.appendChild(b);
-      // 🔗 공간잇기 힌트 버튼 (STEP 5 발견형 단계)
-      if(active && !done && (s.hintPH || s.hintOH)){
+      // 🔗 공간잇기 힌트 버튼 (발견형 단계)
+      if(active && !done && (s.hintPH || s.hintOH || s.hintPOl)){
         var hb=document.createElement('button');
         hb.textContent='🔗 공간잇기 힌트 — 평행이동으로 확인';
         hb.style.cssText='margin-top:6px;width:100%;padding:8px;background:#1a1a2e;border:1.5px dashed #8866cc;border-radius:6px;color:#bb99ff;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.02em';
-        hb.onclick=function(){ try{ playGhostL(s.hintPH?'PH':'OH'); }catch(e){} this.disabled=true;this.style.opacity='.4';this.textContent='👁 평행이동 중...'; var self=this; setTimeout(function(){self.style.opacity='1';self.disabled=false;self.textContent='🔗 공간잇기 힌트 — 다시 보기';},4500); };
+        var tgt = s.hintPH?'PH':(s.hintOH?'OH':'O'); // hintPOl일 때는 'O' 타깃 (기존 STEP1 애니메이션 재활용)
+        hb.onclick=function(){ try{ playGhostL(tgt); }catch(e){} this.disabled=true;this.style.opacity='.4';this.textContent='👁 평행이동 중...'; var self=this; setTimeout(function(){self.style.opacity='1';self.disabled=false;self.textContent='🔗 공간잇기 힌트 — 다시 보기';},4500); };
         dv.appendChild(hb);
       }
     }
@@ -2088,6 +2089,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613d</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613e</div>
 </body>
 </html>
