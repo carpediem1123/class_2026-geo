@@ -357,7 +357,7 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
               <div class="sa-title" id="saTitle" style="cursor:pointer" title="누르면 스토리 접기/펴기"></div>
               <div class="sa-story" id="saStory"></div>
             </div>
-            <div id="saFold" style="position:absolute;top:6px;right:8px;font-size:9px;color:#664422;cursor:pointer;user-select:none;-webkit-user-select:none">접기 ▲▼</div>
+            <div id="saFold" style="position:absolute;top:5px;right:6px;font-size:10px;padding:3px 8px;background:rgba(255,170,68,.12);border:1px solid rgba(255,170,68,.45);border-radius:10px;color:#ffaa44;cursor:pointer;user-select:none;-webkit-user-select:none;font-weight:bold;letter-spacing:.05em">📂 접기</div>
           </div>
         </div>
 
@@ -1346,14 +1346,14 @@ var buildSteps=function(){
       // 🔍 객관식 선택지 (정답 노출 없는 발견 단계)
       if(active && !done && s.choice){
         var qWrap=document.createElement('div');
-        qWrap.style.cssText='margin-top:8px;display:flex;flex-direction:column;gap:6px';
-        var opts=[{k:'수직',sym:'⊥',ok:true},{k:'평행',sym:'∥',ok:false},{k:'그냥 만남',sym:'×',ok:false}];
+        qWrap.style.cssText='margin-top:8px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:4px;width:100%';
+        var opts=[{k:'수직',sym:'⊥',ok:true},{k:'평행',sym:'∥',ok:false},{k:'만남',sym:'×',ok:false}];
         // 보기 순서 셔플 (정답 위치가 매번 같지 않게)
         opts.sort(function(){return Math.random()-.5;});
         opts.forEach(function(o){
           var ob=document.createElement('button');
-          ob.textContent=o.sym+' '+o.k;
-          ob.style.cssText='padding:9px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s';
+          ob.innerHTML='<div style="font-size:14px;line-height:1">'+o.sym+'</div><div style="font-size:9.5px;line-height:1.3;margin-top:3px;letter-spacing:-.02em">'+o.k+'</div>';
+          ob.style.cssText='flex:1 1 0;min-width:0;width:0;padding:7px 2px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s;box-sizing:border-box';
           (function(id,ok,btn){
             btn.onclick=function(){
               if(ok){
@@ -1387,10 +1387,17 @@ var buildSteps=function(){
         hb.style.cssText='margin-top:6px;width:100%;padding:8px;background:#1a1a2e;border:1.5px dashed #8866cc;border-radius:6px;color:#bb99ff;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.02em';
         var tgt = s.hintPH?'PH':(s.hintOH?'OH':'O');
         hb.onclick=function(){
-          try{ playGhostL(tgt); }catch(e){}
-          // STEP 5처럼 PH 힌트는 P→H 점선 그리기도 함께 (천천히 그어지는 애니메이션)
-          if(s.hintPH){ try{ playDrawPH(); }catch(e){} }
-          this.disabled=true;this.style.opacity='.4';this.textContent='👁 평행이동 중...';
+          // STEP 5(hintPH): PH 점선이 P에서 H 방향으로 천천히 그어짐 (단일 애니메이션)
+          // 그 외(hintPOl·hintOH): 직선 l 평행이동 ghostL 애니메이션
+          var label;
+          if(s.hintPH){
+            try{ playDrawPH(); }catch(e){}
+            label='✏️ PH 그리는 중...';
+          }else{
+            try{ playGhostL(tgt); }catch(e){}
+            label='👁 평행이동 중...';
+          }
+          this.disabled=true;this.style.opacity='.4';this.textContent=label;
           var self=this; setTimeout(function(){self.style.opacity='1';self.disabled=false;self.textContent='🔗 공간잇기 힌트 — 다시 보기';},4500);
         };
         dv.appendChild(hb);
@@ -2115,7 +2122,7 @@ document.getElementById('trReflect').addEventListener('click', function(){
       var fd=document.getElementById('saFold');
       var hidden = st.style.display==='none';
       st.style.display = hidden?'':'none';
-      if(fd) fd.textContent = hidden?'접기 ▲▼':'펴기 ▼▲';
+      if(fd) fd.textContent = hidden?'📂 접기':'📂 펴기';
     };
     var t1=document.getElementById('saTitle'), t2=document.getElementById('saFold');
     if(t1) t1.addEventListener('click',toggle);
@@ -2172,6 +2179,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613f</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613g</div>
 </body>
 </html>
