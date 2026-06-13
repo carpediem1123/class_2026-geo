@@ -201,7 +201,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
     animation:neonDot 1.2s ease-in-out infinite}
 @keyframes neonDot{0%,100%{opacity:1;box-shadow:0 0 6px #00ff66}50%{opacity:.4}}
 .ai-ht{font-size:13px;color:#00ff88;font-weight:bold}
-.ai-bdy{flex:0 1 auto;max-height:30%;padding:12px 16px;overflow-y:auto;min-height:54px}
+.ai-bdy{flex:0 1 auto;max-height:17%;padding:8px 16px;overflow-y:auto;min-height:40px}
 .ai-txt{font-size:13px;color:#88ffaa;line-height:1.85;white-space:pre-wrap;min-height:80px}
 .ai-cur{display:inline-block;width:2px;height:15px;background:#00ff88;
     animation:cur .6s ease-in-out infinite;vertical-align:text-bottom}
@@ -311,7 +311,9 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
           <div class="st" id="slTitle">미션! 패널을 얼마나 몇 도(°)로 조절해야할까?</div>
           <div class="tr">
             <label>θ</label>
+            <button type="button" class="msl-btn" id="slMinus" style="width:28px;height:28px;font-size:15px" aria-label="1도 감소">−</button>
             <input type="range" class="thsl" id="sl" min="0" max="90" step="1" value="0">
+            <button type="button" class="msl-btn" id="slPlus" style="width:28px;height:28px;font-size:15px" aria-label="1도 증가">+</button>
             <span class="tv" id="vt">0°</span>
           </div>
         </div>
@@ -413,7 +415,9 @@ S'/S 값을 보며 다음 중 [?]에
               슬라이더를 조작하세요!</div>
 <div class="ang-row" style="flex-direction: column; align-items: stretch;">
     <div style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="msl-btn" id="angMinus" style="width:30px;height:30px;font-size:15px" aria-label="1도 감소">−</button>
         <input type="range" id="angInput" min="0" max="135" step="1" value="0" style="flex:1;">
+        <button type="button" class="msl-btn" id="angPlus" style="width:30px;height:30px;font-size:15px" aria-label="1도 증가">+</button>
         <span class="ang-unit" id="vtAngInput" style="width: 40px;">0°</span>
     </div>
     <button class="ang-check" id="angCheck" style="margin-top:5px;">정답 확인</button>
@@ -2055,6 +2059,15 @@ function nudgeTheta(delta){
   updScene(theta);
 }
 (function(){
+  // 개념탐구 θ / 미션탐구 각도 슬라이더 -/+ 버튼 (태블릿 미세조작용)
+  [['slMinus','sl',-1],['slPlus','sl',1],['angMinus','angInput',-1],['angPlus','angInput',1]].forEach(function(c){
+    var b=document.getElementById(c[0]);
+    if(b)b.addEventListener('click',function(){
+      var s=document.getElementById(c[1]);
+      s.value=Math.min(parseFloat(s.max),Math.max(parseFloat(s.min),parseFloat(s.value)+c[2]));
+      s.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+  });
   const m=document.getElementById('mslMinus'), p=document.getElementById('mslPlus');
   if(m) m.addEventListener('click',()=>nudgeTheta(-1));
   if(p) p.addEventListener('click',()=>nudgeTheta(1));
@@ -2286,6 +2299,6 @@ lockMissionTab(true);
 }
 </script>
 
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260612e</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260613a</div>
 </body>
 </html>
