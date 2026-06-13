@@ -1268,10 +1268,17 @@ var updSliders=function(){
   if(rV)rV.style.display=showV?'flex':'none';
   if(rU)rU.style.display=showU?'flex':'none';
   if(sh)sh.style.display=(ST.mis===3&&showV)?'block':'none';
-  // 실시간 진단 칩 (문제 추적용 — 해결 후 제거 예정)
-  var dbg=document.getElementById('dbgChip');
-  if(dbg)dbg.textContent='DBG m'+ST.mis+' s'+ST.step+' H:'+(rH?rH.style.display:'?');
-  }catch(e){/* 실패 시 슬라이더는 기본 표시 상태 유지 — 진행 차단 방지 */}
+  }catch(e){ updSliders._err=String(e&&e.message).slice(0,30); }
+  // 실시간 진단 칩 (try 밖에서 — 예외가 나도 항상 갱신)
+  try{
+    var dbg=document.getElementById('dbgChip');
+    if(dbg){
+      var rHd=document.getElementById('rH');
+      dbg.textContent='m'+ST.mis+' s'+ST.step+' intro'+(ST.introMode?1:0)
+        +' calc'+(showH?1:0)+' DOM'+(rHd?(rHd.style.display==='none'?'N':'F'):'?')
+        +(updSliders._err?' E:'+updSliders._err:'');
+    }
+  }catch(e2){}
 };
 var buildUI=function(){updTabs();setupHUD();buildSteps();updProgress();};
 var buildSteps=function(){
@@ -1397,7 +1404,7 @@ var doConfirm=function(idx){
   if(s.final){ST.missionDone=true;ST.cleared[ST.mis-1]=true;if(ST.mis<3)ST.unlocked[ST.mis]=true;saveMissionState(ST.mis);updTabs();updProgress();}
   if(s.ghostL){try{playGhostL();}catch(e){}}  // 개념잇기: l 평행이동 애니메이션
   if(idx<MC[ST.mis].steps.length)ST.step=idx+1;
-  buildSteps();updProgress();
+  buildSteps();updProgress();updSliders();
 };
 var updAntenna=function(){
   // 미션 1,2: 기둥이 항상 세워진 상태 → P 이동 시 O 위치 실시간 추적
@@ -2053,7 +2060,7 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613a</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613b</div>
 <div id="dbgChip" style="position:fixed;right:6px;bottom:16px;z-index:99;font-family:monospace;font-size:9px;color:rgba(255,180,80,.7);pointer-events:none"></div>
 </body>
 </html>
