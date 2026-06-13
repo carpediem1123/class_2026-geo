@@ -637,10 +637,24 @@ var ghostMark=(function(){
   sp.scale.set(1.5,1.0,1);sp.visible=false;scene.add(sp);return sp;
 })();
 var ghostAnim=null;  // {t0, F, off, half, O}
-var playGhostL=function(){
+var playGhostL=function(target){
+  // target: 'O'(기본, STEP 1·M3 STEP 4) | 'PH'(M1 STEP 5 힌트) | 'OH'(M2 STEP 4 힌트)
   var pos=getPos();
-  var F=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD)); // O의 l 위 수선의 발
-  ghostAnim={t0:Date.now(),F:F,off:pos.O.clone().sub(F),half:9,O:pos.O.clone()};
+  var dest = pos.O.clone();  // 기본: O에 도달
+  if(target==='PH'){
+    // P에서 직선 l로 내린 수선의 발을 향해 — PH가 l과 수직임을 보여줌
+    var Fp=L0.clone().addScaledVector(LD,pos.P.clone().sub(L0).dot(LD));
+    dest = pos.P.clone();
+    var F=Fp;
+    ghostAnim={t0:Date.now(),F:F,off:dest.clone().sub(F),half:9,O:dest,target:target};
+  }else if(target==='OH'){
+    // O에서 직선 l로 내린 수선의 발 → O (OH가 l과 수직임을 보여줌)
+    var Fo=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD));
+    ghostAnim={t0:Date.now(),F:Fo,off:pos.O.clone().sub(Fo),half:9,O:pos.O.clone(),target:target};
+  }else{
+    var F0=L0.clone().addScaledVector(LD,pos.O.clone().sub(L0).dot(LD));
+    ghostAnim={t0:Date.now(),F:F0,off:pos.O.clone().sub(F0),half:9,O:pos.O.clone(),target:'O'};
+  }
   ghostLn.mat.opacity=.95;ghostMark.material.opacity=1;
 };
 var stepGhostAnim=function(){
@@ -865,20 +879,20 @@ var MC={
   1:{betaMsg:'PO와 OH가 결정하는 β 등장!\nPO⊥l, OH⊥l → β⊥l\nPH = PO+OH ∈ β',
      hud:[['PO⊥α','po'],['OH⊥l','oh'],['PH⊥l','ph'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'PO⊥α 확인 → PO⊥l 자동 성립!\n(l은 α 위의 직선)',btn:'PO⊥l 확인!',auto:1,ghostL:1},
+      {l:'STEP 1',d:'🔗 공간잇기: l을 평행이동해 PO와 수직임을 확인!\n(l은 α 위의 모든 직선 중 하나)',btn:'🔗 공간잇기 실행',auto:1,ghostL:1},
       {l:'STEP 2',d:'H를 조정하여 OH⊥l 달성하세요.',btn:'OH⊥l 달성!',cond:'oh'},
       {l:'STEP 3',d:'레일을 설치하세요.\n(OH 케이블 고정)',btn:'🔧 레일 설치!',auto:1,installOH:1},
       {l:'STEP 4',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3},
-      {l:'STEP 5',d:'PH ∈ β 이므로 ∴ PH⊥l 자동 성립!\n삼수선의 정리 ① ✓',btn:'🎉 정리① 발견!',auto:1,revPH:1},
+      {l:'STEP 5',d:'🔍 발견: PH와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 PH⊥l 발견!',auto:1,revPH:1,hintPH:1},
 { l: 'STEP 6', d: '통신 회선 연결 완료.\n데이터 송신을 시작합니다.', btn: '📡 통신 송출 시작!', auto: 1, commStart: 1, final: 1 }, 
     ]
   },  2:{betaMsg:'PO와 PH가 결정하는 β 등장!\nPO⊥l, PH⊥l → β⊥l\nOH = PH-PO ∈ β',
      hud:[['PO⊥α','po'],['PH⊥l','ph'],['OH⊥l','oh'],null],hudInit:2,
      steps:[
-      {l:'STEP 1',d:'PO⊥α 확인→ PO⊥l 자동 성립!\n👀 l이 평행이동하며 직접 보여줍니다',btn:'PO⊥l 확인!',auto:1,ghostL:1},
+      {l:'STEP 1',d:'🔗 공간잇기: l을 평행이동해 PO와 수직임을 확인!\n(l은 α 위의 모든 직선 중 하나)',btn:'🔗 공간잇기 실행',auto:1,ghostL:1},
       {l:'STEP 2',d:'PH가 직선l과 수직이 되도록 조정하세요.',btn:'PH⊥l 달성!',cond:'ph'},
       {l:'STEP 3',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3,revOHdim2bright:1},
-      {l:'STEP 4',d:'OH ∈ β 이므로 ∴ OH⊥l 자동 성립!\n삼수선의 정리 ② ✓',btn:'🎉 정리② 발견!',auto:1,revOH:1},
+      {l:'STEP 4',d:'🔍 발견: OH와 직선 l은 어떤 관계일까요?\n🔄 시점을 돌려가며 관찰해 보세요.\n(막히면 [🔗 공간잇기 힌트] 버튼을 눌러보세요)',btn:'🎉 OH⊥l 발견!',auto:1,revOH:1,hintOH:1},
       {l:'STEP 5',d:'통신장비 보수 완료!\n신호를 발사하세요.',btn:'📡 신호 발사!',auto:1,commStart:1}
     ]},
   3:{betaMsg:'PH와 OH가 결정하는 β 등장!\nPH⊥l, OH⊥l → β⊥l\nPO ⊥ β 면 내의 모든 직선 → PO⊥α!',
@@ -887,7 +901,7 @@ var MC={
       {l:'STEP 1',d:'[기어1] 전력선과 수직\nH를 조정하여 PH⊥l 을 달성하세요.',btn:'기어① 맞물림(PH⊥l)!',cond:'ph'},
       {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh'},
       {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l\n(β : PH와 OH가 결정하는 평면)',btn:'기어 평면 확인!',auto:1,beta:1},
-      {l:'STEP 4',d:'β 위의 한 직선 PO 확인\nPO ∈ β 이고 β⊥l 이므로\n∴ PO⊥l 자동 성립!\n👀 l이 평행이동하며 직접 보여줍니다',btn:'PO⊥l 확인!',auto:1,hlPO:1,ghostL:1},
+      {l:'STEP 4',d:'🔗 공간잇기: PO ∈ β 이고 β⊥l\nl을 평행이동해 PO와 수직임을 확인!',btn:'🔗 공간잇기 실행',auto:1,hlPO:1,ghostL:1},
       {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
       {l:'STEP 6',d:'3개 기어 완전 맞물림!\n기둥이 완벽하게 수직 고정됨\n PO⊥l, PO⊥OH → PO⊥α 자동 성립!\n(α: OH, l에 의하여 결정된 평면)\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
     ]}
@@ -1290,6 +1304,14 @@ var buildSteps=function(){
       if(!done&&!s.auto)b.disabled=true;
       (function(id){b.onclick=done?null:function(){doConfirm(id);};})(idx);
       dv.appendChild(b);
+      // 🔗 공간잇기 힌트 버튼 (STEP 5 발견형 단계)
+      if(active && !done && (s.hintPH || s.hintOH)){
+        var hb=document.createElement('button');
+        hb.textContent='🔗 공간잇기 힌트 — 평행이동으로 확인';
+        hb.style.cssText='margin-top:6px;width:100%;padding:8px;background:#1a1a2e;border:1.5px dashed #8866cc;border-radius:6px;color:#bb99ff;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.02em';
+        hb.onclick=function(){ try{ playGhostL(s.hintPH?'PH':'OH'); }catch(e){} this.disabled=true;this.style.opacity='.4';this.textContent='👁 평행이동 중...'; var self=this; setTimeout(function(){self.style.opacity='1';self.disabled=false;self.textContent='🔗 공간잇기 힌트 — 다시 보기';},4500); };
+        dv.appendChild(hb);
+      }
     }
     el.appendChild(dv);
   });
@@ -2066,6 +2088,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613c</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613d</div>
 </body>
 </html>
