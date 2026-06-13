@@ -1268,6 +1268,9 @@ var updSliders=function(){
   if(rV)rV.style.display=showV?'flex':'none';
   if(rU)rU.style.display=showU?'flex':'none';
   if(sh)sh.style.display=(ST.mis===3&&showV)?'block':'none';
+  // 실시간 진단 칩 (문제 추적용 — 해결 후 제거 예정)
+  var dbg=document.getElementById('dbgChip');
+  if(dbg)dbg.textContent='DBG m'+ST.mis+' s'+ST.step+' H:'+(rH?rH.style.display:'?');
   }catch(e){/* 실패 시 슬라이더는 기본 표시 상태 유지 — 진행 차단 방지 */}
 };
 var buildUI=function(){updTabs();setupHUD();buildSteps();updProgress();};
@@ -2050,6 +2053,7 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260612e</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613a</div>
+<div id="dbgChip" style="position:fixed;right:6px;bottom:16px;z-index:99;font-family:monospace;font-size:9px;color:rgba(255,180,80,.7);pointer-events:none"></div>
 </body>
 </html>
