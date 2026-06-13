@@ -816,10 +816,12 @@ var startCableInstall=function(target,startA,startB,endA,endB){
 // 통신 송출 효과
 var commActive=false;
 var commPulse=0;
-var mkRA=function(col){var g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));var l=new THREE.Line(g,new THREE.LineBasicMaterial({color:col}));scene.add(l);return l;};
+var mkRA=function(col){var g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));var l=new THREE.Line(g,new THREE.LineBasicMaterial({color:col}));l.visible=false;scene.add(l);return l;};
 var mvRA=function(l,piv,v1,v2,s){s=s||.27;if(!l||v1.length()<1e-5||v2.length()<1e-5)return;var d1=v1.clone().normalize().multiplyScalar(s),d2=v2.clone().normalize().multiplyScalar(s);var a=l.geometry.attributes.position.array;a[0]=piv.x+d1.x;a[1]=piv.y+d1.y;a[2]=piv.z+d1.z;a[3]=piv.x+d1.x+d2.x;a[4]=piv.y+d1.y+d2.y;a[5]=piv.z+d1.z+d2.z;a[6]=piv.x+d2.x;a[7]=piv.y+d2.y;a[8]=piv.z+d2.z;l.geometry.attributes.position.needsUpdate=true;};
 var raO=mkRA(0x88ccff),raH_OH=mkRA(0x44ffcc),raH_PH=mkRA(0xff99dd),raO_POOH=mkRA(0xffdd88);
 raO.frustumCulled=false;raH_OH.frustumCulled=false;raH_PH.frustumCulled=false;raO_POOH.frustumCulled=false;
+// 직각 마커는 수직이 확정된 후에만 표시 (STEP 1부터 OH⊥l 기호가 보이던 수학적 오류 수정)
+raO.visible=false;raH_OH.visible=false;raH_PH.visible=false;raO_POOH.visible=false;
 var betaMat=new THREE.MeshStandardMaterial({color:0x7722cc,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,emissive:0x5511aa,emissiveIntensity:.7});
 var betaMsh=new THREE.Mesh(new THREE.PlaneGeometry(9,9),betaMat);betaMsh.frustumCulled=false;scene.add(betaMsh);
 var betaEdgeMat=new THREE.LineBasicMaterial({color:0xee99ff,transparent:true,opacity:0});
@@ -1252,6 +1254,8 @@ var updHUD=function(a,b,c,d){
 // ── 단계 연동 슬라이더 가시성: 해당 단계에서 필요한 조작만 노출 ──
 var updSliders=function(){
   try{
+  // 보정: STEP이 진행됐는데 introMode가 켜져 있으면 자동 해제 (상태 꼬임 방지)
+  if(ST.introMode && (ST.step>1 || (ST.done && ST.done.length>0))) ST.introMode=false;
   var rH=document.getElementById('rH'),rV=document.getElementById('rV'),rU=document.getElementById('rU');
   var sh=document.getElementById('sliderHint');
   var showH=false,showV=false,showU=false;
@@ -1269,16 +1273,6 @@ var updSliders=function(){
   if(rU)rU.style.display=showU?'flex':'none';
   if(sh)sh.style.display=(ST.mis===3&&showV)?'block':'none';
   }catch(e){ updSliders._err=String(e&&e.message).slice(0,30); }
-  // 실시간 진단 칩 (try 밖에서 — 예외가 나도 항상 갱신)
-  try{
-    var dbg=document.getElementById('dbgChip');
-    if(dbg){
-      var rHd=document.getElementById('rH');
-      dbg.textContent='m'+ST.mis+' s'+ST.step+' intro'+(ST.introMode?1:0)
-        +' calc'+(showH?1:0)+' DOM'+(rHd?(rHd.style.display==='none'?'N':'F'):'?')
-        +(updSliders._err?' E:'+updSliders._err:'');
-    }
-  }catch(e2){}
 };
 var buildUI=function(){updTabs();setupHUD();buildSteps();updProgress();};
 var buildSteps=function(){
@@ -1575,8 +1569,20 @@ var updScene=function(){
   }
   
   var POv=O.clone().sub(P),OHv=H.clone().sub(O),PHv=H.clone().sub(P);
+  // 직각 마커 가시성을 매 프레임 명시적으로 결정 (수직 확정 후에만 표시)
+  // — STEP1처럼 미확정 상태에서 마커가 잔존하는 수학적 오류 방지
+  (function(){
+    var step=ST.step, mis=ST.mis, done=ST.done||[];
+    var ohOK = done.indexOf(2)>=0;  // M1·M2 STEP2 / M3 STEP2 완수 후
+    var phOK = (mis===2 && done.indexOf(2)>=0) || (mis===3 && done.indexOf(1)>=0);  // PH⊥l 확정
+    var poaOK = done.indexOf(1)>=0; // M1·M2 STEP1 PO⊥α는 이미 확정된 조건
+    raO.visible      = poaOK && (mis<3 || done.indexOf(6)>=0);  // PO⊥α 마커 (O점 옆)
+    raH_OH.visible   = ohOK;
+    raH_PH.visible   = phOK;
+    raO_POOH.visible = (mis===3 && done.indexOf(5)>=0);
+  })();
   if(raO.visible)mvRA(raO,O,POv.clone().negate(),E1);
-  mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate());
+  if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate());
   if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate());
   if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv,.32);
   betaOpa+=(betaTgt-betaOpa)*.055;if(betaPulse>0)betaPulse--;
@@ -2060,7 +2066,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613b</div>
-<div id="dbgChip" style="position:fixed;right:6px;bottom:16px;z-index:99;font-family:monospace;font-size:9px;color:rgba(255,180,80,.7);pointer-events:none"></div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613c</div>
 </body>
 </html>
