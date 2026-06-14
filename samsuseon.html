@@ -975,12 +975,9 @@ var mvRA=function(grp,piv,v1,v2,s){
 };
 // 빨간 화성 배경에 잘 보이는 색상 — 시안·연두·노랑·민트 (보색 또는 고대비)
 var raO=mkRA(0x00ddff),raH_OH=mkRA(0xffff00),raH_PH=mkRA(0x00ff88),raO_POOH=mkRA(0xffdd00);
-// M3 결론 PO⊥α: 평면 α 위에 별도로 그리는 큰 직각 마커 (PO와 평면이 수직임을 명시)
-var raPOalpha=mkRA(0x44ffaa);  // 더 큰 결론 마커, 지면 색과 대비
 raO.frustumCulled=false;raH_OH.frustumCulled=false;raH_PH.frustumCulled=false;raO_POOH.frustumCulled=false;
-raPOalpha.frustumCulled=false;
 // 직각 마커는 수직이 확정된 후에만 표시 (STEP 1부터 OH⊥l 기호가 보이던 수학적 오류 수정)
-raO.visible=false;raH_OH.visible=false;raH_PH.visible=false;raO_POOH.visible=false;raPOalpha.visible=false;
+raO.visible=false;raH_OH.visible=false;raH_PH.visible=false;raO_POOH.visible=false;
 // 마커 깜빡임 타임스탬프 (0이면 깜빡임 없음, Date.now()가 들어가면 그 시각부터 강조 깜빡임)
 var rapPHBlink=0, rapOHBlink=0, rapPOBlink=0, rapPOOHBlink=0;
 // PH 점선 발견 표시 (STEP 5: 케이블 설치 전 단계)
@@ -1285,7 +1282,7 @@ var showCompleteCard=function(mis){
     2:{title:'📡 안테나 지지대 복구 완수!',body:'삼수선의 정리 ② 증명 완료\nARES-7 구조 신호 전송!',
        hyp:'PO⊥α, PH⊥l', con:'OH⊥l', hudHyp:['po','ph'], hudCon:'oh'},
     3:{title:'🔧 쓰러진 안테나 복구 완수!',body:'삼수선의 정리 ③ 증명 완료\n지구와의 통신 재개!',
-       hyp:'PH⊥l, OH⊥l, PO⊥OH', con:'PO⊥α', hudHyp:['ph','oh','pooh'], hudCon:'po_alpha'}
+       hyp:'PH⊥l, OH⊥l, PO⊥OH', con:'PO⊥α', hudHyp:['ph','oh','pooh'], hudCon:'po'}
   };
   var sm=summaries[mis]; if(!sm) return;
   var mc=document.getElementById('missionComplete');
@@ -1351,7 +1348,7 @@ var highlightRA=function(keys, mode){
   keys.forEach(function(k){ raHighlightState[k] = mode; });
 };
 var applyRAHighlight=function(){
-  var mapping = {'po':raO, 'oh':raH_OH, 'ph':raH_PH, 'pooh':raO_POOH, 'po_alpha':raPOalpha};
+  var mapping = {'po':raO, 'oh':raH_OH, 'ph':raH_PH, 'pooh':raO_POOH};
   Object.keys(mapping).forEach(function(k){
     var grp=mapping[k]; if(!grp||!grp._line) return;
     var state=raHighlightState[k];
@@ -1959,18 +1956,11 @@ var updScene=function(){
     raH_OH.visible   = ohOK;
     raH_PH.visible   = phOK;
     raO_POOH.visible = (mis===3 && done.indexOf(5)>=0);
-    raPOalpha.visible = (mis===3 && done.indexOf(6)>=0);  // M3 STEP 6 PO⊥α 발견 후
   })();
   if(raO.visible)mvRA(raO,O,POv.clone().negate(),E1);
   if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate());
   if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate());
   if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv,.45);  // 삼각형 OPH 내부 직각 마커 (M3 STEP 5)
-  // M3 PO⊥α: O점에서 PO와 평면 위 방향(LD: l 방향과 직교하는 평면 방향) — 더 큼
-  if(raPOalpha.visible){
-    // 평면 위 PO와 직교하는 두 방향을 사용 — 사용자가 원하는 '지면과 PO의 큰 직각 표시'
-    var lDir=V3(1,0,0);  // 평면 위 l 방향 (X축)
-    mvRA(raPOalpha, O, POv.clone().normalize(), lDir, .8);
-  }
   // 케이블 설치 완료 파동 (STEP 6): 설치 직후 1.5초간 강한 글로우
   if(cableInstallPulse>0){
     var ciEl=(Date.now()-cableInstallPulse)/1500;
@@ -2505,6 +2495,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613r</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613t</div>
 </body>
 </html>
