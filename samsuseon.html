@@ -615,7 +615,7 @@ var FALLEN_Q=new THREE.Quaternion().setFromEuler(FALLEN_ROT);
 var UPRIGHT_Q=new THREE.Quaternion().setFromUnitVectors(V3(0,1,0),PN);
 // 쓰러진 기둥 위치: 기둥 반지름(0.2)만큼 지면 위, 쓰러진 방향 고려
 // FALLEN_ROT 기준 기둥 중심이 지면에 딱 붙도록 Y 계산
-var mastFallenPos=V3(-1,ayY(-1,0)+0.2,0);
+var mastFallenPos=V3(-3.5,ayY(-3.5,-1.2)+0.2,-1.2);
 mastGroup.rotation.copy(FALLEN_ROT);mastGroup.position.copy(mastFallenPos);
 mg.add(mastGroup);
 mastGroup.traverse(function(obj){if(obj.isMesh||obj.isLine)obj.frustumCulled=false;});
@@ -1278,21 +1278,22 @@ var showCompleteCard=function(mis){
     hb.style.borderColor='#ffaa44';hb.style.background='#2a1808';hb.style.color='#ffcc88';
     cb.style.borderColor='#4a6a90';cb.style.background='#0c1830';cb.style.color='#bbd0e0';
     cb.style.transform='';cb.style.fontSize='14px';
-    tHud(sm.hudHyp,'blink'); tHud([sm.hudCon],'off');
-    document.getElementById('mcSumHint').textContent='✨ 가정 조건이 화면에서 깜빡입니다. 이제 결론을 눌러보세요';
+    highlightRA(sm.hudHyp,'hyp'); highlightRA([sm.hudCon],'off');
+    document.getElementById('mcSumHint').textContent='✨ 3D 화면의 가정 조건 ⊥ 기호를 확인하세요. 이제 결론을 눌러보세요';
     checkReady();
   };
   cb.onclick=function(){
     conDone=true;
     cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
     cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
-    tHud(sm.hudHyp,'off'); tHud([sm.hudCon],'BIG');
-    document.getElementById('mcSumHint').textContent='🎉 '+sm.hyp+' 로부터 '+sm.con+' 이 자동 성립!';
+    highlightRA([sm.hudCon],'con');  // 결론 강조 (가정은 그대로 유지)
+    document.getElementById('mcSumHint').textContent='🎉 '+sm.hyp+' 로부터 '+sm.con+' 이 자동 성립! 결론 ⊥가 크게 강조되었습니다';
     checkReady();
   };
   nextBtn.onclick=function(){
     if(this.disabled) return;
     tHud([],'off');
+    highlightRA([],'off');  // ⊥ 강조 해제
     mc.style.display='none';
     document.body.classList.remove('show-summary');
     // 다음 미션 브리핑(transit) 표시
@@ -1470,6 +1471,9 @@ var updSliders=function(){
   try{
   // 보정: STEP이 진행됐는데 introMode가 켜져 있으면 자동 해제 (상태 꼬임 방지)
   if(ST.introMode && (ST.step>1 || (ST.done && ST.done.length>0))) ST.introMode=false;
+  // M3는 STEP 1부터 슬라이더 조작이 필수 — introMode가 꺼져 있어야 함
+  if(ST.mis===3 && !ST.missionDone && ST.cleared[2]===false && !ST.introMode) {} // 정상
+  if(ST.mis===3 && ST.introMode && ST.step===1) ST.introMode=false;
   var rH=document.getElementById('rH'),rV=document.getElementById('rV'),rU=document.getElementById('rU');
   var sh=document.getElementById('sliderHint');
   var showH=false,showV=false,showU=false;
@@ -2399,6 +2403,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613k</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613m</div>
 </body>
 </html>
