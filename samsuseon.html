@@ -333,8 +333,8 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
         </div>
         <div id="mcSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건부터 눌러보세요</div>
         <div style="margin-top:8px;text-align:center;font-size:9.5px;color:#6688aa;letter-spacing:.05em">
-          <span style="color:#ffcc44;font-size:11px">●</span> <span style="color:#ffcc44">가정</span> &nbsp;·&nbsp;
-          <span style="color:#00ffcc;font-size:11px">●</span> <span style="color:#00ffcc">결론</span>
+          <span style="color:#ffff00;font-size:11px">●</span> <span style="color:#ffff00">가정</span> &nbsp;·&nbsp;
+          <span style="color:#00ffff;font-size:11px">●</span> <span style="color:#00ffff">결론</span>
         </div>
       </div>
 
@@ -1343,9 +1343,16 @@ var showCompleteCard=function(mis){
 // 임무완수 카드 — 3D ⊥ 마커 강조 (옵션 K: 정적 확대·색 변경, 깜빡임 없음)
 var raHighlightState={}; // {key: 'hyp'|'con'|null}
 var highlightRA=function(keys, mode){
-  if(mode==='off'){ raHighlightState={}; return; }
   if(!Array.isArray(keys)) keys=[keys];
-  keys.forEach(function(k){ raHighlightState[k] = mode; });
+  if(mode==='off' && keys.length===0){
+    // 전체 초기화 (다음 미션 버튼 누를 때)
+    raHighlightState={};
+    return;
+  }
+  keys.forEach(function(k){
+    if(mode==='off') delete raHighlightState[k];
+    else raHighlightState[k] = mode;
+  });
 };
 var applyRAHighlight=function(){
   var mapping = {'po':raO, 'oh':raH_OH, 'ph':raH_PH, 'pooh':raO_POOH};
@@ -1353,7 +1360,6 @@ var applyRAHighlight=function(){
     var grp=mapping[k]; if(!grp||!grp._line) return;
     var state=raHighlightState[k];
     if(!state){
-      grp.scale.set(1,1,1);
       if(grp._origColor!==undefined) grp._line.material.color.setHex(grp._origColor);
       if(grp._origFillColor!==undefined && grp._fill) grp._fill.material.color.setHex(grp._origFillColor);
       return;
@@ -1361,16 +1367,16 @@ var applyRAHighlight=function(){
     if(grp._origColor===undefined) grp._origColor = grp._line.material.color.getHex();
     if(grp._origFillColor===undefined && grp._fill) grp._origFillColor = grp._fill.material.color.getHex();
     // 가정·결론 모두 원래 위치에서 크기만 키움 (위치 이동 없음)
+    // 크기는 mvRA 호출 시 size 인자로 처리 (scale.set은 마커가 절대 좌표라 효과 없음)
     if(state==='hyp'){
-      grp.scale.set(1.5,1.5,1.5);  // 가정: 1.5배
-      grp._line.material.color.setHex(0xffcc44);  // 진한 노랑
+      grp._line.material.color.setHex(0xffff00);  // 순노랑 (빨간 배경 대비 강화)
       grp._line.material.opacity=1;
-      // 채움은 끄고 외곽선만 강조 (사각형 잡음 방지)
+      grp._line.material.transparent=true;
       if(grp._fill){ grp._fill.material.opacity=0; }
     }else if(state==='con'){
-      grp.scale.set(2.0,2.0,2.0);  // 결론: 2.0배 (가정보다 더 두드러지게)
-      grp._line.material.color.setHex(0x00ffcc);  // 선명한 시안
+      grp._line.material.color.setHex(0x00ffff);  // 순시안 (대비 강화)
       grp._line.material.opacity=1;
+      grp._line.material.transparent=true;
       if(grp._fill){ grp._fill.material.opacity=0; }
     }
   });
@@ -1957,10 +1963,23 @@ var updScene=function(){
     raH_PH.visible   = phOK;
     raO_POOH.visible = (mis===3 && done.indexOf(5)>=0);
   })();
-  if(raO.visible)mvRA(raO,O,POv.clone().negate(),E1);
-  if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate());
-  if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate());
-  if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv,.45);  // 삼각형 OPH 내부 직각 마커 (M3 STEP 5)
+  // 강조 상태에 따라 마커 크기를 동적으로 결정 (scale은 시각적 효과 없음 — 좌표를 직접 키워야 함)
+  var raSize=function(key){
+    var st=raHighlightState[key];
+    if(st==='hyp') return .68;  // 가정: 1.6배
+    if(st==='con') return .90;  // 결론: 2.1배
+    return .42;  // 기본
+  };
+  var raSize_POOH=function(){
+    var st=raHighlightState['pooh'];
+    if(st==='hyp') return .72;
+    if(st==='con') return .95;
+    return .45;
+  };
+  if(raO.visible)mvRA(raO,O,POv.clone().negate(),E1, raSize('po'));
+  if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate(), raSize('oh'));
+  if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate(), raSize('ph'));
+  if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv, raSize_POOH());
   // 케이블 설치 완료 파동 (STEP 6): 설치 직후 1.5초간 강한 글로우
   if(cableInstallPulse>0){
     var ciEl=(Date.now()-cableInstallPulse)/1500;
@@ -2495,6 +2514,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613t</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613w</div>
 </body>
 </html>
