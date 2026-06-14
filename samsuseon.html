@@ -883,9 +883,45 @@ var startCableInstall=function(target,startA,startB,endA,endB){
 // 통신 송출 효과
 var commActive=false;
 var commPulse=0;
-var mkRA=function(col){var g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));var l=new THREE.Line(g,new THREE.LineBasicMaterial({color:col}));l.visible=false;scene.add(l);return l;};
-var mvRA=function(l,piv,v1,v2,s){s=s||.27;if(!l||v1.length()<1e-5||v2.length()<1e-5)return;var d1=v1.clone().normalize().multiplyScalar(s),d2=v2.clone().normalize().multiplyScalar(s);var a=l.geometry.attributes.position.array;a[0]=piv.x+d1.x;a[1]=piv.y+d1.y;a[2]=piv.z+d1.z;a[3]=piv.x+d1.x+d2.x;a[4]=piv.y+d1.y+d2.y;a[5]=piv.z+d1.z+d2.z;a[6]=piv.x+d2.x;a[7]=piv.y+d2.y;a[8]=piv.z+d2.z;l.geometry.attributes.position.needsUpdate=true;};
-var raO=mkRA(0x88ccff),raH_OH=mkRA(0x44ffcc),raH_PH=mkRA(0xff99dd),raO_POOH=mkRA(0xffdd88);
+var mkRA=function(col){
+  // 직각 마커: 외곽선(굵게 보이도록 같은 라인을 살짝 어긋난 두 개로) + 채움 사각형
+  var grp=new THREE.Group();
+  var g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));
+  var lineMat=new THREE.LineBasicMaterial({color:col,linewidth:3,transparent:true,opacity:.95});
+  var l=new THREE.Line(g,lineMat);
+  // 채움: 작은 삼각형(직각 마커 사각형의 코너) — 노란 반투명
+  var fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));
+  fg.setIndex([0,1,2]);
+  var fillMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.35,side:THREE.DoubleSide,depthWrite:false});
+  var fill=new THREE.Mesh(fg,fillMat);
+  grp.add(l); grp.add(fill);
+  grp.visible=false;
+  // 호환용: 외부에서 .visible / .material / .frustumCulled 접근하던 곳을 위해
+  grp._line=l; grp._fill=fill; grp._fillGeo=fg;
+  Object.defineProperty(grp,'frustumCulled',{set:function(v){l.frustumCulled=v;fill.frustumCulled=v;},configurable:true});
+  scene.add(grp);
+  return grp;
+};
+var mvRA=function(grp,piv,v1,v2,s){
+  s=s||.42;  // 기본 크기 .27 → .42 (약 1.55배 커짐)
+  if(!grp||!grp._line||v1.length()<1e-5||v2.length()<1e-5)return;
+  var d1=v1.clone().normalize().multiplyScalar(s), d2=v2.clone().normalize().multiplyScalar(s);
+  // 외곽선 (3점)
+  var a=grp._line.geometry.attributes.position.array;
+  a[0]=piv.x+d1.x;a[1]=piv.y+d1.y;a[2]=piv.z+d1.z;
+  a[3]=piv.x+d1.x+d2.x;a[4]=piv.y+d1.y+d2.y;a[5]=piv.z+d1.z+d2.z;
+  a[6]=piv.x+d2.x;a[7]=piv.y+d2.y;a[8]=piv.z+d2.z;
+  grp._line.geometry.attributes.position.needsUpdate=true;
+  // 채움 삼각형 (피벗 + 두 끝점)
+  var f=grp._fillGeo.attributes.position.array;
+  f[0]=piv.x;f[1]=piv.y;f[2]=piv.z;
+  f[3]=piv.x+d1.x+d2.x;f[4]=piv.y+d1.y+d2.y;f[5]=piv.z+d1.z+d2.z;
+  f[6]=piv.x+d2.x;f[7]=piv.y+d2.y;f[8]=piv.z+d2.z;
+  grp._fillGeo.attributes.position.needsUpdate=true;
+  grp._fillGeo.computeBoundingSphere();
+};
+// 빨간 화성 배경에 잘 보이는 색상 — 시안·연두·노랑·민트 (보색 또는 고대비)
+var raO=mkRA(0x00ddff),raH_OH=mkRA(0xffff00),raH_PH=mkRA(0x00ff88),raO_POOH=mkRA(0xffdd00);
 raO.frustumCulled=false;raH_OH.frustumCulled=false;raH_PH.frustumCulled=false;raO_POOH.frustumCulled=false;
 // 직각 마커는 수직이 확정된 후에만 표시 (STEP 1부터 OH⊥l 기호가 보이던 수학적 오류 수정)
 raO.visible=false;raH_OH.visible=false;raH_PH.visible=false;raO_POOH.visible=false;
@@ -1439,13 +1475,14 @@ var buildSteps=function(){
                 btn.style.background='#3a0a0a';btn.style.borderColor='#ff6644';btn.style.color='#ffaa88';
                 btn.style.animation='shake .4s';
                 setTimeout(function(){btn.style.background='#0c1822';btn.style.borderColor='#2a4060';btn.style.color='#bbd0e0';btn.style.animation='';},800);
-                // 오답 안내
+                // 오답 안내 — qWrap(가로 보기) 밖 별도 줄에 표시
                 var msg=document.getElementById('wrongMsg_'+id);
                 if(!msg){
                   msg=document.createElement('div');msg.id='wrongMsg_'+id;
-                  msg.style.cssText='margin-top:4px;font-size:11px;color:#ff9977;text-align:center';
+                  msg.style.cssText='margin-top:6px;padding:5px 8px;font-size:11px;color:#ff9977;text-align:center;background:rgba(255,100,68,.08);border:1px solid rgba(255,100,68,.3);border-radius:4px';
                   msg.textContent='다시 생각해 보세요. 막히면 아래 힌트 버튼을 활용!';
-                  qWrap.appendChild(msg);
+                  // qWrap 다음에 삽입 (가로 영역 밖)
+                  if(qWrap.parentNode) qWrap.parentNode.insertBefore(msg, qWrap.nextSibling);
                 }
               }
             };
@@ -2254,6 +2291,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613h</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613i</div>
 </body>
 </html>
