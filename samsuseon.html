@@ -1265,16 +1265,17 @@ var showCompleteCard=function(mis){
   hypBtn.parentNode.replaceChild(hb,hypBtn);
   conBtn.parentNode.replaceChild(cb,conBtn);
 
-  var hypDone=false, conDone=false;
+  var state={hyp:false, con:false};
   var checkReady=function(){
-    if(hypDone && conDone){
-      nextBtn.disabled=false;
-      nextBtn.style.opacity='1';
-      nextBtn.textContent='▶ 다음 미션으로 →';
+    var nb=document.getElementById('mcNext');
+    if(state.hyp && state.con){
+      nb.disabled=false;
+      nb.style.opacity='1';
+      nb.textContent='▶ 다음 미션으로 →';
     }
   };
   hb.onclick=function(){
-    hypDone=true;
+    state.hyp=true;
     hb.style.borderColor='#ffaa44';hb.style.background='#2a1808';hb.style.color='#ffcc88';
     cb.style.borderColor='#4a6a90';cb.style.background='#0c1830';cb.style.color='#bbd0e0';
     cb.style.transform='';cb.style.fontSize='14px';
@@ -1283,10 +1284,10 @@ var showCompleteCard=function(mis){
     checkReady();
   };
   cb.onclick=function(){
-    conDone=true;
+    state.con=true;
     cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
     cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
-    highlightRA([sm.hudCon],'con');  // 결론 강조 (가정은 그대로 유지)
+    highlightRA([sm.hudCon],'con');
     document.getElementById('mcSumHint').textContent='🎉 '+sm.hyp+' 로부터 '+sm.con+' 이 자동 성립! 결론 ⊥가 크게 강조되었습니다';
     checkReady();
   };
@@ -1304,6 +1305,38 @@ var showCompleteCard=function(mis){
 };
 
 // HUD 깜빡임/강조 (정리 카드 시각화용)
+// 임무완수 카드 — 3D ⊥ 마커 강조 (옵션 K: 정적 확대·색 변경, 깜빡임 없음)
+var raHighlightState={}; // {key: 'hyp'|'con'|null}
+var highlightRA=function(keys, mode){
+  if(mode==='off'){ raHighlightState={}; return; }
+  if(!Array.isArray(keys)) keys=[keys];
+  keys.forEach(function(k){ raHighlightState[k] = mode; });
+};
+var applyRAHighlight=function(){
+  var mapping = {'po':raO, 'oh':raH_OH, 'ph':raH_PH, 'pooh':raO_POOH};
+  Object.keys(mapping).forEach(function(k){
+    var grp=mapping[k]; if(!grp||!grp._line) return;
+    var state=raHighlightState[k];
+    if(!state){
+      grp.scale.set(1,1,1);
+      if(grp._origColor!==undefined) grp._line.material.color.setHex(grp._origColor);
+      return;
+    }
+    if(grp._origColor===undefined) grp._origColor = grp._line.material.color.getHex();
+    if(state==='hyp'){
+      grp.scale.set(1.8,1.8,1.8);
+      grp._line.material.color.setHex(0xffcc44);
+      grp._line.material.opacity=1;
+      if(grp._fill){ grp._fill.material.color.setHex(0xffaa22); grp._fill.material.opacity=.55; }
+    }else if(state==='con'){
+      grp.scale.set(2.4,2.4,2.4);
+      grp._line.material.color.setHex(0x00ffcc);
+      grp._line.material.opacity=1;
+      if(grp._fill){ grp._fill.material.color.setHex(0x00ddaa); grp._fill.material.opacity=.65; }
+    }
+  });
+};
+
 var tHud=function(keys, mode){
   var huds=[document.getElementById('hu1'),document.getElementById('hu2'),document.getElementById('hu3'),document.getElementById('hu4')];
   huds.forEach(function(h){ if(!h) return;
@@ -1918,6 +1951,8 @@ var updScene=function(){
     apply(raO, rapPOBlink);
     apply(raO_POOH, rapPOOHBlink);
   })();
+  // 임무완수 카드의 ⊥ 강조 적용 (정적 효과)
+  try{applyRAHighlight();}catch(e){}
   betaOpa+=(betaTgt-betaOpa)*.055;if(betaPulse>0)betaPulse--;
   betaMat.opacity=betaOpa*.52;betaEdgeMat.opacity=betaOpa;betaLbl.material.opacity=Math.min(1,betaOpa*1.4);
   if(betaOpa>.01){var bn=getBetaN(P,O,H);if(bn){var cen=P.clone().add(O).add(H).multiplyScalar(1/3);betaMsh.position.copy(cen);betaMsh.quaternion.setFromUnitVectors(V3(0,0,1),bn);betaEdge.position.copy(cen);betaEdge.quaternion.copy(betaMsh.quaternion);betaLbl.position.copy(cen.clone().addScaledVector(bn,.95));}}
@@ -2403,6 +2438,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613m</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613n</div>
 </body>
 </html>
