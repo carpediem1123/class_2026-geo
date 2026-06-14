@@ -296,24 +296,6 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
     <div class="tr-badge" id="trBadge"></div>
     <div class="tr-title" id="trTitle"></div>
     <div class="tr-body" id="trBody"></div>
-
-    <!-- 🔗 학습 정리 카드: 가정·결론 클릭으로 시각화 -->
-    <div id="trSummary" style="display:none;width:90%;max-width:520px;margin:14px auto 0;padding:14px 18px;background:rgba(8,20,40,.7);border:1.5px solid #3a5a8c;border-radius:10px">
-      <div style="font-size:11px;color:#88aacc;letter-spacing:.18em;text-align:center;margin-bottom:10px">🔗 오늘 이은 수직 관계 — 클릭하여 확인</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-family:'Courier New',monospace">
-        <button id="trHyp" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
-          <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">가정 조건</div>
-          <span id="trHypTxt"></span>
-        </button>
-        <div style="font-size:20px;color:#5599ff;font-weight:bold">→</div>
-        <button id="trCon" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
-          <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">결론</div>
-          <span id="trConTxt"></span>
-        </button>
-      </div>
-      <div id="trSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건을 눌러보세요</div>
-    </div>
-
     <div class="tr-sep"></div>
     <div class="tr-next" id="trNext"></div>
     <button class="tr-btn" id="trBtn">▶ 다음 임무!</button>
@@ -328,6 +310,38 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
       </div>
     </div>
   </div>
+
+  <!-- 🏆 미션 완수 카드: 게임 화면 위에 띄워서 정리 인터랙션만 표시 -->
+  <div id="missionComplete" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,5,15,.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;flex-direction:column;padding:20px;animation:fadeIn .4s ease-out">
+    <div style="background:#0a1525;border:2px solid #44ffaa;border-radius:14px;padding:24px 28px;max-width:560px;width:95%;box-shadow:0 0 40px rgba(68,255,170,.25)">
+      <div style="font-size:11px;letter-spacing:.25em;color:#88ffcc;text-align:center;margin-bottom:8px" id="mcBadge">MISSION COMPLETE</div>
+      <div style="font-size:20px;font-weight:bold;color:#aaffdd;text-align:center;margin-bottom:6px" id="mcTitle">🚨 미션 완수!</div>
+      <div style="font-size:13px;color:#bbd0c0;text-align:center;margin-bottom:18px;white-space:pre-line" id="mcBody"></div>
+
+      <div style="background:rgba(8,20,40,.7);border:1.5px solid #3a5a8c;border-radius:10px;padding:14px 18px">
+        <div style="font-size:11px;color:#88aacc;letter-spacing:.18em;text-align:center;margin-bottom:10px">🔗 오늘 이은 수직 관계 — 클릭하여 확인</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-family:'Courier New',monospace">
+          <button id="mcHyp" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
+            <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">가정 조건</div>
+            <span id="mcHypTxt"></span>
+          </button>
+          <div style="font-size:20px;color:#5599ff;font-weight:bold">→</div>
+          <button id="mcCon" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
+            <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">결론</div>
+            <span id="mcConTxt"></span>
+          </button>
+        </div>
+        <div id="mcSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건을 눌러보세요</div>
+      </div>
+
+      <button id="mcNext" style="display:block;width:100%;margin-top:18px;padding:12px;background:#0a3020;border:2px solid #44ffaa;border-radius:8px;color:#aaffdd;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .2s" disabled>
+        🔍 가정·결론을 모두 확인하면 다음 미션으로 →
+      </button>
+    </div>
+  </div>
+
+  <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}</style>
+
   <!-- 헤더 -->
   <div id="hd">
     <span class="ti">🛰 공간잇기 · 삼수선 <span style="font-size:9.5px;color:#557799;letter-spacing:.04em;font-weight:400">점┄평면┄직선, 수선으로 잇다</span></span>
@@ -925,6 +939,8 @@ var raO=mkRA(0x00ddff),raH_OH=mkRA(0xffff00),raH_PH=mkRA(0x00ff88),raO_POOH=mkRA
 raO.frustumCulled=false;raH_OH.frustumCulled=false;raH_PH.frustumCulled=false;raO_POOH.frustumCulled=false;
 // 직각 마커는 수직이 확정된 후에만 표시 (STEP 1부터 OH⊥l 기호가 보이던 수학적 오류 수정)
 raO.visible=false;raH_OH.visible=false;raH_PH.visible=false;raO_POOH.visible=false;
+// 마커 깜빡임 타임스탬프 (0이면 깜빡임 없음, Date.now()가 들어가면 그 시각부터 강조 깜빡임)
+var rapPHBlink=0, rapOHBlink=0, rapPOBlink=0, rapPOOHBlink=0;
 var betaMat=new THREE.MeshStandardMaterial({color:0x7722cc,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,emissive:0x5511aa,emissiveIntensity:.7});
 var betaMsh=new THREE.Mesh(new THREE.PlaneGeometry(9,9),betaMat);betaMsh.frustumCulled=false;scene.add(betaMsh);
 var betaEdgeMat=new THREE.LineBasicMaterial({color:0xee99ff,transparent:true,opacity:0});
@@ -1214,6 +1230,71 @@ var showIntro=function(mis){
 document.getElementById('ioBtn').onclick=function(){activateMission();};
 
 // 전환 오버레이
+// 🏆 미션 완수 카드: 게임 화면 위에 띄워 정리 인터랙션만 진행
+var showCompleteCard=function(mis){
+  var summaries={
+    1:{title:'🚨 안테나 복구 성공!',body:'삼수선의 정리 ① 증명 완료\n지구 교신 재개 완료!',
+       hyp:'PO⊥α, OH⊥l', con:'PH⊥l', hudHyp:['po','oh'], hudCon:'ph'},
+    2:{title:'📡 신호 발사 성공!',body:'삼수선의 정리 ② 증명 완료\nARES-7 구조 신호 전송!',
+       hyp:'PO⊥α, PH⊥l', con:'OH⊥l', hudHyp:['po','ph'], hudCon:'oh'},
+    3:{title:'🏆 통신장비 완전 복구!',body:'삼수선의 정리 ③ 증명 완료\n지구와의 통신 재개!',
+       hyp:'PH⊥l, OH⊥l, PO⊥OH', con:'PO⊥α', hudHyp:['ph','oh','pooh'], hudCon:'po'}
+  };
+  var sm=summaries[mis]; if(!sm) return;
+  var mc=document.getElementById('missionComplete');
+  document.getElementById('mcBadge').textContent='MISSION 0'+mis+' COMPLETE';
+  document.getElementById('mcTitle').textContent=sm.title;
+  document.getElementById('mcBody').textContent=sm.body;
+  document.getElementById('mcHypTxt').textContent=sm.hyp;
+  document.getElementById('mcConTxt').textContent=sm.con;
+  document.getElementById('mcSumHint').textContent='👆 가정 조건을 눌러보세요';
+  var nextBtn=document.getElementById('mcNext');
+  nextBtn.disabled=true;
+  nextBtn.style.opacity='.55';
+  nextBtn.textContent='🔍 가정·결론을 모두 확인하면 다음 미션으로 →';
+
+  var hypBtn=document.getElementById('mcHyp'), conBtn=document.getElementById('mcCon');
+  var hb=hypBtn.cloneNode(true), cb=conBtn.cloneNode(true);
+  hypBtn.parentNode.replaceChild(hb,hypBtn);
+  conBtn.parentNode.replaceChild(cb,conBtn);
+
+  var hypDone=false, conDone=false;
+  var checkReady=function(){
+    if(hypDone && conDone){
+      nextBtn.disabled=false;
+      nextBtn.style.opacity='1';
+      nextBtn.textContent='▶ 다음 미션으로 →';
+    }
+  };
+  hb.onclick=function(){
+    hypDone=true;
+    hb.style.borderColor='#ffaa44';hb.style.background='#2a1808';hb.style.color='#ffcc88';
+    cb.style.borderColor='#4a6a90';cb.style.background='#0c1830';cb.style.color='#bbd0e0';
+    cb.style.transform='';cb.style.fontSize='14px';
+    tHud(sm.hudHyp,'blink'); tHud([sm.hudCon],'off');
+    document.getElementById('mcSumHint').textContent='✨ 가정 조건이 화면에서 깜빡입니다. 이제 결론을 눌러보세요';
+    checkReady();
+  };
+  cb.onclick=function(){
+    conDone=true;
+    cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
+    cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
+    tHud(sm.hudHyp,'off'); tHud([sm.hudCon],'BIG');
+    document.getElementById('mcSumHint').textContent='🎉 '+sm.hyp+' 로부터 '+sm.con+' 이 자동 성립!';
+    checkReady();
+  };
+  nextBtn.onclick=function(){
+    if(this.disabled) return;
+    tHud([],'off');
+    mc.style.display='none';
+    document.body.classList.remove('show-summary');
+    // 다음 미션 브리핑(transit) 표시
+    showTransit(mis, mis+1);
+  };
+  mc.style.display='flex';
+  document.body.classList.add('show-summary');  // HUD를 transit 위로 띄우는 CSS와 호환
+};
+
 // HUD 깜빡임/강조 (정리 카드 시각화용)
 var tHud=function(keys, mode){
   var huds=[document.getElementById('hu1'),document.getElementById('hu2'),document.getElementById('hu3'),document.getElementById('hu4')];
@@ -1256,41 +1337,6 @@ var showTransit=function(mis,nextMis){
   document.getElementById('trTitle').textContent=m.title;
   document.getElementById('trBody').textContent=m.body;
   document.getElementById('trNext').textContent=m.next;
-
-  // 🔗 학습 정리 카드 설정
-  var sumBox=document.getElementById('trSummary');
-  if(m.summary && sumBox){
-    sumBox.style.display='block';
-    document.body.classList.add('show-summary');
-    document.getElementById('trHypTxt').textContent=m.summary.hyp;
-    document.getElementById('trConTxt').textContent=m.summary.con;
-    document.getElementById('trSumHint').textContent='👆 가정 조건을 눌러보세요';
-    var hypBtn=document.getElementById('trHyp'), conBtn=document.getElementById('trCon');
-    var hb=hypBtn.cloneNode(true), cb=conBtn.cloneNode(true);
-    hypBtn.parentNode.replaceChild(hb,hypBtn);
-    conBtn.parentNode.replaceChild(cb,conBtn);
-    hb.onclick=function(){
-      hb.style.borderColor='#ffaa44';hb.style.background='#2a1808';hb.style.color='#ffcc88';
-      cb.style.borderColor='#4a6a90';cb.style.background='#0c1830';cb.style.color='#bbd0e0';
-      cb.style.transform='';cb.style.fontSize='14px';
-      tHud(m.summary.hudHyp, 'blink');
-      tHud([m.summary.hudCon], 'off');
-      // 결론 HUD는 켜야 하므로 off 후 다시 normal (BIG 없이) — blink-con-big 클래스만 제거
-      var hc=document.getElementById('hu'+(MC[ST.mis].hud.findIndex(function(d){return d&&d[1]===m.summary.hudCon;})+1));
-      if(hc) hc.classList.remove('blink-con-big');
-      document.getElementById('trSumHint').textContent='✨ 가정 조건이 화면에서 깜빡입니다. 이제 결론을 눌러보세요';
-    };
-    cb.onclick=function(){
-      cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
-      cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
-      tHud(m.summary.hudHyp, 'off');
-      tHud([m.summary.hudCon], 'BIG');
-      document.getElementById('trSumHint').textContent='🎉 '+m.summary.hyp+' 로부터 '+m.summary.con+' 이 자동 성립!';
-    };
-  }else if(sumBox){
-    sumBox.style.display='none';
-    document.body.classList.remove('show-summary');
-  }
 
   var btn=document.getElementById('trBtn');
   var closeBtn=document.getElementById('trClose');
@@ -1556,31 +1602,33 @@ var doConfirm=function(idx){
   }
   
   if(s.revPH){
-    // Step 5: PH 공중 케이블 설치 애니메이션 (현재 위치 → P-H)
+    // STEP 5: PH⊥l 발견만 — 직각 마커 표시 + 마커 깜빡임 시작 (케이블 설치는 STEP 6에서!)
+    raH_PH.visible=true;
+    rapPHBlink=Date.now();  // 마커 깜빡임 시작 시각
+  }
+  if(s.installPH){
+    // STEP 6: PH 케이블 실제 설치 애니메이션
     var pos=getPos();
-    
-    // 현재 PH 케이블의 시작/끝 위치 가져오기
     if(!lsPH.tube)return;
     var currentD=lsPH.tube.geometry.attributes.position.array;
     var currentA=V3(currentD[0],currentD[1],currentD[2]);
     var currentB=V3(currentD[3],currentD[4],currentD[5]);
-    
-    // 현재 위치에서 P-H로 애니메이션
     startCableInstall('ph',currentA,currentB,pos.P,pos.H);
     lsPH.installed=true;
-    lsPH.mat.color.set(0x00ddff);  // 하늘색
+    lsPH.mat.color.set(0x00ddff);
     lsPH.mat.emissiveIntensity=0.4;
-    raH_PH.visible=true;
+    rapPHBlink=0;  // 깜빡임 종료
   }
   if(s.revOHdim2bright){lsOH.mat.color.set(0xff7700);}
   if(s.revOH){
-    // Mission 2 Step 4: OH 점선 레일을 선명한 실선으로 변경
+    // M2 STEP 4: OH⊥l 발견 — 직각 마커 표시 + 깜빡임 (케이블 변환은 그대로)
+    raH_OH.visible=true;
+    rapOHBlink=Date.now();
     if(lsOH_cable.tube){
-      setOHCableDashed(false);  // 점선 → 실선 (선명화)
+      setOHCableDashed(false);
     }
-    
-    lsOH_cable.installed=true;  // 확정됨
-    lsOH_cable.mat.color.set(0xff8800);  // 주황색 강조
+    lsOH_cable.installed=true;
+    lsOH_cable.mat.color.set(0xff8800);
   }
   if(s.hlPO){lsPO.mat.color.set(0x88ddff);raO_POOH.visible=true;}
   if(s.revPOA){lsPO.mat.color.set(0xffdd00);raO.visible=true;}
@@ -1604,7 +1652,7 @@ var doConfirm=function(idx){
       updProgress();
       buildUI();  // UI 업데이트
       // 미션 1 정리 화면 표시 (2초 후)
-      setTimeout(function(){showTransit(ST.mis,ST.mis+1);},2000);
+      setTimeout(function(){showCompleteCard(ST.mis);},1500);
     }
     // 미션 2 완료
     else if(ST.mis===2){
@@ -1616,7 +1664,7 @@ var doConfirm=function(idx){
       updProgress();
       buildUI();  // UI 업데이트
       // 미션 2 정리 화면 표시 (2초 후)
-      setTimeout(function(){showTransit(ST.mis,ST.mis+1);},2000);
+      setTimeout(function(){showCompleteCard(ST.mis);},1500);
     }
   }
   if(s.final){ST.missionDone=true;ST.cleared[ST.mis-1]=true;if(ST.mis<3)ST.unlocked[ST.mis]=true;saveMissionState(ST.mis);updTabs();updProgress();}
@@ -1648,7 +1696,7 @@ var updAntenna=function(){
       mastGroup.quaternion.slerpQuaternions(FALLEN_Q,UPRIGHT_Q,t);
       mastGroup.position.lerpVectors(mastFallenPos,antTargetPos,t);
     }
-    if(antAnim>=1){antAnimating=false;buildSteps();setTimeout(function(){showTransit(ST.mis,ST.mis+1);},800);}
+    if(antAnim>=1){antAnimating=false;buildSteps();setTimeout(function(){showCompleteCard(ST.mis);},800);}
   } else if(antAnim>=1){
     // 설치 완료 후: P 이동 시 마스트가 현재 O 위치를 항상 따라가도록
     var pos=getPos();
@@ -1809,6 +1857,27 @@ var updScene=function(){
   if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate());
   if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate());
   if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv,.32);
+  // 직각 마커 깜빡임 효과 (STEP 5 등 발견 직후 일시적 강조 — 5초간)
+  (function(){
+    var now=Date.now();
+    var apply=function(grp,ts){
+      if(!ts||!grp||!grp._line) return;
+      var el=(now-ts)/1000;
+      if(el>5){ // 5초 후 일반 상태로
+        grp._line.material.opacity=.95;
+        if(grp._fill) grp._fill.material.opacity=.35;
+        return;
+      }
+      // 0.4초 주기로 펄스 + 크기 약간 확대
+      var pulse=0.5+0.5*Math.sin(now*0.012);
+      grp._line.material.opacity=.7+.3*pulse;
+      if(grp._fill) grp._fill.material.opacity=.25+.45*pulse;
+    };
+    apply(raH_PH, rapPHBlink);
+    apply(raH_OH, rapOHBlink);
+    apply(raO, rapPOBlink);
+    apply(raO_POOH, rapPOOHBlink);
+  })();
   betaOpa+=(betaTgt-betaOpa)*.055;if(betaPulse>0)betaPulse--;
   betaMat.opacity=betaOpa*.52;betaEdgeMat.opacity=betaOpa;betaLbl.material.opacity=Math.min(1,betaOpa*1.4);
   if(betaOpa>.01){var bn=getBetaN(P,O,H);if(bn){var cen=P.clone().add(O).add(H).multiplyScalar(1/3);betaMsh.position.copy(cen);betaMsh.quaternion.setFromUnitVectors(V3(0,0,1),bn);betaEdge.position.copy(cen);betaEdge.quaternion.copy(betaMsh.quaternion);betaLbl.position.copy(cen.clone().addScaledVector(bn,.95));}}
@@ -2291,6 +2360,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613i</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613j</div>
 </body>
 </html>
