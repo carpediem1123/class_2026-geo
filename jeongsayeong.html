@@ -206,7 +206,10 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 .ai-cur{display:inline-block;width:2px;height:15px;background:#00ff88;
     animation:cur .6s ease-in-out infinite;vertical-align:text-bottom}
 @keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
-.ai-inp{padding:11px 16px;border-top:1px solid #00aa44;flex:1;min-height:0;overflow-y:auto}
+.ai-inp{padding:11px 16px;border-top:1px solid #00aa44;flex:1;min-height:0;overflow-y:scroll;scrollbar-width:thin;scrollbar-color:#44ffaa #0a1810}
+.ai-inp::-webkit-scrollbar{width:10px;background:#0a1810}
+.ai-inp::-webkit-scrollbar-thumb{background:#44ffaa;border-radius:5px;border:2px solid #0a1810}
+.ai-inp::-webkit-scrollbar-thumb:hover{background:#66ffbb}
 .ai-ta{width:100%;background:#031008;border:1.5px solid #007733;border-radius:7px;
     color:#88ffaa;padding:9px 12px;font-size:13px;font-family:inherit;
     resize:none;line-height:1.65;outline:none;height:78px}
@@ -398,10 +401,7 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 2: 탐구 (그림자 공개) -->
           <div class="iq-card" id="iq1">
             <div class="iq-tt">Step 2  그림자 직접 확인!</div>
-            <div class="iq-bd">슬라이더로 0~90° 움직이며
-그림자 변화를 직접 관찰해보세요.
-
-관찰 후, Step 1로 돌아가 다시 답해보세요!</div>
+            <div class="iq-bd">슬라이더로 패널을 움직이며 그림자 변화를 관찰한 뒤, Step 1로 돌아가 답을 다시 골라보세요.</div>
             <button class="gobtn" id="shadowShowBtn" style="margin:5px 0 0">그림자 보기 👁️</button>
             <button class="gobtn" id="backToStep1Btn" style="margin:5px 0 0;display:none">← Step 1로 돌아가기</button>
           </div>
@@ -409,12 +409,10 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 3: 에너지 최대 효율 각도 찾기 -->
           <div class="iq-card" id="iq2">
             <div class="iq-tt">Step 3  언제 에너지 효율이 최대일까?</div>
-            <div class="iq-bd">슬라이더로 패널을 움직여 에너지 효율이 최대가 되는 패널 각도를 찾아보세요!
+            <div class="iq-bd">에너지 효율이 최대가 되는 패널 각도를 찾아보세요.
 <button class="gobtn" id="energyInfoBtn" 
   style="margin:8px 0;padding:8px;font-size:12px;background:#0a1828;border-color:#3366aa">[읽을거리📖]에너지효율의 원리
 </button></div>
-            <div style="font-size:11px;color:#6688bb;margin-top:4px">
-              슬라이더를 조작하세요!</div>
 <div class="ang-row" style="flex-direction: column; align-items: stretch;">
     <div style="display: flex; gap: 10px; align-items: center;">
         <button type="button" class="msl-btn" id="angMinus" style="width:30px;height:30px;font-size:15px" aria-label="1도 감소">−</button>
@@ -433,28 +431,19 @@ S'/S 값을 보며 다음 중 [?]에
             <div class="iq-tt">Step 4  왜 45°일까?</div>
             <div class="iq-bd" id="iq3body">✅ θ=45°에서 에너지 효율 최대!
 
-💡 왜 45°일까요?
-지면 α는 수평보다 -15° 기울어짐.
-태양은 지면에서 30° 고도
-→ 수평 기준 30°+15° = 45° 고도
-
-패널을 45° 세우면 빛과 패널이 정확히 수직(90°)!
-→ 직사광선을 정면으로 받아 그림자가 최대가 됩니다.
-(힌트: Side View에서 확인해보세요!)</div>
+💡 지면 -15° 기울기 + 태양 30° 고도 = 수평 기준 45°
+패널을 45°로 세우면 빛과 패널이 수직(90°)이 되어 직사광선을 정면으로 받아요.
+(Side View에서 확인!)</div>
             <button class="gobtn" id="iq3btn" style="margin:8px 0 0">공식 찾기 →</button>
           </div>
 
           <!-- Step 4: 공식 선택 -->
           <div class="iq-card" id="iq4">
             <div class="iq-tt">Step 5  그림자 넓이 공식 발견</div>
-            <div class="iq-bd">θ=45°일 때, 그림자 넓이는 200
+            <div class="iq-bd">θ=45°일 때 그림자 넓이는 200.
+<strong>S' = 100 [?] [?] [?°] = 200</strong> 이 되는 조합을 찾아보세요.
 
-S' = 100 [?] [?] [?°] = 200
-가 되는 조합을 찾아보세요!
-
-💡 힌트:
-수평 기준 패널 45° + 경사면 15° = ?°
-</div>
+💡 힌트: 수평 기준 45° + 경사면 15° = ?°</div>
             <div style="margin-top:8px">
               <div style="font-size:11px;color:#6688bb;margin-bottom:4px">연산자</div>
               <div class="sel-btns">
@@ -615,6 +604,10 @@ E = cos(θ)
         <label class="rf-opt"><input type="radio" name="method" value="🔁 시행착오 탐색"> 🔁 슬라이더를 여러 번 움직여보며 찾았어요</label>
         <label class="rf-opt"><input type="radio" name="method" value="👁 그래프 직관"> 👁 그래프를 보고 감각적으로 정했어요</label>
         <label class="rf-opt"><input type="radio" name="method" value="📋 조건 분석"> 📋 문제의 조건(지형·면적)을 먼저 읽었어요</label>
+
+        <div style="margin-top:14px;padding:8px 10px;background:rgba(68,255,170,.08);border:1px dashed #44aa66;border-radius:6px;text-align:center;font-size:12px;color:#88ddaa">
+          ⬇️ 아래로 더 있어요 — 자유 서술과 제출 버튼
+        </div>
 
         <div style="margin-top:15px; font-size:14px; color:#fff;">✏️ 더 설명하고 싶다면? <span style="color:#88aa99; font-size:12px;">(선택)</span></div>
         <textarea id="aiInput" name="extra" placeholder="내가 각도를 정한 과정을 자유롭게 적어보세요"
@@ -2301,6 +2294,6 @@ lockMissionTab(true);
 }
 </script>
 
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260613w</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260613x</div>
 </body>
 </html>
