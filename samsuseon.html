@@ -312,8 +312,8 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
   </div>
 
   <!-- 🏆 미션 완수 카드: 게임 화면 위에 띄워서 정리 인터랙션만 표시 -->
-  <div id="missionComplete" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,5,15,.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;flex-direction:column;padding:20px;animation:fadeIn .4s ease-out">
-    <div style="background:#0a1525;border:2px solid #44ffaa;border-radius:14px;padding:24px 28px;max-width:560px;width:95%;box-shadow:0 0 40px rgba(68,255,170,.25)">
+  <div id="missionComplete" style="display:none;position:fixed;top:50px;right:20px;z-index:150;width:380px;max-width:calc(100vw - 40px);max-height:calc(100vh - 80px);overflow-y:auto;animation:slideInRight .4s ease-out">
+    <div style="background:#0a1525;border:2px solid #44ffaa;border-radius:14px;padding:18px 20px;box-shadow:0 0 30px rgba(68,255,170,.35),0 0 60px rgba(0,0,0,.6)">
       <div style="font-size:11px;letter-spacing:.25em;color:#88ffcc;text-align:center;margin-bottom:8px" id="mcBadge">MISSION COMPLETE</div>
       <div style="font-size:20px;font-weight:bold;color:#aaffdd;text-align:center;margin-bottom:6px" id="mcTitle">🚨 미션 완수!</div>
       <div style="font-size:13px;color:#bbd0c0;text-align:center;margin-bottom:18px;white-space:pre-line" id="mcBody"></div>
@@ -340,7 +340,10 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
     </div>
   </div>
 
-  <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}</style>
+  <style>
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+</style>
 
   <!-- 헤더 -->
   <div id="hd">
@@ -941,6 +944,10 @@ raO.frustumCulled=false;raH_OH.frustumCulled=false;raH_PH.frustumCulled=false;ra
 raO.visible=false;raH_OH.visible=false;raH_PH.visible=false;raO_POOH.visible=false;
 // 마커 깜빡임 타임스탬프 (0이면 깜빡임 없음, Date.now()가 들어가면 그 시각부터 강조 깜빡임)
 var rapPHBlink=0, rapOHBlink=0, rapPOBlink=0, rapPOOHBlink=0;
+// PH 점선 발견 표시 (STEP 5: 케이블 설치 전 단계)
+var phRevealMode=false, phRevealStart=0;
+// 케이블 설치 완료 파동 (STEP 6)
+var cableInstallPulse=0;
 var betaMat=new THREE.MeshStandardMaterial({color:0x7722cc,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,emissive:0x5511aa,emissiveIntensity:.7});
 var betaMsh=new THREE.Mesh(new THREE.PlaneGeometry(9,9),betaMat);betaMsh.frustumCulled=false;scene.add(betaMsh);
 var betaEdgeMat=new THREE.LineBasicMaterial({color:0xee99ff,transparent:true,opacity:0});
@@ -1233,11 +1240,11 @@ document.getElementById('ioBtn').onclick=function(){activateMission();};
 // 🏆 미션 완수 카드: 게임 화면 위에 띄워 정리 인터랙션만 진행
 var showCompleteCard=function(mis){
   var summaries={
-    1:{title:'🚨 안테나 복구 성공!',body:'삼수선의 정리 ① 증명 완료\n지구 교신 재개 완료!',
+    1:{title:'🚨 통신 안테나 안정화 완수!',body:'삼수선의 정리 ① 증명 완료\n지구 교신 재개!',
        hyp:'PO⊥α, OH⊥l', con:'PH⊥l', hudHyp:['po','oh'], hudCon:'ph'},
-    2:{title:'📡 신호 발사 성공!',body:'삼수선의 정리 ② 증명 완료\nARES-7 구조 신호 전송!',
+    2:{title:'📡 안테나 지지대 복구 완수!',body:'삼수선의 정리 ② 증명 완료\nARES-7 구조 신호 전송!',
        hyp:'PO⊥α, PH⊥l', con:'OH⊥l', hudHyp:['po','ph'], hudCon:'oh'},
-    3:{title:'🏆 통신장비 완전 복구!',body:'삼수선의 정리 ③ 증명 완료\n지구와의 통신 재개!',
+    3:{title:'🔧 쓰러진 안테나 복구 완수!',body:'삼수선의 정리 ③ 증명 완료\n지구와의 통신 재개!',
        hyp:'PH⊥l, OH⊥l, PO⊥OH', con:'PO⊥α', hudHyp:['ph','oh','pooh'], hudCon:'po'}
   };
   var sm=summaries[mis]; if(!sm) return;
@@ -1602,22 +1609,30 @@ var doConfirm=function(idx){
   }
   
   if(s.revPH){
-    // STEP 5: PH⊥l 발견만 — 직각 마커 표시 + 마커 깜빡임 시작 (케이블 설치는 STEP 6에서!)
+    // STEP 5: PH⊥l 발견 — P-H 위치에 점선 표시 + 직각 마커 깜빡임 (케이블 설치는 STEP 6에서!)
     raH_PH.visible=true;
-    rapPHBlink=Date.now();  // 마커 깜빡임 시작 시각
+    rapPHBlink=Date.now();
+    // PH 점선을 임시로 표시: 기존 케이블을 점선·하늘색 강조로 (위치 이동 없이)
+    phRevealMode=true;
+    phRevealStart=Date.now();
   }
   if(s.installPH){
-    // STEP 6: PH 케이블 실제 설치 애니메이션
+    // STEP 6: PH 케이블 실제 설치 애니메이션 (디테일 강화)
     var pos=getPos();
     if(!lsPH.tube)return;
+    phRevealMode=false;  // 점선 강조 종료
+    rapPHBlink=0;  // 마커 깜빡임 종료
     var currentD=lsPH.tube.geometry.attributes.position.array;
     var currentA=V3(currentD[0],currentD[1],currentD[2]);
     var currentB=V3(currentD[3],currentD[4],currentD[5]);
     startCableInstall('ph',currentA,currentB,pos.P,pos.H);
     lsPH.installed=true;
-    lsPH.mat.color.set(0x00ddff);
-    lsPH.mat.emissiveIntensity=0.4;
-    rapPHBlink=0;  // 깜빡임 종료
+    lsPH.mat.color.set(0xff8800);  // 주황: 실제 통신 케이블
+    lsPH.mat.opacity=1;lsPH.mat.transparent=false;
+    if(lsPH.mat.emissive) lsPH.mat.emissive.set(0xcc4400);
+    lsPH.mat.emissiveIntensity=0.6;
+    // 설치 완료 파동 효과
+    cableInstallPulse=Date.now();
   }
   if(s.revOHdim2bright){lsOH.mat.color.set(0xff7700);}
   if(s.revOH){
@@ -1857,6 +1872,27 @@ var updScene=function(){
   if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate());
   if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate());
   if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv,.32);
+  // 케이블 설치 완료 파동 (STEP 6): 설치 직후 1.5초간 강한 글로우
+  if(cableInstallPulse>0){
+    var ciEl=(Date.now()-cableInstallPulse)/1500;
+    if(ciEl>=1){cableInstallPulse=0;}
+    else if(lsPH && lsPH.mat && lsPH.mat.emissiveIntensity!==undefined){
+      var pp=Math.sin(ciEl*Math.PI*4)*0.5+0.5;
+      lsPH.mat.emissiveIntensity=0.6+0.6*pp*(1-ciEl);
+    }
+  }
+
+  // PH 발견 표시 (STEP 5): 케이블을 점선 하늘색으로 강조하며 펄스 (실제 설치는 STEP 6)
+  if(phRevealMode && lsPH && lsPH.mat){
+    var prEl=(Date.now()-phRevealStart)*0.003;
+    var pulse=0.6+0.4*Math.sin(prEl);
+    lsPH.mat.color.set(0x66ccff);  // 하늘색
+    lsPH.mat.emissive && lsPH.mat.emissive.set(0x4499ff);
+    if(lsPH.mat.emissiveIntensity!==undefined) lsPH.mat.emissiveIntensity=0.5+0.3*pulse;
+    lsPH.mat.opacity=0.55+0.35*pulse;
+    lsPH.mat.transparent=true;
+  }
+
   // 직각 마커 깜빡임 효과 (STEP 5 등 발견 직후 일시적 강조 — 5초간)
   (function(){
     var now=Date.now();
@@ -1939,6 +1975,7 @@ var doResetMis=function(){
   try{
   ST.step=1;ST.done=[];ST.pB=ptA(2.2,-1.5);ST.pH=3.5;ST.tH=-2;ST.uO=1;ST.vO=2;
   ST.missionDone=false;ST.hudVisible=MC[ST.mis].hudInit;ST.introMode=true;
+  phRevealMode=false; cableInstallPulse=0;
   // 스텝 목록 스크롤 맨 위로 초기화
   var spEl=document.getElementById('sp');if(spEl)spEl.scrollTop=0;
   betaTgt=0;betaOpa=0;betaPulse=0;betaMat.opacity=0;betaEdgeMat.opacity=0;betaLbl.material.opacity=0;
@@ -2073,8 +2110,10 @@ var doResetMis=function(){
   }
 };
 var doResetAll=function(){
-  ST.mis=1;ST.unlocked=[true,false,false];ST.cleared=[false,false,false];
-  doResetMis();buildUI();showIntro(1);
+  // 현재 미션만 초기화 (다른 미션의 진행 상황은 보존)
+  if(!confirm('현재 미션('+ ST.mis +'번)만 처음부터 다시 시작합니다.\n다른 미션의 진행 상황은 그대로 유지됩니다.\n계속하시겠습니까?')) return;
+  ST.cleared[ST.mis-1]=false;  // 현재 미션 완수 상태만 리셋
+  doResetMis();buildUI();showIntro(ST.mis);
 };
 var DG={on:false,x:0,y:0,pd:0};
 var RC=new THREE.Raycaster(),DP=new THREE.Plane();
@@ -2360,6 +2399,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613j</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613k</div>
 </body>
 </html>
