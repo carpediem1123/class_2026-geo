@@ -194,6 +194,43 @@
   .lab-step-card[data-lab-step="5"] { border-left: 3px solid #ffaa00; }
   .lab-step-card[data-lab-step="6"] { border-left: 3px solid #00ffcc; }
   .lab-step-card[data-lab-step="7"] { border-left: 3px solid #ff00ff; }
+  .lab-blank-q {
+    margin: 10px 0 6px;
+    padding: 8px 10px;
+    background: rgba(255,221,102,.08);
+    border-left: 2px solid #ffdd66;
+    border-radius: 4px;
+  }
+  .lab-blank-eq {
+    font-size: 13px;
+    color: #eedd99;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lab-blank-in {
+    width: 72px;
+    padding: 4px 6px;
+    background: #0c1822;
+    border: 1.5px solid #ffdd66;
+    border-radius: 4px;
+    color: #ffdd66;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .lab-blank-hint {
+    margin-top: 6px;
+    font-size: 10.5px;
+    color: #7799bb;
+    min-height: 13px;
+  }
+  .lab-blank-hint.ok { color: #aaffdd; }
+  .lab-blank-hint.warn { color: #ffaa88; }
 
   .lab-progress-bar {
     height: 3px;
@@ -310,28 +347,45 @@
     <div class="lab-step-card" data-lab-step="4">
       <strong style="color:#00d4ff;">2. 수직이등분선의 성질 추출</strong><br><br>
       두 직선 m과 n은 기둥 선분 PP'을 한가운데서 직교 관통하므로 기하학적 정의에 의해 완벽한 수직이등분선입니다.<br><br>
-      따라서 양 끝단 대칭점까지의 거리가 같으므로 대응변 <strong>선분 AP = 선분 AP'</strong>과 <strong>선분 BP = 선분 BP'</strong>이 성립합니다.
+      수직이등분선 위의 점에서 양 끝점까지의 거리는 같습니다.<br>
+      직선 m이 PP'의 수직이등분선이므로:
+      <div class="lab-blank-q" data-step="4" data-answer="AP'">
+        <span class="lab-blank-eq">선분 AP = 선분 <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"></span>
+        <div class="lab-blank-hint"></div>
+      </div>
     </div>
     <div class="lab-step-card" data-lab-step="5">
       <strong style="color:#ffaa00;">3. 합동 (SSS)</strong><br><br>
-      방금 증명한 변들의 길이와 공통변 선분 AB에 의해 두 입체 대칭 삼각형<br>
-      <strong>삼각형 PAB와 삼각형 P'AB는 SSS 합동</strong>이 성립합니다.<br><br>
-      <span style="color:#ffaa00;">💡 캔버스를 상하·좌우로 움직여보며, 황금색 삼각형과 고동색 삼각형이 완전히 일치하는지 관찰해 보세요.</span>
+      앞 단계에서 얻은 변의 길이와 공통변 선분 AB에 의해<br>
+      <strong>삼각형 PAB ≡ 삼각형 P'AB (SSS 합동)</strong>이 성립합니다.<br><br>
+      합동인 두 삼각형의 대응각도 같습니다:
+      <div class="lab-blank-q" data-step="5" data-answer="∠P'AC|각P'AC|∠P′AC|각P′AC">
+        <span class="lab-blank-eq">∠PAC = <input type="text" class="lab-blank-in" maxlength="8" placeholder="?"></span>
+        <div class="lab-blank-hint"></div>
+      </div>
+      <span style="color:#ffaa00;font-size:11.5px">💡 캔버스를 상하·좌우로 움직여보며 황금색·고동색 삼각형이 일치하는지 관찰해 보세요.</span>
     </div>
     <div class="lab-step-card" data-lab-step="6">
-      <strong style="color:#00ffcc;">4. 청록색 삼각형의 SAS 합동</strong><br><br>
-      앞선 합동의 성질에 의해 사이 각도인 각 PAC = 각 P'AC 임이 밝혀집니다.<br><br>
-      그 결과, 선분 AC를 공통변으로 공유하는 두 삼각형<br>
-      <strong>삼각형 PAC와 삼각형 P'AC는 SAS 합동</strong>이 성립하며,<br>
-      이로 인해 <strong>선분 CP = 선분 CP'</strong>임이 유도됩니다.
+      <strong style="color:#00ffcc;">4. 합동 (SAS)</strong><br><br>
+      앞 단계의 ∠PAC = ∠P'AC, AP = AP', 그리고 공통변 AC에 의해<br>
+      <strong>삼각형 PAC ≡ 삼각형 P'AC (SAS 합동)</strong>이 성립합니다.<br><br>
+      합동인 두 삼각형의 대응변도 같습니다:
+      <div class="lab-blank-q" data-step="6" data-answer="CP'|CP′">
+        <span class="lab-blank-eq">선분 CP = 선분 <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"></span>
+        <div class="lab-blank-hint"></div>
+      </div>
     </div>
     <div class="lab-step-card" data-lab-step="7">
       <strong style="color:#ff00ff;">5. 이등변삼각형 결론 및 완증</strong><br><br>
-      최종적으로 솟아오른 <strong>삼각형 PCP'</strong>은 두 변의 길이가 같은 이등변삼각형입니다.<br><br>
-      이때 점 O는 밑변 PP'의 중점이므로 이등변삼각형의 성질에 의해<br>
-      중선 <strong>선분 OC와 선분 PP'은 수직</strong>, 즉 <strong>직선 l과 직선 k는 수직</strong>이 완벽히 성립합니다.<br><br>
-      평면 α 위의 임의의 모든 직선 k와 수직이므로 마침내<br>
-      <strong style="color:#ff88ff; font-size:14px;">직선 l과 평면 α의 수직 증명 완료!</strong>
+      앞 단계에서 CP = CP'을 얻었습니다.<br>
+      두 변의 길이가 같은 삼각형 PCP'은 어떤 삼각형일까요?
+      <div class="lab-blank-q" data-step="7" data-answer="이등변|이등변삼각형">
+        <span class="lab-blank-eq">△PCP'은 <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"> 삼각형</span>
+        <div class="lab-blank-hint"></div>
+      </div>
+      점 O가 밑변 PP'의 <strong>중점</strong>이므로 이등변삼각형의 성질에 의해 중선 OC ⊥ PP', 즉 <strong>직선 k ⊥ 직선 l</strong>!<br><br>
+      평면 α 위의 <strong>임의의</strong> 직선 k에 대해 성립하므로<br>
+      <strong style="color:#ff88ff; font-size:14px;">직선 l ⊥ 평면 α 증명 완료!</strong>
     </div>
   </div>
 
@@ -1151,9 +1205,47 @@ function goLabStep(n) {
 
   updateProofGeometryEngine(currentLabStep);
   setupGoalInteraction();
+  setupBlankInteraction();
 }
 
 // ── 단계 2 (증명 목표 세우기) 인터랙션 핸들러 ──
+// 단계 3~7 빈칸 채점
+function setupBlankInteraction() {
+  document.querySelectorAll('.lab-blank-q').forEach(function(box){
+    if (box.dataset.bound === '1') return;
+    box.dataset.bound = '1';
+    var inp = box.querySelector('.lab-blank-in');
+    var hint = box.querySelector('.lab-blank-hint');
+    var answers = (box.dataset.answer || '').split('|').map(function(a){return a.trim().toLowerCase();});
+    inp.addEventListener('input', function(){
+      var v = this.value.trim().toLowerCase()
+        .replace(/\s+/g,'').replace(/['′]/g,"'");  // 따옴표 정규화
+      var ok = answers.some(function(a){
+        return a.replace(/\s+/g,'').replace(/['′]/g,"'") === v;
+      });
+      if (ok) {
+        this.style.borderColor = '#44ffaa';
+        this.style.color = '#aaffdd';
+        this.style.background = '#0a3020';
+        if (hint) hint.innerHTML = '🎉 정답!';
+        hint.className = 'lab-blank-hint ok';
+      } else if (v.length > 0) {
+        this.style.borderColor = '#ff8844';
+        this.style.color = '#ffaa88';
+        this.style.background = '#1a0800';
+        if (hint) hint.innerHTML = '💡 합동인 두 삼각형의 대응되는 변(또는 각)을 생각해보세요.';
+        hint.className = 'lab-blank-hint warn';
+      } else {
+        this.style.borderColor = '#ffdd66';
+        this.style.color = '#ffdd66';
+        this.style.background = '#0c1822';
+        if (hint) hint.innerHTML = '';
+        hint.className = 'lab-blank-hint';
+      }
+    });
+  });
+}
+
 function setupGoalInteraction() {
   if (currentLabStep !== 2) {
     // 단계 2 이탈 시 회전 데모 중단
@@ -1378,6 +1470,6 @@ function animate() {
 
 animate();
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613n</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613o</div>
 </body>
 </html>
