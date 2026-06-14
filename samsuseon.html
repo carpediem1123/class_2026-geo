@@ -296,6 +296,24 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
     <div class="tr-badge" id="trBadge"></div>
     <div class="tr-title" id="trTitle"></div>
     <div class="tr-body" id="trBody"></div>
+
+    <!-- 🔗 학습 정리 카드: 가정·결론 클릭으로 시각화 -->
+    <div id="trSummary" style="display:none;width:90%;max-width:520px;margin:14px auto 0;padding:14px 18px;background:rgba(8,20,40,.7);border:1.5px solid #3a5a8c;border-radius:10px">
+      <div style="font-size:11px;color:#88aacc;letter-spacing:.18em;text-align:center;margin-bottom:10px">🔗 오늘 이은 수직 관계 — 클릭하여 확인</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-family:'Courier New',monospace">
+        <button id="trHyp" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
+          <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">가정 조건</div>
+          <span id="trHypTxt"></span>
+        </button>
+        <div style="font-size:20px;color:#5599ff;font-weight:bold">→</div>
+        <button id="trCon" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
+          <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">결론</div>
+          <span id="trConTxt"></span>
+        </button>
+      </div>
+      <div id="trSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건을 눌러보세요</div>
+    </div>
+
     <div class="tr-sep"></div>
     <div class="tr-next" id="trNext"></div>
     <button class="tr-btn" id="trBtn">▶ 다음 임무!</button>
@@ -1160,6 +1178,24 @@ var showIntro=function(mis){
 document.getElementById('ioBtn').onclick=function(){activateMission();};
 
 // 전환 오버레이
+// HUD 깜빡임/강조 (정리 카드 시각화용)
+var tHud=function(keys, mode){
+  var huds=[document.getElementById('hu1'),document.getElementById('hu2'),document.getElementById('hu3'),document.getElementById('hu4')];
+  huds.forEach(function(h){ if(!h) return;
+    h.classList.remove('blink-hyp','blink-con-big');
+  });
+  if(mode==='off') return;
+  var hudDef = MC[ST.mis] && MC[ST.mis].hud;
+  if(!hudDef) return;
+  hudDef.forEach(function(d,i){
+    if(!d) return;
+    var key=d[1], hud=huds[i];
+    if(!hud) return;
+    if(keys.indexOf(key)<0) return;
+    if(mode==='blink') hud.classList.add('blink-hyp');
+    else if(mode==='BIG') hud.classList.add('blink-con-big');
+  });
+};
 var showTransit=function(mis,nextMis){
   var t=document.getElementById('transit');
   var msgs={
@@ -1167,13 +1203,16 @@ var showTransit=function(mis,nextMis){
        body:'화성 기지 KOSA-1\n세 개의 수학적 정리로\n기지를 복구하세요!\n\n삼수선의 정리 ①②③\n증명 → 임무 완수!',
        next:'🚀 Mission 01 부여:\n통신 안테나 안정화 작전!'},
     1:{badge:'MISSION 01 COMPLETE',title:'🚨 안테나 복구 성공!',
-       body:'삼수선의 정리 ① 증명 완료\nPO⊥α, OH⊥l → PH⊥l\n지구 교신 재개 완료!',
+       body:'삼수선의 정리 ① 증명 완료\n지구 교신 재개 완료!',
+       summary:{hyp:'PO⊥α, OH⊥l', con:'PH⊥l', hudHyp:['po','oh'], hudCon:'ph'},
        next:'📡 Mission 02 브리핑:\n로버 ARES-7에서 SOS 신호 포착!'},
     2:{badge:'MISSION 02 COMPLETE',title:'📡 신호 발사 성공!',
-       body:'삼수선의 정리 ② 증명 완료\nPO⊥α, PH⊥l → OH⊥l\nARES-7 구조 신호 전송!',
+       body:'삼수선의 정리 ② 증명 완료\nARES-7 구조 신호 전송!',
+       summary:{hyp:'PO⊥α, PH⊥l', con:'OH⊥l', hudHyp:['po','ph'], hudCon:'oh'},
        next:'🔧 Mission 03 브리핑:\n지진으로 메인 안테나 기둥 완전 붕괴!\n기둥을 수직으로 세워 통신을 복구하라!'},
     3:{badge:'ALL MISSIONS COMPLETE',title:'🏆 통신장비 완전 복구!',
-       body:'삼수선의 정리 ③ 증명 완료\nPH⊥l, OH⊥l, PO⊥OH → PO⊥α\n통신장비 완전 복구, 지구와의 통신 재개!',
+       body:'삼수선의 정리 ③ 증명 완료\n통신장비 완전 복구, 지구와의 통신 재개!',
+       summary:{hyp:'PH⊥l, OH⊥l, PO⊥OH', con:'PO⊥α', hudHyp:['ph','oh','pooh'], hudCon:'po'},
        next:'🎉 삼수선의 정리 ①②③ 모두 증명!\nKOSA-1 화성 기지 완전 복구 성공!'}
   };
   var m=msgs[mis];
@@ -1181,6 +1220,42 @@ var showTransit=function(mis,nextMis){
   document.getElementById('trTitle').textContent=m.title;
   document.getElementById('trBody').textContent=m.body;
   document.getElementById('trNext').textContent=m.next;
+
+  // 🔗 학습 정리 카드 설정
+  var sumBox=document.getElementById('trSummary');
+  if(m.summary && sumBox){
+    sumBox.style.display='block';
+    document.body.classList.add('show-summary');
+    document.getElementById('trHypTxt').textContent=m.summary.hyp;
+    document.getElementById('trConTxt').textContent=m.summary.con;
+    document.getElementById('trSumHint').textContent='👆 가정 조건을 눌러보세요';
+    var hypBtn=document.getElementById('trHyp'), conBtn=document.getElementById('trCon');
+    var hb=hypBtn.cloneNode(true), cb=conBtn.cloneNode(true);
+    hypBtn.parentNode.replaceChild(hb,hypBtn);
+    conBtn.parentNode.replaceChild(cb,conBtn);
+    hb.onclick=function(){
+      hb.style.borderColor='#ffaa44';hb.style.background='#2a1808';hb.style.color='#ffcc88';
+      cb.style.borderColor='#4a6a90';cb.style.background='#0c1830';cb.style.color='#bbd0e0';
+      cb.style.transform='';cb.style.fontSize='14px';
+      tHud(m.summary.hudHyp, 'blink');
+      tHud([m.summary.hudCon], 'off');
+      // 결론 HUD는 켜야 하므로 off 후 다시 normal (BIG 없이) — blink-con-big 클래스만 제거
+      var hc=document.getElementById('hu'+(MC[ST.mis].hud.findIndex(function(d){return d&&d[1]===m.summary.hudCon;})+1));
+      if(hc) hc.classList.remove('blink-con-big');
+      document.getElementById('trSumHint').textContent='✨ 가정 조건이 화면에서 깜빡입니다. 이제 결론을 눌러보세요';
+    };
+    cb.onclick=function(){
+      cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
+      cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
+      tHud(m.summary.hudHyp, 'off');
+      tHud([m.summary.hudCon], 'BIG');
+      document.getElementById('trSumHint').textContent='🎉 '+m.summary.hyp+' 로부터 '+m.summary.con+' 이 자동 성립!';
+    };
+  }else if(sumBox){
+    sumBox.style.display='none';
+    document.body.classList.remove('show-summary');
+  }
+
   var btn=document.getElementById('trBtn');
   var closeBtn=document.getElementById('trClose');
   var replayDiv=document.getElementById('trReplay');
@@ -1208,13 +1283,13 @@ var showTransit=function(mis,nextMis){
   
   // ── 닫기(✕) 버튼 ──
   closeBtn.onclick=function(){
-    t.style.display='none';
+    document.body.classList.remove('show-summary');t.style.display='none';
     btn.style.display='';
   };
   
   // ── 다음 미션 버튼 ──
   btn.onclick=function(){
-    t.style.display='none';
+    document.body.classList.remove('show-summary');t.style.display='none';
     btn.style.display='';
     if(mis===0){
       ST.mis=1;
@@ -1234,7 +1309,7 @@ var showTransit=function(mis,nextMis){
   [1,2,3].forEach(function(n){
     var rb=document.getElementById('trR'+n);
     rb.onclick=function(){
-      t.style.display='none';
+      document.body.classList.remove('show-summary');t.style.display='none';
       btn.style.display='';
       // 해당 미션이 완수된 경우 저장 상태로 복원, 아니면 초기화
       ST.mis=n;
@@ -2179,6 +2254,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613g</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613h</div>
 </body>
 </html>
