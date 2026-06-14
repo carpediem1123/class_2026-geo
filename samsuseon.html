@@ -333,8 +333,8 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
         </div>
         <div id="mcSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건부터 눌러보세요</div>
         <div style="margin-top:8px;text-align:center;font-size:9.5px;color:#6688aa;letter-spacing:.05em">
-          <span style="color:#ffcc44">●</span> 노란 ⊥ = 가정 &nbsp;·&nbsp;
-          <span style="color:#00ffcc">●</span> 시안 ⊥ = 결론
+          <span style="color:#ffcc44;font-size:11px">●</span> <span style="color:#ffcc44">가정</span> &nbsp;·&nbsp;
+          <span style="color:#00ffcc;font-size:11px">●</span> <span style="color:#00ffcc">결론</span>
         </div>
       </div>
 
@@ -690,6 +690,38 @@ var playDrawPH=function(){
     drawPHAnim={t0:Date.now(), P:pos.P.clone(), H:pos.H.clone(), line:ln, mat:m};
   }catch(e){}
 };
+// M2 STEP 4 힌트용: O에서 H 방향으로 천천히 그어지는 점선
+var drawOHAnim=null;
+var playDrawOH=function(){
+  try{
+    var pos=getPos();
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([pos.O.x,pos.O.y,pos.O.z, pos.O.x,pos.O.y,pos.O.z]),3));
+    var m=new THREE.LineDashedMaterial({color:0xffff66,dashSize:0.16,gapSize:0.12,transparent:true,opacity:1});
+    var ln=new THREE.Line(g,m); ln.computeLineDistances(); scene.add(ln);
+    drawOHAnim={t0:Date.now(), O:pos.O.clone(), H:pos.H.clone(), line:ln, mat:m};
+  }catch(e){}
+};
+var stepDrawOH=function(){
+  if(!drawOHAnim) return;
+  var t=(Date.now()-drawOHAnim.t0)/1800;
+  if(t<1){
+    var k=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    var O=drawOHAnim.O, H=drawOHAnim.H;
+    var tip=O.clone().lerp(H,k);
+    var arr=drawOHAnim.line.geometry.attributes.position.array;
+    arr[0]=O.x;arr[1]=O.y;arr[2]=O.z; arr[3]=tip.x;arr[4]=tip.y;arr[5]=tip.z;
+    drawOHAnim.line.geometry.attributes.position.needsUpdate=true;
+    drawOHAnim.line.computeLineDistances();
+  }else if(t<2.4){
+    drawOHAnim.mat.opacity=Math.max(0,1-(t-1.4)/1);
+  }else{
+    scene.remove(drawOHAnim.line);
+    drawOHAnim.line.geometry.dispose();
+    drawOHAnim=null;
+  }
+};
+
 var stepDrawPH=function(){
   if(!drawPHAnim) return;
   var t=(Date.now()-drawPHAnim.t0)/1800;  // 1.8초에 걸쳐 천천히 그려짐
@@ -1010,7 +1042,8 @@ var MC={
       {l:'STEP 2',d:'PH가 직선l과 수직이 되도록 조정하세요.',btn:'PH⊥l 달성!',cond:'ph'},
       {l:'STEP 3',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3,revOHdim2bright:1},
       {l:'STEP 4',d:'평면 β 위의 직선인 OH와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,revOH:1,choice:'OHl',hintOH:1},
-      {l:'STEP 5',d:'통신장비 보수 완료!\n신호를 발사하세요.',btn:'📡 신호 발사!',auto:1,commStart:1}
+      {l:'STEP 5',d:'정리 ② 확인 완료!\nOH⊥l 이 발견되었습니다.\n이제 안전한 OH 지지대를 설치합니다.',btn:'🔧 OH 지지대 설치!',auto:1,installOH2:1},
+      {l:'STEP 6',d:'안테나 지지대 보수 완료!\n신호를 발사하세요.',btn:'📡 신호 발사!',auto:1,commStart:1,final:1}
     ]},
   3:{betaMsg:'PH와 OH가 결정하는 β 등장!\nPH⊥l, OH⊥l → β⊥l\nPO ⊥ β 면 내의 모든 직선 → PO⊥α!',
      hud:[['PH⊥l','ph'],['OH⊥l','oh'],['PO⊥OH','pooh'],['PO⊥α','po']],hudInit:3,
@@ -1322,19 +1355,26 @@ var applyRAHighlight=function(){
     if(!state){
       grp.scale.set(1,1,1);
       if(grp._origColor!==undefined) grp._line.material.color.setHex(grp._origColor);
+      if(grp._origFillColor!==undefined && grp._fill) grp._fill.material.color.setHex(grp._origFillColor);
       return;
     }
     if(grp._origColor===undefined) grp._origColor = grp._line.material.color.getHex();
+    if(grp._origFillColor===undefined && grp._fill) grp._origFillColor = grp._fill.material.color.getHex();
     if(state==='hyp'){
       grp.scale.set(1.8,1.8,1.8);
       grp._line.material.color.setHex(0xffcc44);
       grp._line.material.opacity=1;
-      if(grp._fill){ grp._fill.material.color.setHex(0xffaa22); grp._fill.material.opacity=.55; }
+      // 채움은 끄고 외곽선만 강조 (사각형으로 보이는 문제 해결)
+      if(grp._fill){ grp._fill.material.opacity=0; }
     }else if(state==='con'){
       grp.scale.set(2.4,2.4,2.4);
       grp._line.material.color.setHex(0x00ffcc);
       grp._line.material.opacity=1;
-      if(grp._fill){ grp._fill.material.color.setHex(0x00ddaa); grp._fill.material.opacity=.65; }
+      if(grp._fill){ grp._fill.material.opacity=0; }
+      // M3 결론(PO⊥α)에서 raO와 raO_POOH가 같은 O점에 겹치지 않게 더 크게 + Y축 양수 방향으로 살짝 띄움
+      if(k==='po'){
+        grp.scale.set(3.0,3.0,3.0);  // 더 크게
+      }
     }
   });
 };
@@ -1597,6 +1637,9 @@ var buildSteps=function(){
           if(s.hintPH){
             try{ playDrawPH(); }catch(e){}
             label='✏️ PH 그리는 중...';
+          }else if(s.hintOH){
+            try{ playDrawOH(); }catch(e){}
+            label='✏️ OH 그리는 중...';
           }else{
             try{ playGhostL(tgt); }catch(e){}
             label='👁 평행이동 중...';
@@ -1675,14 +1718,24 @@ var doConfirm=function(idx){
   }
   if(s.revOHdim2bright){lsOH.mat.color.set(0xff7700);}
   if(s.revOH){
-    // M2 STEP 4: OH⊥l 발견 — 직각 마커 표시 + 깜빡임 (케이블 변환은 그대로)
+    // M2 STEP 4: OH⊥l 발견 — 직각 마커 표시 + 깜빡임만 (지지대 설치는 STEP 5)
     raH_OH.visible=true;
     rapOHBlink=Date.now();
+    // OH 케이블은 점선 노랑 유지 (발견 표시)
+    if(lsOH_cable.tube){
+      setOHCableDashed(true);
+      lsOH_cable.mat.color.set(0xffff66);
+    }
+  }
+  if(s.installOH2){
+    // M2 STEP 5: OH 지지대 설치 — 점선 → 실선 + 주황
     if(lsOH_cable.tube){
       setOHCableDashed(false);
+      lsOH_cable.mat.color.set(0xff8800);
     }
     lsOH_cable.installed=true;
-    lsOH_cable.mat.color.set(0xff8800);
+    cableInstallPulse=Date.now();
+    rapOHBlink=0;  // 깜빡임 종료
   }
   if(s.hlPO){lsPO.mat.color.set(0x88ddff);raO_POOH.visible=true;}
   if(s.revPOA){lsPO.mat.color.set(0xffdd00);raO.visible=true;}
@@ -1899,8 +1952,8 @@ var updScene=function(){
   // — STEP1처럼 미확정 상태에서 마커가 잔존하는 수학적 오류 방지
   (function(){
     var step=ST.step, mis=ST.mis, done=ST.done||[];
-    var ohOK = done.indexOf(2)>=0;  // M1·M2 STEP2 / M3 STEP2 완수 후
-    var phOK = (mis===2 && done.indexOf(2)>=0) || (mis===3 && done.indexOf(1)>=0);  // PH⊥l 확정
+    var ohOK = (mis===1 && done.indexOf(2)>=0) || (mis===2 && done.indexOf(4)>=0) || (mis===3 && done.indexOf(2)>=0);
+    var phOK = (mis===1 && done.indexOf(5)>=0) || (mis===2 && done.indexOf(2)>=0) || (mis===3 && done.indexOf(1)>=0);  // PH⊥l 확정 (M1: STEP5 발견 후)
     var poaOK = done.indexOf(1)>=0; // M1·M2 STEP1 PO⊥α는 이미 확정된 조건
     raO.visible      = poaOK && (mis<3 || done.indexOf(6)>=0);  // PO⊥α 마커 (O점 옆)
     raH_OH.visible   = ohOK;
@@ -1961,6 +2014,7 @@ var updScene=function(){
   updHUD(pos.aPOa,pos.aOHl,pos.aPHl,pos.aPOOH);
   try{stepGhostAnim();}catch(e){}  // 평행이동 애니메이션 프레임 진행
   try{stepDrawPH();}catch(e){}     // PH 점선 그리기 애니메이션
+  try{stepDrawOH();}catch(e){}     // OH 점선 그리기 애니메이션 (M2 STEP 4)
   try{updSliders();}catch(e){}     // 슬라이더 가시성 매 프레임 동기화 — 일회성 오류가 나도 다음 프레임에 자가 복구
   var cs2=MC[ST.mis].steps[ST.step-1];
   if(cs2&&cs2.cond&&ST.done.indexOf(ST.step)<0){
@@ -2440,6 +2494,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613o</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613p</div>
 </body>
 </html>
