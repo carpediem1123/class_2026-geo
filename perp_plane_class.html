@@ -283,7 +283,7 @@
       <strong style="color:#ffaa44;">0. 가정 조건 체크</strong><br><br>
       평면 α 위에서 점 O를 지나는 두 직선 <strong>m, n</strong>이 직선 <strong>l</strong>과 각각 수직이라고 가정합니다.<br><br>
       <span style="color:#ffaa44;font-size:14px;font-weight:bold;letter-spacing:.05em">m ⊥ l &nbsp;&nbsp;그리고&nbsp;&nbsp; n ⊥ l</span><br><br>
-      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 세 직선 <strong>l, m, n</strong>의 관계를 살펴보세요.</span>
+      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 세 직선 <strong>l, m, n</strong>의 관계를 살펴보세요. 점 O에서 m과 n이 각각 직선 l과 수직임을 직각 기호로 확인할 수 있습니다.</span>
     </div>
     <div class="lab-step-card" data-lab-step="2">
       <strong style="color:#bb99ff;">1. 증명 목표 세우기</strong><br><br>
@@ -316,7 +316,7 @@
       <strong style="color:#ffaa00;">3. 황금색 삼각형의 SSS 합동</strong><br><br>
       방금 증명한 변들의 길이와 공통변 선분 AB에 의해 두 입체 대칭 삼각형<br>
       <strong>삼각형 PAB와 삼각형 P'AB는 SSS 합동</strong>이 성립합니다.<br><br>
-      <span style="color:#ffaa00;">💡 캔버스를 상하/좌우로 움직여 노란색 대칭면이 완전히 일치하는지 확인해 보세요.</span>
+      <span style="color:#ffaa00;">💡 캔버스를 드래그해 노란색 대칭면이 완전히 일치하는지 확인해 보세요.</span>
     </div>
     <div class="lab-step-card" data-lab-step="6">
       <strong style="color:#00ffcc;">4. 청록색 삼각형의 SAS 합동</strong><br><br>
@@ -1165,12 +1165,26 @@ function setupGoalInteraction() {
         this.style.background = '#0a3020';
         this.style.borderColor = '#44ffaa';
         this.style.color = '#aaffdd';
+        // 회전 데모 중단 + 도형 원위치 + 오답 메시지 정리
+        if (typeof kRotationAnim !== 'undefined' && kRotationAnim) { clearInterval(kRotationAnim); kRotationAnim = null; }
+        if (typeof proofMeshGroup !== 'undefined' && proofMeshGroup) proofMeshGroup.rotation.y = 0;
+        var wm = document.getElementById('goalWrongMsg');
+        if (wm) wm.remove();
         // 2단계 영역 펼치기
         document.getElementById('goalStep2').style.display = 'block';
       } else {
         this.style.background = '#3a0a0a';
         this.style.borderColor = '#ff6644';
         this.style.color = '#ffaa88';
+        var msgEl = document.getElementById('goalWrongMsg');
+        if (!msgEl) {
+          msgEl = document.createElement('div');
+          msgEl.id = 'goalWrongMsg';
+          msgEl.style.cssText = 'margin-top:8px;padding:8px 10px;background:rgba(255,100,68,.1);border:1px solid rgba(255,100,68,.4);border-radius:5px;font-size:11px;color:#ffaa88;line-height:1.5';
+          document.getElementById('goalQ1').parentNode.insertBefore(msgEl, document.getElementById('goalQ1').nextSibling);
+        }
+        msgEl.innerHTML = '🔄 평면 위 직선이 무한히 많아요. 모두 보는 건 불가능합니다.<br>3D에서 직선 k가 회전하며 여러 방향을 시도해보세요...';
+        try { startKRotationDemo(); } catch(e) {}
         var self = this;
         setTimeout(function(){
           self.style.background = '#0c1822';
@@ -1310,6 +1324,6 @@ function animate() {
 
 animate();
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613l</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613m</div>
 </body>
 </html>
