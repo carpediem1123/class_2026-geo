@@ -103,7 +103,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
     color:#ccdeff;padding:7px 10px;font-size:18px;font-weight:bold;text-align:center;
     font-family:inherit;outline:none}
 .ang-input:focus{border-color:#5588ff}
-.ang-unit{font-size:16px;color:#99aacc;font-weight:bold}
+.ang-unit{font-size:15px;color:#99aacc;font-weight:bold;letter-spacing:-.02em}
 .ang-check{padding:8px 14px;background:#142250;border:2px solid #3366cc;border-radius:7px;
     color:#aaccff;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit}
 .ang-check:hover{background:#1a2e6a}
@@ -418,7 +418,7 @@ S'/S 값을 보며 다음 중 [?]에
         <button type="button" class="msl-btn" id="angMinus" style="width:30px;height:30px;font-size:15px" aria-label="1도 감소">−</button>
         <input type="range" id="angInput" min="0" max="135" step="1" value="0" style="flex:1;">
         <button type="button" class="msl-btn" id="angPlus" style="width:30px;height:30px;font-size:15px" aria-label="1도 증가">+</button>
-        <span class="ang-unit" id="vtAngInput" style="width: 40px;">0°</span>
+        <span class="ang-unit" id="vtAngInput" style="width:56px;text-align:right;flex-shrink:0">0°</span>
     </div>
     <button class="ang-check" id="angCheck" style="margin-top:5px;">정답 확인</button>
 </div>
@@ -2299,6 +2299,6 @@ lockMissionTab(true);
 }
 </script>
 
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260613d</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260613k</div>
 </body>
 </html>
