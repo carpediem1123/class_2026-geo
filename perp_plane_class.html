@@ -283,7 +283,7 @@
       <strong style="color:#ffaa44;">0. 가정 조건 체크</strong><br><br>
       평면 α 위에서 점 O를 지나는 두 직선 <strong>m, n</strong>이 직선 <strong>l</strong>과 각각 수직이라고 가정합니다.<br><br>
       <span style="color:#ffaa44;font-size:14px;font-weight:bold;letter-spacing:.05em">m ⊥ l &nbsp;&nbsp;그리고&nbsp;&nbsp; n ⊥ l</span><br><br>
-      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 세 직선 <strong>l, m, n</strong>의 관계를 살펴보세요. 점 O에서 m과 n이 각각 직선 l과 수직임을 직각 기호로 확인할 수 있습니다.</span>
+      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 세 직선 <strong>l, m, n</strong>의 관계를 살펴보세요.</span>
     </div>
     <div class="lab-step-card" data-lab-step="2">
       <strong style="color:#bb99ff;">1. 증명 목표 세우기</strong><br><br>
@@ -313,10 +313,10 @@
       따라서 양 끝단 대칭점까지의 거리가 같으므로 대응변 <strong>선분 AP = 선분 AP'</strong>과 <strong>선분 BP = 선분 BP'</strong>이 성립합니다.
     </div>
     <div class="lab-step-card" data-lab-step="5">
-      <strong style="color:#ffaa00;">3. 황금색 삼각형의 SSS 합동</strong><br><br>
+      <strong style="color:#ffaa00;">3. 합동 (SSS)</strong><br><br>
       방금 증명한 변들의 길이와 공통변 선분 AB에 의해 두 입체 대칭 삼각형<br>
       <strong>삼각형 PAB와 삼각형 P'AB는 SSS 합동</strong>이 성립합니다.<br><br>
-      <span style="color:#ffaa00;">💡 캔버스를 드래그해 노란색 대칭면이 완전히 일치하는지 확인해 보세요.</span>
+      <span style="color:#ffaa00;">💡 캔버스를 상하·좌우로 움직여보며, 황금색 삼각형과 고동색 삼각형이 완전히 일치하는지 관찰해 보세요.</span>
     </div>
     <div class="lab-step-card" data-lab-step="6">
       <strong style="color:#00ffcc;">4. 청록색 삼각형의 SAS 합동</strong><br><br>
@@ -1001,12 +1001,15 @@ function updateProofGeometryEngine(stepNum) {
   // stepNum=2: 증명 목표 — k 라인 추가 (점 O만)
   // stepNum>=3: 본격 증명 — ABC, P, P' 모두 등장
 
-  // k 라인은 stepNum>=2일 때만
-  if (stepNum >= 2) {
+  // k 라인: stepNum===2에서는 정답을 맞춰야 등장 (goalAnswered) / stepNum>=3은 무조건
+  if (stepNum >= 3 || (stepNum === 2 && goalAnswered)) {
     const vecK = pC.clone().normalize();
-    proofMeshGroup.add(makeProofLine(vecK.clone().multiplyScalar(-5.5), vecK.clone().multiplyScalar(5.5), 0xd97706, true)); 
+    // 회전 데모 중일 때는 kRotationAngle 적용 (오답 시각화), 정답 후엔 0
+    var angle = (stepNum === 2 && kRotationActive) ? kRotationAngle : 0;
+    var dir = vecK.clone().applyAxisAngle(new THREE.Vector3(0,1,0), angle);
+    proofMeshGroup.add(makeProofLine(dir.clone().multiplyScalar(-5.5), dir.clone().multiplyScalar(5.5), 0xd97706, true));
     const labelK = createLabelTexture('k', '#d97706');
-    labelK.position.copy(vecK).multiplyScalar(5.2).setY(0.25); 
+    labelK.position.copy(dir).multiplyScalar(5.2).setY(0.25);
     proofMeshGroup.add(labelK);
   }
 
@@ -1152,7 +1155,11 @@ function goLabStep(n) {
 
 // ── 단계 2 (증명 목표 세우기) 인터랙션 핸들러 ──
 function setupGoalInteraction() {
-  if (currentLabStep !== 2) return;
+  if (currentLabStep !== 2) {
+    // 단계 2 이탈 시 회전 데모 중단
+    if (typeof kRotationAnim !== 'undefined' && kRotationAnim) { clearInterval(kRotationAnim); kRotationAnim = null; }
+    return;
+  }
   var opts = document.querySelectorAll('#goalQ1 .goal-opt');
   if (!opts.length) return;
   // 이미 핸들러가 등록된 경우 중복 방지
@@ -1166,16 +1173,32 @@ function setupGoalInteraction() {
         this.style.borderColor = '#44ffaa';
         this.style.color = '#aaffdd';
         // 회전 데모 중단 + 도형 원위치 + 오답 메시지 정리
-        if (typeof kRotationAnim !== 'undefined' && kRotationAnim) { clearInterval(kRotationAnim); kRotationAnim = null; }
-        if (typeof proofMeshGroup !== 'undefined' && proofMeshGroup) proofMeshGroup.rotation.y = 0;
+        if (kRotationAnim) { clearInterval(kRotationAnim); kRotationAnim = null; }
+        kRotationActive = false; kRotationAngle = 0;
+        if (proofMeshGroup) proofMeshGroup.rotation.y = 0;
         var wm = document.getElementById('goalWrongMsg');
         if (wm) wm.remove();
+        // 칭찬 메시지 + k 직선 등장
+        var praiseEl = document.getElementById('goalPraise');
+        if (!praiseEl) {
+          praiseEl = document.createElement('div');
+          praiseEl.id = 'goalPraise';
+          praiseEl.style.cssText = 'margin-top:8px;padding:8px 10px;background:rgba(68,255,170,.1);border:1px solid rgba(68,255,170,.4);border-radius:5px;font-size:11.5px;color:#aaffdd;line-height:1.5';
+          document.getElementById('goalQ1').parentNode.insertBefore(praiseEl, document.getElementById('goalQ1').nextSibling);
+        }
+        praiseEl.innerHTML = '🎉 정답! 이 임의의 직선이 3D 화면에 등장합니다 →';
+        // k 직선 등장
+        goalAnswered = true;
+        updateProofGeometryEngine(currentLabStep);
         // 2단계 영역 펼치기
         document.getElementById('goalStep2').style.display = 'block';
       } else {
         this.style.background = '#3a0a0a';
         this.style.borderColor = '#ff6644';
         this.style.color = '#ffaa88';
+        // 이전 칭찬 메시지 제거
+        var pe = document.getElementById('goalPraise');
+        if (pe) pe.remove();
         var msgEl = document.getElementById('goalWrongMsg');
         if (!msgEl) {
           msgEl = document.createElement('div');
@@ -1216,6 +1239,37 @@ function setupGoalInteraction() {
       }
     });
   }
+}
+
+// 단계 2 오답 시 회전 데모용 변수
+let kRotationAnim = null;
+let goalAnswered = false;
+let kRotationActive = false;
+let kRotationAngle = 0;
+
+function startKRotationDemo() {
+  if (currentLabStep !== 2) return;
+  if (kRotationAnim) clearInterval(kRotationAnim);
+  goalAnswered = true;  // 임시로 k 표시 (회전 데모용)
+  kRotationActive = true;
+  var t0 = Date.now();
+  var duration = 4500;
+  kRotationAnim = setInterval(function(){
+    var t = (Date.now() - t0) / duration;
+    if (t >= 1) {
+      clearInterval(kRotationAnim);
+      kRotationAnim = null;
+      kRotationActive = false;
+      kRotationAngle = 0;
+      goalAnswered = false;  // 데모 후 k 다시 숨김
+      updateProofGeometryEngine(currentLabStep);
+      var msg = document.getElementById('goalWrongMsg');
+      if (msg) msg.innerHTML = '💡 ...이렇게 무한히 시도해도 끝이 없죠.<br>다시 생각해봐요: <strong>임의의 직선 하나만</strong> 보이면 어떻게 될까요?';
+      return;
+    }
+    kRotationAngle = t * Math.PI * 2.4;
+    updateProofGeometryEngine(currentLabStep);
+  }, 60);
 }
 
 function labNav(dir) {
@@ -1324,6 +1378,6 @@ function animate() {
 
 animate();
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613m</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613n</div>
 </body>
 </html>
