@@ -1972,13 +1972,13 @@ var updScene=function(){
   };
   var raSize_POOH=function(){
     var st=raHighlightState['pooh'];
-    if(st==='hyp') return .72;
-    if(st==='con') return .95;
-    return .45;
+    if(st==='hyp') return .85;  // 가정 강조 시 더 크게
+    if(st==='con') return 1.05;
+    return .55;  // 기본 크기도 키움 (M3 STEP 5 가시성)
   };
   if(raO.visible)mvRA(raO,O,POv.clone().negate(),E1, raSize('po'));
-  if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD.clone().negate(), raSize('oh'));
-  if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate(), raSize('ph'));
+  if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD, raSize('oh'));  // l의 +방향(좌측) — PH 마커와 반대편
+  if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate(), raSize('ph'));  // l의 -방향(우측)
   if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv, raSize_POOH());
   // 케이블 설치 완료 파동 (STEP 6): 설치 직후 1.5초간 강한 글로우
   if(cableInstallPulse>0){
@@ -2514,6 +2514,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613x</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613y</div>
 </body>
 </html>
