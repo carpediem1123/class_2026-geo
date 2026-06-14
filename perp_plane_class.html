@@ -187,11 +187,13 @@
   .lab-step-card.active { display: block; animation: fadeCard 0.3s ease; }
   @keyframes fadeCard { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  .lab-step-card[data-lab-step="1"] { border-left: 3px solid #00d4ff; }
-  .lab-step-card[data-lab-step="2"] { border-left: 3px solid #00d4ff; }
-  .lab-step-card[data-lab-step="3"] { border-left: 3px solid #ffaa00; }
-  .lab-step-card[data-lab-step="4"] { border-left: 3px solid #00ffcc; }
-  .lab-step-card[data-lab-step="5"] { border-left: 3px solid #ff00ff; }
+  .lab-step-card[data-lab-step="1"] { border-left: 3px solid #ffaa44; }
+  .lab-step-card[data-lab-step="2"] { border-left: 3px solid #bb99ff; }
+  .lab-step-card[data-lab-step="3"] { border-left: 3px solid #00d4ff; }
+  .lab-step-card[data-lab-step="4"] { border-left: 3px solid #00d4ff; }
+  .lab-step-card[data-lab-step="5"] { border-left: 3px solid #ffaa00; }
+  .lab-step-card[data-lab-step="6"] { border-left: 3px solid #00ffcc; }
+  .lab-step-card[data-lab-step="7"] { border-left: 3px solid #ff00ff; }
 
   .lab-progress-bar {
     height: 3px;
@@ -281,32 +283,49 @@
       <strong style="color:#ffaa44;">0. 가정 조건 체크</strong><br><br>
       평면 α 위에서 점 O를 지나는 두 직선 <strong>m, n</strong>이 직선 <strong>l</strong>과 각각 수직이라고 가정합니다.<br><br>
       <span style="color:#ffaa44;font-size:14px;font-weight:bold;letter-spacing:.05em">m ⊥ l &nbsp;&nbsp;그리고&nbsp;&nbsp; n ⊥ l</span><br><br>
-      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 세 직선 l(세로 기둥), m(초록), n(파랑)의 관계를 살펴보세요.</span>
+      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 세 직선 <strong>l, m, n</strong>의 관계를 살펴보세요.</span>
     </div>
     <div class="lab-step-card" data-lab-step="2">
-      <strong style="color:#00d4ff;">1. 가설 작도 및 점 설정</strong><br><br>
+      <strong style="color:#bb99ff;">1. 증명 목표 세우기</strong><br><br>
+      <div style="font-size:13px;color:#ccddee;margin-bottom:10px">❓ 평면 α 위 <strong>모든 직선</strong>이 l과 ⊥? 어떻게 보일까요?</div>
+      <div id="goalQ1" style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="goal-opt" data-correct="1" style="flex:1;padding:8px 6px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-size:11px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s">✓ 임의의 하나만</button>
+        <button class="goal-opt" data-correct="0" style="flex:1;padding:8px 6px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-size:11px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s">✗ 전부 다</button>
+      </div>
+      <div id="goalStep2" style="display:none">
+        <div style="font-size:12px;color:#aaaadd;margin-bottom:10px;padding:6px 8px;background:rgba(187,153,255,.1);border-left:2px solid #bb99ff;border-radius:3px">임의의 직선 = <strong style="color:#ffdd66">k</strong></div>
+        <div style="font-size:13px;color:#ccddee;margin-bottom:8px">🎯 우리의 목표:</div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;font-family:'Courier New',monospace;font-size:18px">
+          <input id="goalBlank" type="text" maxlength="2" placeholder="?" style="width:48px;padding:6px;text-align:center;background:#0c1822;border:2px solid #ffdd66;border-radius:5px;color:#ffdd66;font-size:18px;font-weight:bold;font-family:inherit">
+          <span style="color:#ffdd66;font-weight:bold">⊥ l</span>
+        </div>
+        <div id="goalHint" style="margin-top:8px;font-size:10.5px;color:#7799bb;text-align:center;min-height:14px"></div>
+      </div>
+    </div>
+    <div class="lab-step-card" data-lab-step="3">
+      <strong style="color:#00d4ff;">2. 가설 작도 및 점 설정</strong><br><br>
       교점 O를 지나며 평면 α 위에 놓인 임의의 또 다른 직선을 k라고 정의합니다.<br><br>
       세 직선 m, n, k를 가로지르는 임의의 평면 선분을 작도하여 생기는 교점을 각각 <strong>A, B, C</strong>라고 지정합니다. 그 후 기둥 l 상에 선분 OP = 선분 OP'이 되도록 상하 대칭점 <strong>P, P'</strong>을 잡습니다.
     </div>
-    <div class="lab-step-card" data-lab-step="3">
+    <div class="lab-step-card" data-lab-step="4">
       <strong style="color:#00d4ff;">2. 수직이등분선의 성질 추출</strong><br><br>
       두 직선 m과 n은 기둥 선분 PP'을 한가운데서 직교 관통하므로 기하학적 정의에 의해 완벽한 수직이등분선입니다.<br><br>
       따라서 양 끝단 대칭점까지의 거리가 같으므로 대응변 <strong>선분 AP = 선분 AP'</strong>과 <strong>선분 BP = 선분 BP'</strong>이 성립합니다.
     </div>
-    <div class="lab-step-card" data-lab-step="4">
+    <div class="lab-step-card" data-lab-step="5">
       <strong style="color:#ffaa00;">3. 황금색 삼각형의 SSS 합동</strong><br><br>
       방금 증명한 변들의 길이와 공통변 선분 AB에 의해 두 입체 대칭 삼각형<br>
       <strong>삼각형 PAB와 삼각형 P'AB는 SSS 합동</strong>이 성립합니다.<br><br>
       <span style="color:#ffaa00;">💡 캔버스를 드래그해 노란색 대칭면이 완전히 일치하는지 확인해 보세요.</span>
     </div>
-    <div class="lab-step-card" data-lab-step="5">
+    <div class="lab-step-card" data-lab-step="6">
       <strong style="color:#00ffcc;">4. 청록색 삼각형의 SAS 합동</strong><br><br>
       앞선 합동의 성질에 의해 사이 각도인 각 PAC = 각 P'AC 임이 밝혀집니다.<br><br>
       그 결과, 선분 AC를 공통변으로 공유하는 두 삼각형<br>
       <strong>삼각형 PAC와 삼각형 P'AC는 SAS 합동</strong>이 성립하며,<br>
       이로 인해 <strong>선분 CP = 선분 CP'</strong>임이 유도됩니다.
     </div>
-    <div class="lab-step-card" data-lab-step="6">
+    <div class="lab-step-card" data-lab-step="7">
       <strong style="color:#ff00ff;">5. 이등변삼각형 결론 및 완증</strong><br><br>
       최종적으로 솟아오른 <strong>삼각형 PCP'</strong>은 두 변의 길이가 같은 이등변삼각형입니다.<br><br>
       이때 점 O는 밑변 PP'의 중점이므로 이등변삼각형의 성질에 의해<br>
@@ -977,14 +996,33 @@ function updateProofGeometryEngine(stepNum) {
   labelN.position.copy(vecN).multiplyScalar(5.0).setY(0.25); 
   proofMeshGroup.add(labelN);
 
-  const vecK = pC.clone().normalize();
-  proofMeshGroup.add(makeProofLine(vecK.clone().multiplyScalar(-5.5), vecK.clone().multiplyScalar(5.5), 0xd97706, true)); 
-  const labelK = createLabelTexture('k', '#d97706');
-  labelK.position.copy(vecK).multiplyScalar(5.2).setY(0.25); 
-  proofMeshGroup.add(labelK);
+  // ── 단계별 등장 ──
+  // stepNum=1: 가정 조건 — l, m, n + 직각 기호만 표시
+  // stepNum=2: 증명 목표 — k 라인 추가 (점 O만)
+  // stepNum>=3: 본격 증명 — ABC, P, P' 모두 등장
 
+  // k 라인은 stepNum>=2일 때만
+  if (stepNum >= 2) {
+    const vecK = pC.clone().normalize();
+    proofMeshGroup.add(makeProofLine(vecK.clone().multiplyScalar(-5.5), vecK.clone().multiplyScalar(5.5), 0xd97706, true)); 
+    const labelK = createLabelTexture('k', '#d97706');
+    labelK.position.copy(vecK).multiplyScalar(5.2).setY(0.25); 
+    proofMeshGroup.add(labelK);
+  }
+
+  // O 점은 stepNum>=1부터 항상 (가정 조건의 핵심)
+  proofMeshGroup.add(makeProofNode(pO, 'O', '#111111'));
+
+  // 직각 기호 (m⊥l, n⊥l): stepNum>=1부터 표시 — 가정 조건 시각화
   if (stepNum >= 1) {
-    proofMeshGroup.add(makeProofNode(pO, 'O', '#111111')); 
+    const vecMd = pA.clone().normalize();
+    const vecNd = pB.clone().normalize();
+    proofMeshGroup.add(makeRightAngleMarker(vecMd, 0x059669));  // m⊥l
+    proofMeshGroup.add(makeRightAngleMarker(vecNd, 0x0284c7));  // n⊥l
+  }
+
+  // P, P', A, B, C: stepNum>=3부터 (본격 증명 작도)
+  if (stepNum >= 3) {
     proofMeshGroup.add(makeProofNode(pP, 'P', '#111111'));
     proofMeshGroup.add(makeProofNode(pP_, "P'", '#111111'));
     proofMeshGroup.add(makeProofNode(pA, 'A', '#111111'));
@@ -994,14 +1032,14 @@ function updateProofGeometryEngine(stepNum) {
     proofMeshGroup.add(makeProofLine(pA, pB, 0x475569)); 
   }
 
-  if (stepNum === 2) {
+  if (stepNum === 4) {
     proofMeshGroup.add(makeProofLine(pP, pA, 0xd946ef));  
     proofMeshGroup.add(makeProofLine(pP_, pA, 0xd946ef));
     proofMeshGroup.add(makeProofLine(pP, pB, 0x0ea5e9));  
     proofMeshGroup.add(makeProofLine(pP_, pB, 0x0ea5e9));
   }
 
-  if (stepNum === 3) {
+  if (stepNum === 5) {
     const triPAB = drawProofTriangle(pP, pA, pB, 0xf59e0b);   
     const triP_AB = drawProofTriangle(pP_, pA, pB, 0xb45309);  
     proofMeshGroup.add(triPAB, triP_AB);
@@ -1010,7 +1048,7 @@ function updateProofGeometryEngine(stepNum) {
     proofMeshGroup.add(makeProofLine(pP_, pA, 0xb45309), makeProofLine(pP_, pB, 0xb45309));
   }
 
-  if (stepNum === 4) {
+  if (stepNum === 6) {
     const triPAC = drawProofTriangle(pP, pA, pC, 0x06b6d4);   
     const triP_AC = drawProofTriangle(pP_, pA, pC, 0x0369a1);  
     proofMeshGroup.add(triPAC, triP_AC);
@@ -1018,7 +1056,7 @@ function updateProofGeometryEngine(stepNum) {
     proofMeshGroup.add(makeProofLine(pP, pC, 0x0891b2), makeProofLine(pP_, pC, 0x0369a1));
   }
 
-  if (stepNum === 5) {
+  if (stepNum === 7) {
     const triPCP_ = drawProofTriangle(pP, pC, pP_, 0xec4899); 
     proofMeshGroup.add(triPCP_);
 
@@ -1066,7 +1104,7 @@ btnProofNext.addEventListener('click', () => {
 // --- 7. 수학실험실 패널 제어 시스템 ---
 let labOpen = false;
 let currentLabStep = 1;
-const totalLabSteps = 6;
+const totalLabSteps = 7;
 
 (function initLabDots() {
   const dotsEl = document.getElementById('lab-dots');
@@ -1109,6 +1147,61 @@ function goLabStep(n) {
   }
 
   updateProofGeometryEngine(currentLabStep);
+  setupGoalInteraction();
+}
+
+// ── 단계 2 (증명 목표 세우기) 인터랙션 핸들러 ──
+function setupGoalInteraction() {
+  if (currentLabStep !== 2) return;
+  var opts = document.querySelectorAll('#goalQ1 .goal-opt');
+  if (!opts.length) return;
+  // 이미 핸들러가 등록된 경우 중복 방지
+  if (opts[0].dataset.bound === '1') return;
+  opts.forEach(function(btn){
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function(){
+      var ok = this.dataset.correct === '1';
+      if (ok) {
+        this.style.background = '#0a3020';
+        this.style.borderColor = '#44ffaa';
+        this.style.color = '#aaffdd';
+        // 2단계 영역 펼치기
+        document.getElementById('goalStep2').style.display = 'block';
+      } else {
+        this.style.background = '#3a0a0a';
+        this.style.borderColor = '#ff6644';
+        this.style.color = '#ffaa88';
+        var self = this;
+        setTimeout(function(){
+          self.style.background = '#0c1822';
+          self.style.borderColor = '#2a4060';
+          self.style.color = '#bbd0e0';
+        }, 800);
+      }
+    });
+  });
+  // 빈칸 입력 핸들러
+  var blank = document.getElementById('goalBlank');
+  if (blank && !blank.dataset.bound) {
+    blank.dataset.bound = '1';
+    blank.addEventListener('input', function(){
+      var v = this.value.trim().toLowerCase();
+      var hint = document.getElementById('goalHint');
+      if (v === 'k') {
+        this.style.borderColor = '#44ffaa';
+        this.style.color = '#aaffdd';
+        if (hint) hint.innerHTML = '🎉 좋습니다! 이제 <strong>k ⊥ l</strong>을 보이는 게 목표입니다.';
+      } else if (v.length > 0) {
+        this.style.borderColor = '#ff6644';
+        this.style.color = '#ffaa88';
+        if (hint) hint.textContent = '💡 임의의 직선을 무엇이라 부르기로 했죠?';
+      } else {
+        this.style.borderColor = '#ffdd66';
+        this.style.color = '#ffdd66';
+        if (hint) hint.textContent = '';
+      }
+    });
+  }
 }
 
 function labNav(dir) {
@@ -1217,6 +1310,6 @@ function animate() {
 
 animate();
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613k</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613l</div>
 </body>
 </html>
