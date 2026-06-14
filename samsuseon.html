@@ -319,19 +319,23 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
       <div style="font-size:13px;color:#bbd0c0;text-align:center;margin-bottom:18px;white-space:pre-line" id="mcBody"></div>
 
       <div style="background:rgba(8,20,40,.7);border:1.5px solid #3a5a8c;border-radius:10px;padding:14px 18px">
-        <div style="font-size:11px;color:#88aacc;letter-spacing:.18em;text-align:center;margin-bottom:10px">🔗 오늘 이은 수직 관계 — 클릭하여 확인</div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-family:'Courier New',monospace">
-          <button id="mcHyp" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
-            <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">가정 조건</div>
-            <span id="mcHypTxt"></span>
+        <div style="font-size:11px;color:#88aacc;letter-spacing:.18em;text-align:center;margin-bottom:6px">🔗 3D 화면을 보며 확인해봐요</div>
+        <div style="font-size:10.5px;color:#7799bb;text-align:center;margin-bottom:12px">버튼을 누르면 3D 화면의 ⊥ 기호가 강조됩니다</div>
+        <div style="display:flex;align-items:stretch;justify-content:center;gap:8px">
+          <button id="mcHyp" style="flex:1;padding:14px 8px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div style="font-size:18px;line-height:1">①</div>
+            <div>가정 조건 보기</div>
           </button>
-          <div style="font-size:20px;color:#5599ff;font-weight:bold">→</div>
-          <button id="mcCon" style="padding:10px 14px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s">
-            <div style="font-size:9px;letter-spacing:.15em;color:#6688aa;margin-bottom:4px">결론</div>
-            <span id="mcConTxt"></span>
+          <button id="mcCon" style="flex:1;padding:14px 8px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div style="font-size:18px;line-height:1">②</div>
+            <div>결론 확인</div>
           </button>
         </div>
-        <div id="mcSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건을 눌러보세요</div>
+        <div id="mcSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건부터 눌러보세요</div>
+        <div style="margin-top:8px;text-align:center;font-size:9.5px;color:#6688aa;letter-spacing:.05em">
+          <span style="color:#ffcc44">●</span> 노란 ⊥ = 가정 &nbsp;·&nbsp;
+          <span style="color:#00ffcc">●</span> 시안 ⊥ = 결론
+        </div>
       </div>
 
       <button id="mcNext" style="display:block;width:100%;margin-top:18px;padding:12px;background:#0a3020;border:2px solid #44ffaa;border-radius:8px;color:#aaffdd;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .2s" disabled>
@@ -1252,9 +1256,7 @@ var showCompleteCard=function(mis){
   document.getElementById('mcBadge').textContent='MISSION 0'+mis+' COMPLETE';
   document.getElementById('mcTitle').textContent=sm.title;
   document.getElementById('mcBody').textContent=sm.body;
-  document.getElementById('mcHypTxt').textContent=sm.hyp;
-  document.getElementById('mcConTxt').textContent=sm.con;
-  document.getElementById('mcSumHint').textContent='👆 가정 조건을 눌러보세요';
+  document.getElementById('mcSumHint').textContent='👆 가정 조건부터 눌러보세요';
   var nextBtn=document.getElementById('mcNext');
   nextBtn.disabled=true;
   nextBtn.style.opacity='.55';
@@ -1280,7 +1282,7 @@ var showCompleteCard=function(mis){
     cb.style.borderColor='#4a6a90';cb.style.background='#0c1830';cb.style.color='#bbd0e0';
     cb.style.transform='';cb.style.fontSize='14px';
     highlightRA(sm.hudHyp,'hyp'); highlightRA([sm.hudCon],'off');
-    document.getElementById('mcSumHint').textContent='✨ 3D 화면의 가정 조건 ⊥ 기호를 확인하세요. 이제 결론을 눌러보세요';
+    document.getElementById('mcSumHint').textContent='✨ 3D 화면에 가정 조건의 ⊥가 노란색으로 강조되었어요. 이제 결론을 눌러보세요';
     checkReady();
   };
   cb.onclick=function(){
@@ -1288,7 +1290,7 @@ var showCompleteCard=function(mis){
     cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
     cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
     highlightRA([sm.hudCon],'con');
-    document.getElementById('mcSumHint').textContent='🎉 '+sm.hyp+' 로부터 '+sm.con+' 이 자동 성립! 결론 ⊥가 크게 강조되었습니다';
+    document.getElementById('mcSumHint').textContent='🎉 가정으로부터 결론이 자동 성립! 3D 화면에 결론 ⊥가 크게 강조되었어요';
     checkReady();
   };
   nextBtn.onclick=function(){
@@ -2438,6 +2440,6 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613n</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613o</div>
 </body>
 </html>
