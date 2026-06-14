@@ -278,29 +278,35 @@
 
   <div class="lab-steps-scroll">
     <div class="lab-step-card active" data-lab-step="1">
+      <strong style="color:#ffaa44;">0. 가정 조건 체크</strong><br><br>
+      평면 α 위에서 점 O를 지나는 두 직선 <strong>m, n</strong>이 직선 <strong>l</strong>과 각각 수직이라고 가정합니다.<br><br>
+      <span style="color:#ffaa44;font-size:14px;font-weight:bold;letter-spacing:.05em">m ⊥ l &nbsp;&nbsp;그리고&nbsp;&nbsp; n ⊥ l</span><br><br>
+      <span style="color:#aaaadd;font-size:12px">💡 우측 3D 화면에서 직선 l(세로 기둥), m(초록), n(파랑)을 확인하고 각 점에 수직 기호를 살펴보세요.</span>
+    </div>
+    <div class="lab-step-card" data-lab-step="2">
       <strong style="color:#00d4ff;">1. 가설 작도 및 점 설정</strong><br><br>
       교점 O를 지나며 평면 α 위에 놓인 임의의 또 다른 직선을 k라고 정의합니다.<br><br>
       세 직선 m, n, k를 가로지르는 임의의 평면 선분을 작도하여 생기는 교점을 각각 <strong>A, B, C</strong>라고 지정합니다. 그 후 기둥 l 상에 선분 OP = 선분 OP'이 되도록 상하 대칭점 <strong>P, P'</strong>을 잡습니다.
     </div>
-    <div class="lab-step-card" data-lab-step="2">
+    <div class="lab-step-card" data-lab-step="3">
       <strong style="color:#00d4ff;">2. 수직이등분선의 성질 추출</strong><br><br>
       두 직선 m과 n은 기둥 선분 PP'을 한가운데서 직교 관통하므로 기하학적 정의에 의해 완벽한 수직이등분선입니다.<br><br>
       따라서 양 끝단 대칭점까지의 거리가 같으므로 대응변 <strong>선분 AP = 선분 AP'</strong>과 <strong>선분 BP = 선분 BP'</strong>이 성립합니다.
     </div>
-    <div class="lab-step-card" data-lab-step="3">
+    <div class="lab-step-card" data-lab-step="4">
       <strong style="color:#ffaa00;">3. 황금색 삼각형의 SSS 합동</strong><br><br>
       방금 증명한 변들의 길이와 공통변 선분 AB에 의해 두 입체 대칭 삼각형<br>
       <strong>삼각형 PAB와 삼각형 P'AB는 SSS 합동</strong>이 성립합니다.<br><br>
       <span style="color:#ffaa00;">💡 캔버스를 드래그해 노란색 대칭면이 완전히 일치하는지 확인해 보세요.</span>
     </div>
-    <div class="lab-step-card" data-lab-step="4">
+    <div class="lab-step-card" data-lab-step="5">
       <strong style="color:#00ffcc;">4. 청록색 삼각형의 SAS 합동</strong><br><br>
       앞선 합동의 성질에 의해 사이 각도인 각 PAC = 각 P'AC 임이 밝혀집니다.<br><br>
       그 결과, 선분 AC를 공통변으로 공유하는 두 삼각형<br>
       <strong>삼각형 PAC와 삼각형 P'AC는 SAS 합동</strong>이 성립하며,<br>
       이로 인해 <strong>선분 CP = 선분 CP'</strong>임이 유도됩니다.
     </div>
-    <div class="lab-step-card" data-lab-step="5">
+    <div class="lab-step-card" data-lab-step="6">
       <strong style="color:#ff00ff;">5. 이등변삼각형 결론 및 완증</strong><br><br>
       최종적으로 솟아오른 <strong>삼각형 PCP'</strong>은 두 변의 길이가 같은 이등변삼각형입니다.<br><br>
       이때 점 O는 밑변 PP'의 중점이므로 이등변삼각형의 성질에 의해<br>
@@ -1060,7 +1066,7 @@ btnProofNext.addEventListener('click', () => {
 // --- 7. 수학실험실 패널 제어 시스템 ---
 let labOpen = false;
 let currentLabStep = 1;
-const totalLabSteps = 5;
+const totalLabSteps = 6;
 
 (function initLabDots() {
   const dotsEl = document.getElementById('lab-dots');
@@ -1211,6 +1217,6 @@ function animate() {
 
 animate();
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613d</div>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,150,200,.45);pointer-events:none">v.20260613k</div>
 </body>
 </html>
