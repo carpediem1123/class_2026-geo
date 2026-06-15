@@ -909,7 +909,7 @@ function buildCubeScene(){
   // AFC 테두리 (밝게)
   mkLine([V.A,V.F,V.C,V.A],0xff55aa);
 
-  // 꼭짓점 점 — AFC 꼭짓점은 금색, 나머지 흰색
+  // 꼭짓점 점 — 정사영 찾기 대상 점들을 노란빛으로 (흰색은 와닿지 않음)
   var pCol={A:0xffffff,B:0xffffff,C:0xffffff,D:0xffffff,
             E:0xffffff,F:0xffffff,G:0xffffff,H:0xffffff};
   // 크기: AFC는 크게, 나머지 보통
@@ -1139,10 +1139,10 @@ window.showTetraHint = function(){
   var mdot = window._tetraMdot;
   if(mdot){
     var origScale=mdot.scale.x;
-    mdot.material.color.setHex(0xffdd44);
-    if(mdot.material.emissive) mdot.material.emissive.setHex(0xffdd44);
-    if(mdot.material.emissiveIntensity!==undefined) mdot.material.emissiveIntensity=3.0;
-    mdot.scale.set(1.8,1.8,1.8);
+    mdot.material.color.setHex(0xffff00);
+    if(mdot.material.emissive) mdot.material.emissive.setHex(0xffff00);
+    if(mdot.material.emissiveIntensity!==undefined) mdot.material.emissiveIntensity=4.0;
+    mdot.scale.set(2.2,2.2,2.2);
     setTimeout(function(){
       mdot.material.color.setHex(0xffffff);
       if(mdot.material.emissive) mdot.material.emissive.setHex(0x000000);
@@ -1503,14 +1503,14 @@ function buildBoxScene(){
     var dot = window._cubeVdot && window._cubeVdot[pt];
     if(dot){
       var origScale = dot.scale.x;
-      // 색: 흰색 → 노란색
-      dot.material.color.setHex(0xffdd44);
-      dot.material.emissive.setHex(0xffdd44);
-      dot.material.emissiveIntensity = 3.0;
-      // 크기: 살짝 커짐
-      dot.scale.set(1.8, 1.8, 1.8);
+      // 색: 흰색 → 샛노랑으로 강하게 불 켜짐
+      dot.material.color.setHex(0xffff00);
+      dot.material.emissive.setHex(0xffff00);
+      dot.material.emissiveIntensity = 4.0;
+      // 크기: 확 커짐
+      dot.scale.set(2.2, 2.2, 2.2);
       setTimeout(function(){
-        dot.material.color.setHex(0xffffff); // 흰색 복원
+        dot.material.color.setHex(0xffffff); // 흰색 복원 (기본 상태)
         dot.material.emissive.setHex(0x000000);
         dot.material.emissiveIntensity = 0;
         dot.scale.set(origScale, origScale, origScale);
