@@ -118,7 +118,7 @@ html,body{width:100%;height:100%;overflow:hidden;
               <button class="adv-btn" data-foot="A" data-v="H" style="flex:1">H</button>
             </div>
             <div id="footFb_A" class="adv-fb" style="display:none"></div>
-            <button class="adv-action" id="footHint_A" onclick="showFootHint('A')" style="display:none;font-size:11px;padding:6px;background:#1a1000;border-color:#aa6600;color:#ffcc44">💡 그림자를 따라가세요!</button>
+            <button class="adv-action" id="footHint_A" onclick="showFootHint('A')" style="display:none;font-size:11px;padding:6px;background:#1a1000;border-color:#aa6600;color:#ffcc44">🔗 공간잇기 힌트</button>
           </div>
           <div id="footQ_F" style="margin-bottom:8px;display:none">
             <div style="font-size:11px;color:#cc88ff;font-weight:bold;margin-bottom:5px">F의 수선의 발은?</div>
@@ -129,7 +129,7 @@ html,body{width:100%;height:100%;overflow:hidden;
               <button class="adv-btn" data-foot="F" data-v="H" style="flex:1">H</button>
             </div>
             <div id="footFb_F" class="adv-fb" style="display:none"></div>
-            <button class="adv-action" id="footHint_F" onclick="showFootHint('F')" style="display:none;font-size:11px;padding:6px;background:#1a1000;border-color:#aa6600;color:#ffcc44">💡 그림자를 따라가세요!</button>
+            <button class="adv-action" id="footHint_F" onclick="showFootHint('F')" style="display:none;font-size:11px;padding:6px;background:#1a1000;border-color:#aa6600;color:#ffcc44">🔗 공간잇기 힌트</button>
           </div>
           <div id="footQ_C" style="margin-bottom:8px;display:none">
             <div style="font-size:11px;color:#cc88ff;font-weight:bold;margin-bottom:5px">C의 수선의 발은?</div>
@@ -140,7 +140,7 @@ html,body{width:100%;height:100%;overflow:hidden;
               <button class="adv-btn" data-foot="C" data-v="H" style="flex:1">H</button>
             </div>
             <div id="footFb_C" class="adv-fb" style="display:none"></div>
-            <button class="adv-action" id="footHint_C" onclick="showFootHint('C')" style="display:none;font-size:11px;padding:6px;background:#1a1000;border-color:#aa6600;color:#ffcc44">💡 그림자를 따라가세요!</button>
+            <button class="adv-action" id="footHint_C" onclick="showFootHint('C')" style="display:none;font-size:11px;padding:6px;background:#1a1000;border-color:#aa6600;color:#ffcc44">🔗 공간잇기 힌트</button>
           </div>
           <button class="adv-action" id="btn0q1next" onclick="adv0Step2()" style="display:none">STEP 2 →</button>
         </div>
@@ -203,7 +203,7 @@ cosθ = ?</div>
           </div>
           <div class="adv-fb" id="fb1q0"></div>
           <button class="adv-action" id="hint_1q0" onclick="showTetraHint0()"
-            style="display:none;background:#1a1000;border-color:#aa6600;color:#ffcc44">👁 A에서 수선의 발로 점선 보기</button>
+            style="display:none;background:#1a1000;border-color:#aa6600;color:#ffcc44">🔗 공간잇기 힌트</button>
           <button class="adv-action" id="btn1q0next" onclick="adv1Step1()" style="display:none">STEP 1 →</button>
         </div>
         <div class="adv-card" id="s1q1" style="display:none">
@@ -216,7 +216,7 @@ cosθ = ?</div>
             <button class="adv-btn" data-q="1q1" data-v="d">D 자신</button>
           </div>
           <div class="adv-fb" id="fb1q1"></div>
-          <button class="adv-action" id="hint_1q1" onclick="showTetraHint()" style="display:none;background:#1a1000;border-color:#aa6600;color:#ffcc44">👁 M에서 수선의 발로 점선 보기</button>
+          <button class="adv-action" id="hint_1q1" onclick="showTetraHint()" style="display:none;background:#1a1000;border-color:#aa6600;color:#ffcc44">🔗 공간잇기 힌트</button>
           <button class="adv-action" id="btn1q1next" onclick="adv1Step2()" style="display:none">STEP 2 →</button>
         </div>
         <div class="adv-card" id="s1q2" style="display:none">
@@ -275,7 +275,7 @@ cosθ = ?</div>
             <button class="adv-btn" data-q="2q0" data-v="b">타원<br><small style="color:#aaa">(넓이 &gt; 4π)</small></button>
           </div>
           <div class="adv-fb" id="fb2q0"></div>
-          <button class="adv-action" id="hint_2q0" onclick="show2q0Hint()" style="display:none;background:#1a1000;border-color:#aa6600;color:#ffcc44">👁 3D에서 점선으로 확인하기</button>
+          <button class="adv-action" id="hint_2q0" onclick="show2q0Hint()" style="display:none;background:#1a1000;border-color:#aa6600;color:#ffcc44">🔗 공간잇기 힌트</button>
           <button class="adv-action" id="btn2q0next" onclick="adv2Step1()" style="display:none">STEP 1 →</button>
         </div>
         <div class="adv-card" id="s2q1" style="display:none">
@@ -354,6 +354,21 @@ var advActive=false, advTab=0;
 var advObjs=[], iPoints=[];
 var drawPhase=0, drawPicked=[], drawLines=[];
 var drawProjMesh=null;
+
+/* ── 공간잇기 힌트 버튼 상태 사이클 (삼수선과 동일 로직) ──
+   클릭 → 비활성 + "…중" → (애니메이션) → "🔗 공간잇기 힌트 — 다시 보기"  */
+function hintBtnCycle(btnId, busyLabel, dur){
+  var b=document.getElementById(btnId);
+  if(!b) return;
+  b.disabled=true; b.style.opacity='.4';
+  b.dataset.busy='1';
+  b.textContent=busyLabel||'👁 점선 표시 중...';
+  setTimeout(function(){
+    b.disabled=false; b.style.opacity='1';
+    b.dataset.busy='';
+    b.textContent='🔗 공간잇기 힌트 — 다시 보기';
+  }, dur||4500);
+}
 
 // ── 씬 청소 ──────────────────────────
 function clearAdv(){
@@ -612,11 +627,7 @@ document.addEventListener('click',function(e){
       var hintArea=document.getElementById('hint_'+q);
       if(hintArea) hintArea.style.display='block';
     }
-    // 2q0 오답: 잘못된 도형 잠깐 보여주기
-    if(q==='2q0'){
-      if(v==='b') showWrongEllipse('big');    // 원보다 큰 타원
-      if(v==='c') showWrongEllipse('circle'); // 원 모양
-    }
+    // 2q0 오답: 점선 힌트는 '🔗 공간잇기 힌트' 버튼을 눌렀을 때만 표시 (자동 표시 안 함)
   }
 });
 
@@ -660,14 +671,16 @@ window.adv1Step2=function(){
   document.getElementById('prog1').style.width='33%';
   setTimeout(function(){document.getElementById('s1q2').scrollIntoView({behavior:'smooth',block:'nearest'});},100);
 };
-// 오답 시: 잘못된 도형 잠깐 표시
+// 오답 시: 점선 애니메이션을 즉시 띄우지 않음 (힌트 버튼을 눌러야만 표시)
 window.showWrongEllipse = function(wrongType){
-  // 3D 도형 대신 점선 애니메이션으로 힌트 제공 (오해 소지 제거)
-  _showBoxProjArrows();
+  // 의도적으로 비워둠 — 오답만으로 점선 힌트가 나오던 오류 제거.
+  // 점선 애니메이션은 '🔗 공간잇기 힌트' 버튼(show2q0Hint)으로만 실행됩니다.
 };
 
 // 심화2 STEP0 힌트: 원 위에 점선이 AFGD로 내려가는 애니메이션
 window.show2q0Hint=function(){
+  if(document.getElementById('hint_2q0') && document.getElementById('hint_2q0').dataset.busy==='1') return;
+  hintBtnCycle('hint_2q0', '👁 정사영 그리는 중...', 3500);
   if(window._circCenter && window._ellCenter){
     _showBoxProjArrows(); // 점선 화살표 재실행
   }
@@ -1135,6 +1148,8 @@ function buildTetraScene(){
 
 // ── 심화1 힌트: M 반짝임 → BCD에 그림자 ──
 window.showTetraHint = function(){
+  if(document.getElementById('hint_1q1') && document.getElementById('hint_1q1').dataset.busy==='1') return;
+  hintBtnCycle('hint_1q1', '👁 수선 내리는 중...');
   // ① M 꼭짓점 노란 반짝임 (_tetraMdot으로 직접 접근)
   var mdot = window._tetraMdot;
   if(mdot){
@@ -1224,6 +1239,8 @@ window.showBoxHint = function(){
 
 // STEP0 힌트: A→G 점선 + 반짝임
 window.showTetraHint0 = function(){
+  if(document.getElementById('hint_1q0') && document.getElementById('hint_1q0').dataset.busy==='1') return;
+  hintBtnCycle('hint_1q0', '👁 수선 내리는 중...');
   // ① A 꼭짓점 노란 반짝임
   advObjs.forEach(function(o){
     if(o.isMesh && o.geometry && o.geometry.parameters
@@ -1495,9 +1512,10 @@ function buildBoxScene(){
 
   window.showFootHint = function(pt){
     var hintBtn = document.getElementById('footHint_'+pt);
+    if(hintBtn && hintBtn.dataset.busy==='1') return; // 애니메이션 중 중복 클릭 방지
     var fb = document.getElementById('footFb_'+pt);
-    if(fb){ fb.className='adv-fb ok'; fb.textContent='💡 그림자를 따라가세요!'; fb.style.display='block'; }
-    // 버튼은 계속 표시 (반복 클릭 가능)
+    if(fb){ fb.className='adv-fb ok'; fb.textContent='💡 그림자를 따라 수선의 발로 내려갑니다'; fb.style.display='block'; }
+    hintBtnCycle('footHint_'+pt, '👁 수선 내리는 중...');
 
     // ── ① 꼭짓점: 흰색→노란색으로 불 켜지는 효과 ──
     var dot = window._cubeVdot && window._cubeVdot[pt];
@@ -1631,9 +1649,9 @@ function buildBoxScene(){
       fb.className='adv-fb ng';
       fb.innerHTML='❌ 틀렸어요!';
       fb.style.display='block';
-      // 힌트 버튼: 빛 켜기
+      // 힌트 버튼 노출 (공간잇기 힌트)
       if(hintBtn){
-        hintBtn.textContent='👁 그림자를 따라가세요!';
+        hintBtn.textContent='🔗 공간잇기 힌트';
         hintBtn.style.background='#1a1000';
         hintBtn.style.borderColor='#aa6600';
         hintBtn.style.color='#ffcc44';
