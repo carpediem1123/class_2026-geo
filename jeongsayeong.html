@@ -852,9 +852,11 @@ const gnd2=new THREE.Mesh(new THREE.PlaneGeometry(26,26,18,18),
 gnd2.rotation.x=plA;scene.add(gnd2);
 // ── 미션탐구(Phase2) 전용 경사면 격자 — 기하 모드에서만 표시 ──
 const grid2=new THREE.GridHelper(22,22,0x7799cc,0x44608c);
-grid2.rotation.x=plA;            // gnd2와 동일한 15° 경사
+// GridHelper는 기본이 수평(XZ)면 → 경사면과 같은 기울기는 +R15만 주면 됨
+// (gnd2는 PlaneGeometry라 기준면이 달라 plA를 쓰지만, 격자는 R15)
+grid2.rotation.x=R15;
 grid2.position.copy(gnd2.position);
-grid2.translateZ(0.02);          // z-fighting 방지로 살짝 띄움 (경사면 법선 방향)
+grid2.position.y+=0.02;          // z-fighting 방지로 살짝 띄움
 grid2.visible=false;scene.add(grid2);
 // Phase 2: 수평 기준면 (그림자가 맺히는 면, 반투명)
 const gndH=new THREE.Mesh(new THREE.PlaneGeometry(22,22),
