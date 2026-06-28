@@ -157,7 +157,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 /* 오버레이 */
 .ovbase{display:none;position:absolute;inset:0;z-index:30;
     flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:10px}
-#ph3ov{background:rgba(4,0,0,.96)}
+#ph3ov{background:rgba(4,0,0,.96);position:fixed;inset:0;z-index:9000}
 .ov-scan{position:absolute;top:0;left:0;right:0;height:2px;
     background:linear-gradient(90deg,transparent,rgba(255,0,0,.85),transparent);
     animation:scan 1.8s linear infinite}
@@ -287,7 +287,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
   <div id="hd">
     <span class="ti">🛰 공간잇기 · 정사영</span>
     <button class="tab on" id="tab1">📐 개념탐구</button>
-    <button id="tab3" class="tab">⚡ 공간잇기(空間-IT-gi)</button>
+    <button id="tab3" class="tab">🔍 개념이해</button>
     <button class="tab" id="tab2">🚀 미션탐구</button>
     <div style="width:1px;height:24px;background:#1e3060;margin:0 2px;flex-shrink:0"></div>
     <button class="hb on" id="bM">🪐 Mars</button>
@@ -372,7 +372,7 @@ S'/S 값을 보며 다음 중 [?]에
             </div>
             <!-- ══ /수선의 발 카드 ══ -->
 
-            <button class="gobtn" id="goMission">🌌 공간잇기로 →</button>
+            <button class="gobtn" id="goMission">🔍 개념이해로 →</button>
             <button class="gobtn" id="goMission2" style="display:none;background:#1a3a10;border-color:#55cc44;color:#aaffaa">🚀 미션탐구로 →</button>
           </div>
         </div>
@@ -505,6 +505,7 @@ S'/S 값을 보며 다음 중 [?]에
             <div class="mdn" id="m1done">
               <div class="mdn-t">✅ 45° 달성 · 전력 복구 성공!</div>
             </div>
+            <div id="reviewHint" style="display:none;margin:0 13px 6px;padding:9px 11px;background:#1a0d00;border:1.5px solid #aa6622;border-radius:8px;color:#ffbb66;font-size:12px;line-height:1.6;text-align:center">⚠ 45°에서 벗어났어요.<br>다시 45°로 맞추면 전력이 복구됩니다.</div>
             <button class="lbtn" id="lBtn" onclick="openAI()">📝 미션 성찰로그</button>
             <button class="gobtn" id="retryBtn"
                 style="background:#0a0f20;border-color:#2a3a66;color:#6688aa;font-size:11px;padding:7px">
@@ -587,6 +588,8 @@ E = cos(θ)
       <div class="ai-dot"></div>
       <div class="ai-ht">공간잇기 ┄ 성찰로그 📡</div>
       <div style="margin-left:auto;font-size:10px;color:#44aa66">MODULE 02</div>
+      <button type="button" id="aiCloseBtn" title="닫기"
+        style="margin-left:10px;width:26px;height:26px;flex-shrink:0;background:#0a1f12;border:1px solid #2a5a3a;border-radius:6px;color:#88ddaa;font-size:14px;cursor:pointer;line-height:1">✕</button>
     </div>
     <div class="ai-bdy"><div class="ai-txt" id="aiText"></div></div>
     
@@ -759,9 +762,10 @@ const p1Sp=t=>(S_AREA*Math.abs(Math.cos(t))).toFixed(1);
 const p1Cos=t=>Math.abs(Math.cos(t));
 
 /* ═══ 상태 ════════════════════════════════════════════════ */
-let phase=1,theta=0,marsMode=true,lightOn=false;
+let phase=1,theta=0,marsMode=true,lightOn=false,lightPersistent=false,lightFlashTimer=null;
 let iqStep=0,shadowVisible=false;
 let missionActive=false,missionDone=false;
+let missionCompleted=false;  // 미션 완수(전력기지 점등)되면 true — 복습 모드 판단용
 let launchDone=false,launchAnim=0,launchAnimating=false;
 let selOp=null,selFn=null,selAng=null;
 let predAns=null;
@@ -826,10 +830,32 @@ const gnd1=new THREE.Mesh(new THREE.PlaneGeometry(24,24,16,16),
   new THREE.MeshStandardMaterial({color:0x223344,roughness:.8}));
 gnd1.rotation.x=-PI/2;scene.add(gnd1);
 const grid1=new THREE.GridHelper(22,22,0x7799cc,0x44608c);scene.add(grid1);
+// ── 개념탐구(Phase1) 전용 화성 바닥 (수평) — Mars 모드에서만 표시 ──
+const gnd1Mars=new THREE.Mesh(new THREE.PlaneGeometry(24,24,16,16),
+  new THREE.MeshStandardMaterial({map:makeMarsT(),side:THREE.DoubleSide,roughness:.9}));
+gnd1Mars.rotation.x=-PI/2;gnd1Mars.position.y=-0.01;gnd1Mars.visible=false;scene.add(gnd1Mars);
+// 개념탐구 전용 수평 바위 그룹
+const rockG1=new THREE.Group();scene.add(rockG1);rockG1.visible=false;
+for(let i=0;i<18;i++){
+  const px=-9+Math.random()*18, pz=-9+Math.random()*18;
+  const s=.12+.3*Math.random();
+  const r=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),
+    new THREE.MeshStandardMaterial({color:0x5a2208,roughness:1}));
+  r.scale.set(1+s*.2,.5+s*.3,1+s*.2);
+  r.position.set(px,s*0.35,pz);
+  r.rotation.set(Math.random()*.5,Math.random()*6.28,Math.random()*.5);
+  rockG1.add(r);
+}
 // Phase 2: 15° 기울어진 지면 (Mars 배경용)
 const gnd2=new THREE.Mesh(new THREE.PlaneGeometry(26,26,18,18),
   new THREE.MeshStandardMaterial({map:makeMarsT(),side:THREE.DoubleSide,roughness:.9}));
 gnd2.rotation.x=plA;scene.add(gnd2);
+// ── 미션탐구(Phase2) 전용 경사면 격자 — 기하 모드에서만 표시 ──
+const grid2=new THREE.GridHelper(22,22,0x7799cc,0x44608c);
+grid2.rotation.x=plA;            // gnd2와 동일한 15° 경사
+grid2.position.copy(gnd2.position);
+grid2.translateZ(0.02);          // z-fighting 방지로 살짝 띄움 (경사면 법선 방향)
+grid2.visible=false;scene.add(grid2);
 // Phase 2: 수평 기준면 (그림자가 맺히는 면, 반투명)
 const gndH=new THREE.Mesh(new THREE.PlaneGeometry(22,22),
   new THREE.MeshStandardMaterial({color:0x1a2a3a,transparent:true,opacity:.18,
@@ -1022,18 +1048,34 @@ const rocketG=new THREE.Group();scene.add(rocketG);
 rocketG.visible=false;
 
 
-/* ═══ 광선 ════════════════════════════════════════════════ */
+/* ═══ 광선 (점선 — 공간잇기 맥락) ════════════════════════════ */
 const lgP1=new THREE.Group();scene.add(lgP1);lgP1.visible=false;
 const lgP2=new THREE.Group();scene.add(lgP2);lgP2.visible=false;
 const RAY_P1=V3(0,-1,0);
 const RAY_P2=V3(0,-Math.SQRT1_2,Math.SQRT1_2); // 45° 수평에서
+// 점선 광선 한 줄기 만들기: dir 방향으로 len 길이의 점선 + 끝 화살촉
+function makeDashRay(dir,len){
+  const g=new THREE.Group();
+  const end=dir.clone().multiplyScalar(len);
+  const geo=new THREE.BufferGeometry().setFromPoints([V3(0,0,0),end]);
+  const line=new THREE.Line(geo,new THREE.LineDashedMaterial({color:0xffee33,dashSize:.22,gapSize:.14,transparent:true,opacity:.95}));
+  line.computeLineDistances();
+  g.add(line);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(.10,.28,8),
+    new THREE.MeshBasicMaterial({color:0xffee33}));
+  const q=new THREE.Quaternion().setFromUnitVectors(V3(0,1,0),dir.clone().normalize());
+  cone.setRotationFromQuaternion(q);
+  cone.position.copy(end);
+  g.add(cone);
+  return g;
+}
 for(let xi=-2;xi<=2;xi++) for(let zi=-1;zi<=3;zi++){
-  const a=new THREE.ArrowHelper(RAY_P1,V3(xi*1.4,6.5,zi*1.4),2.8,0xffee33,.18,.10);
+  const a=makeDashRay(RAY_P1,2.8);a.position.set(xi*1.4,6.5,zi*1.4);
   a.userData={x:xi*1.4,z:zi*1.4,ph:Math.random()*4.5};lgP1.add(a);
 }
 [{x:0,z:1.2},{x:1.2,z:1.2},{x:-1.2,z:1.2},{x:0,z:2.4},{x:1.2,z:2.4},
  {x:-1.2,z:2.4},{x:0,z:3.6},{x:-5,z:2},{x:5,z:2}].forEach(d=>{
-  const a=new THREE.ArrowHelper(RAY_P2,V3(d.x,7.5,d.z),3.0,0xffee33,.22,.12);
+  const a=makeDashRay(RAY_P2,3.0);a.position.set(d.x,7.5,d.z);
   a.userData={x:d.x,z:d.z,ph:Math.random()*4.5};lgP2.add(a);
 });
 
@@ -1064,6 +1106,13 @@ function updScene(t){
     lbSh.position.copy(shCen).add(V3(0,.22,0));
     lbSh.visible=(shadowVisible&&iqStep>=1);
     if(missionActive)checkMission(Math.round(t/DEG));
+    // ── 복습 모드: 45°를 벗어나면 소등, 다시 맞추면 점등 ──
+    if(missionCompleted && phase===2){
+      const litNow = Math.abs(Math.round(t/DEG)-45)<=2;
+      if(litNow !== !!powerStationG.userData.powered){
+        setStationLit(litNow);
+      }
+    }
     // 에너지 코어 (착륙선 제거로 사용 안함)
     // if(missionDone){coreMat.color.set(0x00cc55);coreMat.emissive.set(0x00ff44);coreMat.emissiveIntensity=.9;}
     // else if(missionActive&&Math.abs(t/DEG-45)<1){coreMat.color.set(0xff8800);coreMat.emissive.set(0xff6600);coreMat.emissiveIntensity=.7;}
@@ -1194,6 +1243,7 @@ document.getElementById('lOkBtn').addEventListener('click',()=>{
 function activatePowerSystems(){
   if(powerStationG.userData.powered) return; // 이미 켜져있으면 무시
   powerStationG.userData.powered = true;
+  missionCompleted = true;  // 복습 모드 활성화 — 이후 탭 전환 시 작업 내용 보존
   
   // 전력기지 창문 불 켜기 (점진적으로)
   const windows = powerStationG.userData.windows;
@@ -1226,10 +1276,14 @@ function activatePowerSystems(){
     }, 300);
   }, 500);
   
-  // 전력기지 주변 포인트 라이트 추가
-  const powerLight = new THREE.PointLight(0x44ff88, 4, 25);
-  powerLight.position.set(HX-2.5, stationBaseY+2.0, stationZ);
-  scene.add(powerLight);
+  // 전력기지 주변 포인트 라이트 추가 (참조 보존 — 복습 모드 토글용)
+  let powerLight = powerStationG.userData.powerLight;
+  if(!powerLight){
+    powerLight = new THREE.PointLight(0x44ff88, 4, 25);
+    powerLight.position.set(HX-2.5, stationBaseY+2.0, stationZ);
+    scene.add(powerLight);
+    powerStationG.userData.powerLight = powerLight;
+  }
   
   // 조명 서서히 밝아지기
   let intensity = 0;
@@ -1240,6 +1294,51 @@ function activatePowerSystems(){
       clearInterval(lightUpInterval);
     }
   }, 100);
+}
+
+/* ── 전력기지 즉시 점등/소등 토글 (복습 모드: 45° 이탈 시 소등, 복귀 시 점등) ── */
+function setStationLit(on){
+  if(!powerStationG.userData.windows) return;
+  powerStationG.userData.windows.forEach(winMat => {
+    if(on){
+      winMat.emissive = new THREE.Color(0x44ffaa);
+      winMat.emissiveIntensity = 0.8;
+      winMat.color = new THREE.Color(0x88ffcc);
+    }else{
+      winMat.emissive = new THREE.Color(0x000000);
+      winMat.emissiveIntensity = 0;
+      winMat.color = new THREE.Color(0x112233);
+    }
+  });
+  const beacon = powerStationG.userData.beacon;
+  if(beacon){
+    if(on){
+      beacon.color = new THREE.Color(0x00ff44);
+      beacon.emissive = new THREE.Color(0x00ff44);
+      beacon.emissiveIntensity = 1.0;
+    }else{
+      beacon.color = new THREE.Color(0x440000);
+      beacon.emissive = new THREE.Color(0x000000);
+      beacon.emissiveIntensity = 0;
+    }
+  }
+  let pl = powerStationG.userData.powerLight;
+  if(!pl && on){
+    pl = new THREE.PointLight(0x44ff88, 4, 25);
+    pl.position.set(HX-2.5, stationBaseY+2.0, stationZ);
+    scene.add(pl);
+    powerStationG.userData.powerLight = pl;
+  }
+  if(pl) pl.intensity = on ? 4 : 0;
+  powerStationG.userData.powered = on;
+  // 좌측 전력 게이지 표시도 동기화
+  const plv = document.getElementById('powerLevel');
+  if(plv){ plv.textContent = on ? '100%' : '18%'; plv.style.color = on ? '#44ff88' : '#ff6666'; }
+  // 복습 모드 안내: 점등=완료배지 / 소등=다시 맞추라는 안내
+  const md = document.getElementById('m1done');
+  const rh = document.getElementById('reviewHint');
+  if(md) md.style.display = on ? 'block' : 'none';
+  if(rh) rh.style.display = on ? 'none' : 'block';
 }
 
 function animLaunch(){
@@ -1271,6 +1370,13 @@ function openAI(){
   try { typeEffect(document.getElementById('aiText'), AI_TEXT, 50); } catch(err){ console.warn(err); }
 }
 window.openAI = openAI;  // boot() 내부 정의이므로 inline onclick용 전역 노출 (성찰로그 버튼 수정)
+// 성찰로그 닫기(✕) — 제출하지 않고 닫아 두고, 작업을 점검한 뒤 다시 열 수 있음
+(function(){
+  var cb=document.getElementById('aiCloseBtn');
+  if(cb) cb.addEventListener('click',function(){
+    document.getElementById('aibox').style.display='none';
+  });
+})();
 
 // ▼▼▼ 선생님 설정: 구글 Apps Script 웹앱 URL을 따옴표 안에 붙여넣으세요 ▼▼▼
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxFeI4Qxi3F8o6dmyzXB6T2JmKeOozUMVUWPeEzH1XOKNghf4E9b7TQqpRYi4PhBHC8vQ/exec';
@@ -1558,19 +1664,33 @@ function draw2D(t){drawTop(t);drawSide(t);}
 /* ═══ 모드 & 페이즈 ═══════════════════════════════════════ */
 function setMode(mars){
   marsMode=mars;
-  const bgC=phase===1?(mars?0x0a1a2a:0x04091a):(mars?0x0d0100:0x04091a);
+  // 미션탐구(2) 기하 모드는 격자가 보이도록 배경을 약간 밝게
+  const bgC=phase===1?(mars?0x0a1a2a:0x04091a):(mars?0x0d0100:0x0a1626);
   scene.background=new THREE.Color(bgC);scene.fog=new THREE.FogExp2(bgC,.018);
   gnd2.material.opacity=mars?1:.06;gnd2.material.transparent=!mars;gnd2.material.needsUpdate=true;
   panelM.material=mars?matSolar:matGeo;
+  // ── 개념탐구(Phase1): Mars=붉은 바위 바닥 / 기하=격자 ──
+  if(phase===1){
+    gnd1Mars.visible=mars; rockG1.visible=mars;
+    grid1.visible=!mars; gnd1.visible=!mars;
+  }
+  // ── 미션탐구(Phase2): 기하 모드면 경사면 격자 표시 ──
+  if(phase===2){
+    grid2.visible=!mars;
+  }
   document.getElementById('bM').className='hb'+(mars?' on':'');
   document.getElementById('bG').className='hb'+(!mars?' on':'');
   updScene(theta);
 }
-function setPhase(p){
+function setPhase(p,keep){
   const ep=(p===4)?2:p;phase=ep;
-  gnd1.visible=(ep===1);grid1.visible=(ep===1);hinge1.visible=(ep===1);
+  // 개념탐구(ep===1): Mars 모드면 화성 바닥, 기하 모드면 격자
+  const p1mars=(ep===1 && marsMode);
+  gnd1.visible=(ep===1 && !marsMode);grid1.visible=(ep===1 && !marsMode);hinge1.visible=(ep===1);
+  gnd1Mars.visible=p1mars; rockG1.visible=p1mars;
   gnd2.visible=(ep===2);gndH.visible=(ep===2);hinge2.visible=(ep===2);
   rockG.visible=(ep===2);landerG.visible=false;
+  grid2.visible=(ep===2 && !marsMode);  // 미션탐구 기하 모드에서만 경사면 격자
   powerStationG.visible=false; // Phase 전환 시 전력기지 숨김 (acceptBtn에서 다시 보임)
   document.getElementById('lp3inner').style.display=(ep===3)?'flex':'none';
   document.getElementById('lps').style.display=(ep===3)?'none':'flex';
@@ -1589,9 +1709,24 @@ if (ep === 2) {
     sl.max = 90;  // 탐구 단계에서는 90도까지
 }
   CAM=ep===1?{th:.80,ph:.58,r:12}:{th:.80,ph:.62,r:16};
-  const bgC=ep===1?0x0a1a2a:(marsMode?0x0d0100:0x04091a);
+  const bgC=ep===1?0x0a1a2a:(marsMode?0x0d0100:0x0a1626);
   scene.background=new THREE.Color(bgC);scene.fog=new THREE.FogExp2(bgC,.018);
-  theta=0;sl.value=0;
+  if(!keep){ theta=0;sl.value=0; }  // 복습 모드(keep)에서는 각도를 보존
+  // ── 광선 버튼: 개념탐구(1)·미션탐구(2)에서 활성화, 탭 전환 시 광선 리셋 ──
+  (function(){
+    if(lightFlashTimer){ clearTimeout(lightFlashTimer); lightFlashTimer=null; }
+    lightOn=false; lightPersistent=false;
+    lgP1.visible=false; lgP2.visible=false;
+    const bL=document.getElementById('bL');
+    if(bL){
+      bL.textContent='☀️ 광선'; bL.className='hb';
+      if(ep===1||ep===2){
+        bL.disabled=false; bL.style.opacity='1'; bL.style.cursor='pointer';
+      }else{
+        bL.disabled=true; bL.style.opacity='.35'; bL.style.cursor='not-allowed';
+      }
+    }
+  })();
   if(p===4){
     shadowVisible=true;iqStep=4;missionActive=true;missionDone=false;
     launchDone=false;launchAnim=0;launchAnimating=false;
@@ -1656,15 +1791,8 @@ document.querySelectorAll('.pbtn').forEach(btn=>{
 });
 
 document.getElementById('iq0btn').addEventListener('click',()=>{
-  // 광선 켜기
-  const bL=document.getElementById('bL');
-  if(!bL.classList.contains('on')){
-    lightOn=true;
-    lgP1.visible=(phase===1);
-    lgP2.visible=(phase===2);
-    bL.classList.add('on');
-  }
-  bL.disabled=false;bL.style.opacity='1';bL.style.cursor='pointer';
+  // '태양은 어디에?' → 광선을 잠깐만 보여주고 자동으로 끔 (지속 X)
+  flashLight();
 
   // Step1→Step2 이동 (그림자 숨김 상태로)
   shadowVisible=false;
@@ -1675,6 +1803,25 @@ document.getElementById('iq0btn').addEventListener('click',()=>{
   document.getElementById('backToStep1Btn').style.display='none';
   updScene(theta);
 });
+
+// 광선 잠깐 보여주기 (태양은 어디에 전용) — 지속 광선이 켜져 있으면 그대로 둠
+function flashLight(){
+  const bL=document.getElementById('bL');
+  if(bL){ bL.disabled=false;bL.style.opacity='1';bL.style.cursor='pointer'; }
+  if(lightPersistent) return; // 이미 지속 광선이 켜져 있으면 손대지 않음
+  if(lightFlashTimer){ clearTimeout(lightFlashTimer); lightFlashTimer=null; }
+  lightOn=true;
+  lgP1.visible=(phase===1);
+  lgP2.visible=(phase===2);
+  lightFlashTimer=setTimeout(function(){
+    if(!lightPersistent){
+      lightOn=false;
+      lgP1.visible=false;
+      lgP2.visible=false;
+    }
+    lightFlashTimer=null;
+  }, 2600);
+}
 
 // Step 2: 그림자 보기 버튼
 document.getElementById('shadowShowBtn').addEventListener('click',()=>{
@@ -2069,15 +2216,63 @@ function nudgeTheta(delta){
 document.getElementById('bM').addEventListener('click',()=>setMode(true));
 document.getElementById('bG').addEventListener('click',()=>setMode(false));
 document.getElementById('bL').addEventListener('click',function(){
-  lightOn=!lightOn;
+  if(this.disabled) return;
+  // 지속 광선 토글 — 켜면 비활성화할 때까지 계속 보임
+  if(lightFlashTimer){ clearTimeout(lightFlashTimer); lightFlashTimer=null; }
+  lightPersistent=!lightPersistent;
+  lightOn=lightPersistent;
   lgP1.visible=(lightOn&&phase===1);lgP2.visible=(lightOn&&phase===2);
-  this.textContent=lightOn?'☀️ 광선 ON':'☀️ 광선';
-  this.className='hb'+(lightOn?' gon':'');
+  this.textContent=lightPersistent?'☀️ 광선 ON':'☀️ 광선';
+  this.className='hb'+(lightPersistent?' gon':'');
 });
 document.getElementById('goMission').addEventListener('click',function(){
   this.classList.remove('blink-red');
-  document.getElementById('tab3').click();   // 개념잇기 → 입체잇기로 이동
+  document.getElementById('tab3').click();   // 개념탐구 → 개념이해로 이동
 });
+
+// 미션 완수 후 '미션탐구' 재진입 시: 브리핑/리셋 없이 완료 상태 그대로 복원 (복습용)
+function showCompletedMission(){
+  shadowVisible=false;
+  missionActive=true;missionDone=true;
+  // 씬: Phase 2 (경사면 + 바위 + 전력기지 점등 상태 유지)
+  phase=2;
+  gnd1.visible=false;grid1.visible=false;hinge1.visible=false;
+  gnd1Mars.visible=false;rockG1.visible=false;
+  gnd2.visible=true;gndH.visible=true;hinge2.visible=true;
+  rockG.visible=true;landerG.visible=false;
+  grid2.visible=!marsMode;
+  powerStationG.visible=true;
+  const bgC=marsMode?0x0d0100:0x0a1626;
+  scene.background=new THREE.Color(bgC);scene.fog=new THREE.FogExp2(bgC,.018);
+  // 오버레이/패널 정리
+  document.getElementById('ph3ov').style.display='none';
+  document.getElementById('lps').style.display='flex';
+  document.getElementById('lp3inner').style.display='none';
+  document.getElementById('lp').style.background='#0d1630';
+  document.getElementById('p1content').style.display='none';
+  document.getElementById('p2content').style.display='flex';
+  document.getElementById('p2content').style.flexDirection='column';
+  // 미션 영역 = 완료 상태(브리핑 숨김, 완료 배지·성찰로그 버튼 표시)
+  document.getElementById('missionArea').style.display='flex';
+  document.getElementById('missionArea').style.flexDirection='column';
+  document.getElementById('missionBrief').style.display='none';
+  document.getElementById('m1done').style.display='block';
+  const lb=document.getElementById('lBtn');lb.style.display='block';lb.classList.remove('blink');
+  // 탭 하이라이트
+  document.getElementById('tab1').className='tab';
+  document.getElementById('tab2').className='tab on';
+  // 해결한 각도(45°)로 복원
+  CAM={th:.80,ph:.62,r:16};
+  const sl=document.getElementById('sl');sl.max=165;sl.value=45;
+  const mSl=document.getElementById('mSl');if(mSl)mSl.value=45;
+  theta=45*DEG;
+  // 광선 리셋 (버튼은 활성 유지)
+  if(lightFlashTimer){ clearTimeout(lightFlashTimer); lightFlashTimer=null; }
+  lightOn=false;lightPersistent=false;lgP1.visible=false;lgP2.visible=false;
+  const bL=document.getElementById('bL');
+  if(bL){ bL.disabled=false;bL.style.opacity='1';bL.style.cursor='pointer';bL.textContent='☀️ 광선';bL.className='hb'; }
+  updScene(theta);
+}
 document.getElementById('acceptBtn').addEventListener('click',()=>{
   // Phase 2 탐구 모드 시작
   shadowVisible=false;iqStep=0;predAns=null;selOp=null;selFn=null;selAng=null;
@@ -2103,10 +2298,12 @@ document.getElementById('acceptBtn').addEventListener('click',()=>{
   document.getElementById('iq1btn').style.display='none';
   phase=2;
   gnd1.visible=false;grid1.visible=false;hinge1.visible=false;
+  gnd1Mars.visible=false;rockG1.visible=false;
   gnd2.visible=true;gndH.visible=true;hinge2.visible=true;
   rockG.visible=true;landerG.visible=false;
+  grid2.visible=!marsMode;  // 미션탐구 기하 모드면 경사면 격자
   powerStationG.visible=true; // 전력기지 처음부터 보이기 (어두운 상태)
-  const bgC=marsMode?0x0d0100:0x04091a;
+  const bgC=marsMode?0x0d0100:0x0a1626;
   scene.background=new THREE.Color(bgC);scene.fog=new THREE.FogExp2(bgC,.018);
   document.getElementById('ph3ov').style.display='none';
   document.getElementById('lps').style.display='flex';
@@ -2122,8 +2319,10 @@ document.getElementById('acceptBtn').addEventListener('click',()=>{
 document.getElementById('retryBtn').addEventListener('click',()=>{
   theta=0;CAM={th:.80,ph:.58,r:12};shadowVisible=false;iqStep=0;selOp=null;selFn=null;selAng=null;
   step1Mode='initial';finalAns=null;
-  lightOn=false;lgP1.visible=false;lgP2.visible=false;
-  const bLr=document.getElementById('bL');bLr.disabled=true;bLr.style.opacity='.35';bLr.style.cursor='not-allowed';
+  missionCompleted=false;missionDone=false;missionActive=false;launchDone=false; // 복습 모드 해제 → 완전 초기화
+  if(lightFlashTimer){ clearTimeout(lightFlashTimer); lightFlashTimer=null; }
+  lightOn=false;lightPersistent=false;lgP1.visible=false;lgP2.visible=false;
+  const bLr=document.getElementById('bL');bLr.disabled=false;bLr.style.opacity='1';bLr.style.cursor='pointer';
   bLr.textContent='☀️ 광선';bLr.className='hb';
   document.getElementById('formulaReveal').style.display='none';
   document.getElementById('qmsg').style.display='none';
@@ -2131,6 +2330,7 @@ document.getElementById('retryBtn').addEventListener('click',()=>{
   document.querySelectorAll('.qbtn').forEach(b=>b.classList.remove('correct','wrong'));
   document.getElementById('mwin').style.display='none';document.getElementById('aibox').style.display='none';
   document.getElementById('launchOv').style.display='none';document.getElementById('lOkBtn').style.display='none';
+  var _rh=document.getElementById('reviewHint');if(_rh)_rh.style.display='none';  // 복습 안내 숨김
   // 전력기지 불 끄기 (초기화)
   if(powerStationG.userData.windows){
     powerStationG.userData.windows.forEach(winMat => {
@@ -2230,7 +2430,7 @@ window.addEventListener('message', function(e){
 });
 document.getElementById('goMission2').addEventListener('click', function(){
   this.classList.remove('blink-red');
-  document.getElementById('tab2').click();   // 개념잇기 → 미션잇기로 이동
+  document.getElementById('tab2').click();   // 개념탐구 → 미션탐구로 이동
 });
 
 function unlockAdvTab(){
@@ -2238,8 +2438,18 @@ function unlockAdvTab(){
   t.disabled=false; t.style.opacity='1'; t.style.cursor='pointer';
   t.style.borderColor='#ffcc44'; t.style.color='#ffee88';
 }
+// 성찰로그(aibox)가 열려 있으면 탭 전환을 막고 안내창을 띄움
+function reflectLogBlocking(){
+  var box=document.getElementById('aibox');
+  if(box && box.style.display!=='none' && box.style.display!==''){
+    alert('📝 성찰로그가 열려 있습니다.\n\n먼저 성찰로그를 작성해 제출하거나 닫은 뒤,\n개념탐구·미션탐구를 다시 살펴볼 수 있어요.');
+    return true;
+  }
+  return false;
+}
 document.getElementById('tab3').addEventListener('click',function(){
   if(this.disabled)return;
+  if(reflectLogBlocking())return;
   document.getElementById('tab1').className='tab';
   document.getElementById('tab2').className='tab';
   this.className='tab on';
@@ -2247,15 +2457,23 @@ document.getElementById('tab3').addEventListener('click',function(){
   openAdvIframe();
 });
 document.getElementById('tab1').addEventListener('click',function(){
+  if(reflectLogBlocking())return;
   closeAdvIframe();
   resetFootAnim();  // 개념탐구 재진입 시에도 깨끗한 상태로
-  setPhase(1);
+  // 미션 완수 후에는 각도 등 작업 내용을 보존(복습) — 초기화는 ↺ 버튼으로
+  setPhase(1, missionCompleted);
 });
 document.getElementById('tab2').addEventListener('click',function(){
   if(this.disabled)return;
+  if(reflectLogBlocking())return;
   closeAdvIframe();
   resetFootAnim();  // P·P′ 애니메이션 잔상 제거
-  setPhase(3);
+  if(missionCompleted){
+    // 복습 모드: 브리핑/리셋 없이 완료된 미션 상태 그대로 복원
+    showCompletedMission();
+  }else{
+    setPhase(3);
+  }
 });
 document.getElementById('mwinOk').addEventListener('click',function(){
   document.getElementById('mwin').style.display='none';
