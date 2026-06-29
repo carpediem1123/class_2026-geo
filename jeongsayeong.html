@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
-  font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a1020;
+  font-family:'Noto Sans KR',sans-serif;background:#0a1020;
   -webkit-overflow-scrolling:touch;position:fixed;top:0;left:0;right:0;bottom:0}
 #app{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;
   width:100%;height:100%;
@@ -913,17 +913,21 @@ scene.add(new THREE.Mesh(new THREE.SphereGeometry(.11,10,8),
 
 /* ═══ 스프라이트 ═══════════════════════════════════════════ */
 function mkSp(txt,col,fw=64,fh=36,fs=24){
-  const c=document.createElement('canvas');c.width=fw;c.height=fh;
-  const ctx=c.getContext('2d');ctx.font=`bold ${fs}px monospace`;ctx.fillStyle=col;ctx.fillText(txt,4,fs);
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  const SS=2; // 슈퍼샘플링: 텍스처를 2배 해상도로 그려 글자를 또렷하게 (표시 크기는 동일)
+  const c=document.createElement('canvas');c.width=fw*SS;c.height=fh*SS;
+  const ctx=c.getContext('2d');ctx.font=`bold ${fs*SS}px monospace`;ctx.fillStyle=col;ctx.fillText(txt,4*SS,fs*SS);
+  const tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
   sp.scale.set(fw/50,fh/30,1);scene.add(sp);return sp;
 }
 const lbA=mkSp('α','#ffaa44',44,30,22);lbA.position.set(-5,.5,4.5);
 const lbS=mkSp('S','#66aaff',40,30,22);
 const lbSp=(function(){
-  var c=document.createElement('canvas');c.width=60;c.height=34;
-  var ctx=c.getContext('2d');ctx.font='bold 26px monospace';ctx.fillStyle='#cc66ff';ctx.fillText("S'",4,26);
-  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:true,depthWrite:false}));
+  var SS=2;
+  var c=document.createElement('canvas');c.width=60*SS;c.height=34*SS;
+  var ctx=c.getContext('2d');ctx.font='bold '+(26*SS)+'px monospace';ctx.fillStyle='#cc66ff';ctx.fillText("S'",4*SS,26*SS);
+  var tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:true,depthWrite:false}));
   sp.scale.set(1.2,.68,1);scene.add(sp);return sp;
 })();
 const lbSh=mkSp('그림자','#ffaa44',80,28,16);
@@ -2513,6 +2517,5 @@ lockMissionTab(true);
 }
 </script>
 
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(200,180,120,.45);pointer-events:none">v.20260613y</div>
 </body>
 </html>
