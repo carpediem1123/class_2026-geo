@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;overflow:hidden;
-  font-family:'Courier New',monospace;position:fixed;top:0;left:0;right:0;bottom:0;
+  font-family:'Noto Sans KR',sans-serif;position:fixed;top:0;left:0;right:0;bottom:0;
   -webkit-overflow-scrolling:touch}
 
 #app{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;
@@ -567,16 +567,18 @@ var mkSp=function(txt,col,fw,fh,fs){
   var ch=Math.ceil(fs*1.6+padY*2);
   // 2의 거듭제곱 올림 제거 → 그대로 사용 (잘림 방지)
   var c=document.createElement('canvas');
-  c.width=cw; c.height=ch;
+  var SS=2; // 슈퍼샘플링: 텍스처만 2배 해상도로 그려 또렷하게 (표시 크기·비율 동일)
+  c.width=cw*SS; c.height=ch*SS;
   var ctx=c.getContext('2d');
-  ctx.clearRect(0,0,cw,ch);
-  ctx.font='bold '+fs+'px Arial,sans-serif';
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.font='bold '+(fs*SS)+'px Arial,sans-serif';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
   ctx.fillStyle=col;
-  ctx.fillText(txt,cw/2,ch/2);
+  ctx.fillText(txt,c.width/2,c.height/2);
+  var _tex=new THREE.CanvasTexture(c);_tex.minFilter=THREE.LinearFilter;_tex.generateMipmaps=false;
   var mat=new THREE.SpriteMaterial({
-    map:new THREE.CanvasTexture(c),
+    map:_tex,
     transparent:true,
     depthTest:false,
     sizeAttenuation:true
@@ -2513,6 +2515,5 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
   });
 });
 </script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99;font-family:monospace;font-size:9px;color:rgba(120,200,170,.45);pointer-events:none">v.20260613y</div>
 </body>
 </html>
