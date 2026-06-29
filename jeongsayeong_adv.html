@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;
-  font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a1020}
+  font-family:'Noto Sans KR',sans-serif;background:#0a1020}
 #app{display:flex;flex-direction:column;width:100%;height:100%}
 /* 탭 헤더 */
 #adv-hd{flex-shrink:0;height:44px;background:#080e1c;border-bottom:2px solid #1e3060;
@@ -680,7 +680,7 @@ window.showWrongEllipse = function(wrongType){
 // 심화2 STEP0 힌트: 원 위에 점선이 AFGD로 내려가는 애니메이션
 window.show2q0Hint=function(){
   if(document.getElementById('hint_2q0') && document.getElementById('hint_2q0').dataset.busy==='1') return;
-  hintBtnCycle('hint_2q0', '👁 그림자가 어디에 비춰지나..', 3500);
+  hintBtnCycle('hint_2q0', '👁 정사영 그리는 중...', 3500);
   if(window._circCenter && window._ellCenter){
     _showBoxProjArrows(); // 점선 화살표 재실행
   }
@@ -951,12 +951,14 @@ function buildCubeScene(){
 
   // 범례 (화면 왼쪽 상단 고정 스프라이트)
   function mkLegend(txt, col){
-    var c=document.createElement('canvas'); c.width=420; c.height=52;
+    var SS=2;
+    var c=document.createElement('canvas'); c.width=420*SS; c.height=52*SS;
     var ctx=c.getContext('2d');
-    ctx.font='bold 26px "Noto Sans KR","Malgun Gothic",sans-serif';
-    ctx.fillStyle=col; ctx.fillText(txt, 8, 38);
+    ctx.font='bold '+(26*SS)+'px "Noto Sans KR",sans-serif';
+    ctx.fillStyle=col; ctx.fillText(txt, 8*SS, 38*SS);
+    var tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;
     var sp=new THREE.Sprite(new THREE.SpriteMaterial({
-      map:new THREE.CanvasTexture(c), transparent:true, depthTest:false}));
+      map:tex, transparent:true, depthTest:false}));
     sp.scale.set(5.2, .8, 1);
     return sp;
   }
@@ -1472,11 +1474,13 @@ function buildBoxScene(){
 
     // 범례
   function mkLeg(txt,col){
-    var c=document.createElement('canvas');c.width=420;c.height=52;
+    var SS=2;
+    var c=document.createElement('canvas');c.width=420*SS;c.height=52*SS;
     var ctx=c.getContext('2d');
-    ctx.font='bold 26px "Noto Sans KR","Malgun Gothic",sans-serif';
-    ctx.fillStyle=col;ctx.fillText(txt,8,38);
-    var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false,fog:false}));
+    ctx.font='bold '+(26*SS)+'px "Noto Sans KR",sans-serif';
+    ctx.fillStyle=col;ctx.fillText(txt,8*SS,38*SS);
+    var tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;
+    var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,fog:false}));
     sp.scale.set(5.2,.8,1);return sp;
   }
   var lgABCD=mkLeg('■ 평면 ABCD (주황)', '#ffaa44');
