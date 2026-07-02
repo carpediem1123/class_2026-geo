@@ -784,6 +784,24 @@ const rdr=new THREE.WebGLRenderer({
 });
 rdr.setPixelRatio(Math.min(devicePixelRatio,2));
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(48,1,.1,200);
+
+// ── 우주 별 배경 (화성 하늘) — fog:false로 안개 영향 없이 항상 보임 ──
+(function makeStars(){
+  var N=800,pos=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var r=90+Math.random()*50,th=Math.random()*Math.PI*2,ph=Math.acos(1-Math.random()*1.15);
+    pos[i*3]=r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1]=Math.max(r*Math.cos(ph),3);
+    pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  var dim=new THREE.Points(g,new THREE.PointsMaterial({color:0xcfe0ff,size:1.4,sizeAttenuation:false,transparent:true,opacity:.55,fog:false,depthWrite:false}));
+  var bright=new THREE.Points(g.clone(),new THREE.PointsMaterial({color:0xffffff,size:2.2,sizeAttenuation:false,transparent:true,opacity:.9,fog:false,depthWrite:false}));
+  bright.geometry.setDrawRange(0,Math.floor(N/7));
+  dim.renderOrder=-2;bright.renderOrder=-2;
+  scene.add(dim);scene.add(bright);
+})();
 function updCam(){
   const{th,ph,r}=CAM;
   cam.position.set(r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph),r*Math.sin(ph)*Math.cos(th));
@@ -2439,11 +2457,6 @@ document.getElementById('goMission2').addEventListener('click', function(){
   document.getElementById('tab2').click();   // 개념탐구 → 미션탐구로 이동
 });
 
-function unlockAdvTab(){
-  var t=document.getElementById('tab3');
-  t.disabled=false; t.style.opacity='1'; t.style.cursor='pointer';
-  t.style.borderColor='#ffcc44'; t.style.color='#ffee88';
-}
 // 성찰로그(aibox)가 열려 있으면 탭 전환을 막고 안내창을 띄움
 function reflectLogBlocking(){
   var box=document.getElementById('aibox');
