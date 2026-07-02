@@ -16,6 +16,10 @@ html,body{width:100%;height:100%;overflow:hidden;
   background:none;border:none;border-bottom:2px solid transparent;
   margin-bottom:-2px;cursor:pointer;font-family:inherit}
 .adv-tab-btn.on{color:#88ccff;border-bottom-color:#5588ff;background:#0d1630}
+/* ── 단계형 잠금: 잠긴 탭은 흐리게, 해제 순간 금색 반짝임 ── */
+.adv-tab-btn.lk{color:#3a4a66;cursor:not-allowed}
+.adv-tab-btn.just-unlocked{animation:unlockFlash 1.2s ease-out 2}
+@keyframes unlockFlash{0%{color:#ffee88;background:#2a2000;box-shadow:inset 0 -2px 0 #ffcc44}50%{color:#7799bb;background:none;box-shadow:none}100%{color:#ffee88;background:#2a2000;box-shadow:inset 0 -2px 0 #ffcc44}}
 /* 3D 캔버스 */
 #cw{flex:1;position:relative;min-height:0;overflow:hidden}
 #c3{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -84,8 +88,8 @@ html,body{width:100%;height:100%;overflow:hidden;
   <div id="adv-hd">
 <button id="btn-back" onclick="if(window !== window.parent){ window.parent.postMessage({type:'closeAdv'}, '*'); }" style="flex-shrink:0; width:150px; height:100%; font-size:11.5px; font-weight:bold; color:#88ccff; background:#0f1d3a; border:none; border-right:1.5px solid #1e3060; cursor:pointer; font-family:inherit;">◀ 정사영 탐구로 복귀</button>
     <button class="adv-tab-btn on" id="at0" onclick="switchAdvTab(0)">📐 기본개념</button>
-    <button class="adv-tab-btn" id="at1" onclick="switchAdvTab(1)">🔵 심화①</button>
-    <button class="adv-tab-btn" id="at2" onclick="switchAdvTab(2)">🌳 심화②</button>
+    <button class="adv-tab-btn lk" id="at1" onclick="switchAdvTab(1)">🔒 심화①</button>
+    <button class="adv-tab-btn lk" id="at2" onclick="switchAdvTab(2)">🔒 심화②</button>
   </div>
   <!-- 3D 씬 -->
   <div id="cw">
@@ -350,6 +354,33 @@ S′ = S × cosθ = ?</div>
    심화문제 모듈 (SyntaxError 방지: 모든 문자열 단일행)
 ══════════════════════════════════════ */
 var advTab=0;
+
+// ═══ 단계형 잠금해제: 기본개념 → 심화① → 심화② 순서 강제 ═══
+// sessionStorage에 저장해 새로고침·iOS 페이지 이동에도 진행 상태 유지
+var advUnlocked=(function(){
+  try{
+    var s=sessionStorage.getItem('kosa_adv_unlock');
+    if(s){var a=JSON.parse(s); if(Array.isArray(a)&&a.length===3) return a;}
+  }catch(e){}
+  return [true,false,false];
+})();
+var advTabLabels=['📐 기본개념','🔵 심화①','🌳 심화②'];
+var applyAdvLocks=function(){
+  [1,2].forEach(function(i){
+    var b=document.getElementById('at'+i); if(!b)return;
+    if(advUnlocked[i]){ b.classList.remove('lk'); b.textContent=advTabLabels[i]; }
+    else{ b.classList.add('lk'); b.textContent='🔒 '+advTabLabels[i].replace(/^[^\s]+\s/,''); }
+  });
+};
+var unlockAdvStage=function(i){
+  if(advUnlocked[i])return;
+  advUnlocked[i]=true;
+  try{sessionStorage.setItem('kosa_adv_unlock',JSON.stringify(advUnlocked));}catch(e){}
+  applyAdvLocks();
+  var b=document.getElementById('at'+i);
+  if(b){ b.classList.add('just-unlocked');
+    setTimeout(function(){b.classList.remove('just-unlocked');},2600); }
+};
 var advObjs=[], iPoints=[];
 var drawPhase=0, drawPicked=[], drawLines=[];
 var drawProjMesh=null;
@@ -438,6 +469,12 @@ function showCongrats(msg){
 
 // ── 탭 전환 ──────────────────────────
 window.switchAdvTab=function(n){
+  if(!advUnlocked[n]){
+    alert(n===1
+      ? '🔒 심화①은 아직 잠겨 있어요!\n\n📐 기본개념의 마지막 퀴즈까지 풀면\n잠금이 해제됩니다. 개념을 스스로 발견한 뒤 도전하세요!'
+      : '🔒 심화②는 아직 잠겨 있어요!\n\n🔵 심화①의 마지막 퀴즈까지 풀면\n잠금이 해제됩니다. 한 단계씩 개념을 이어가 볼까요?');
+    return;
+  }
   advTab=n;
   [0,1,2].forEach(function(i){
     document.getElementById('at'+i).className='adv-tab'+(i===n?' on':'');
@@ -567,7 +604,8 @@ document.addEventListener('click',function(e){
     if(q==='0q3') {
       document.getElementById('prog0').style.width='100%';
       document.getElementById('s0done').style.display='block';
-      showCongrats('기본개념 완전 정복! 정사영의 핵심 원리를 스스로 발견했어요! 🎉');
+      unlockAdvStage(1);   // 🔓 심화① 잠금해제
+      showCongrats('기본개념 완전 정복! 정사영의 핵심 원리를 스스로 발견했어요! 🎉 심화①이 열렸습니다!');
     }
     if(q==='1q0') {
       document.getElementById('prog1').style.width='15%';
@@ -582,7 +620,8 @@ document.addEventListener('click',function(e){
       document.getElementById('prog1').style.width='100%';
       document.getElementById('s1done').style.display='block';
       showMprimeFinal();
-      showCongrats('심화① 완성! 수선의 발로 정사영을 정복했어요! 🏆');
+      unlockAdvStage(2);   // 🔓 심화② 잠금해제
+      showCongrats('심화① 완성! 수선의 발로 정사영을 정복했어요! 🏆 심화②가 열렸습니다!');
     }
     if(q==='2q3') {
       document.getElementById('prog2').style.width='100%';
@@ -1726,6 +1765,7 @@ function startRender(){
   onRes();
   initLblOverlay();
   document.getElementById('ld').style.display='none';
+  applyAdvLocks();   // 저장된 잠금해제 상태 복원
   switchAdvTab(0);
   
   (function loop(){
