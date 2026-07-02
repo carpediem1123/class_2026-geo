@@ -311,38 +311,42 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
     </div>
   </div>
 
-  <!-- 🏆 미션 완수 카드: 게임 화면 위에 띄워서 정리 인터랙션만 표시 -->
-  <div id="missionComplete" style="display:none;position:fixed;top:50px;right:20px;z-index:150;width:380px;max-width:calc(100vw - 40px);max-height:calc(100vh - 80px);overflow-y:auto;animation:slideInRight .4s ease-out">
-    <div style="background:#0a1525;border:2px solid #44ffaa;border-radius:14px;padding:18px 20px;box-shadow:0 0 30px rgba(68,255,170,.35),0 0 60px rgba(0,0,0,.6)">
-      <div style="font-size:11px;letter-spacing:.25em;color:#88ffcc;text-align:center;margin-bottom:8px" id="mcBadge">MISSION COMPLETE</div>
-      <div style="font-size:20px;font-weight:bold;color:#aaffdd;text-align:center;margin-bottom:6px" id="mcTitle">🚨 미션 완수!</div>
-      <div style="font-size:13px;color:#bbd0c0;text-align:center;margin-bottom:18px;white-space:pre-line" id="mcBody"></div>
+  <!-- 🏆 미션 완수 카드: 게임 화면 위에 띄워서 정리 인터랙션만 표시 (컴팩트 + 접기 지원) -->
+  <div id="missionComplete" style="display:none;position:fixed;top:50px;right:14px;z-index:150;width:292px;max-width:calc(100vw - 28px);max-height:calc(100vh - 70px);overflow-y:auto;animation:slideInRight .4s ease-out">
+    <div style="background:#0a1525;border:2px solid #44ffaa;border-radius:12px;padding:12px 14px;box-shadow:0 0 24px rgba(68,255,170,.35),0 0 50px rgba(0,0,0,.6);position:relative">
+      <button id="mcMinBtn" title="카드를 접고 3D 화면 전체 보기" style="position:absolute;top:8px;right:8px;background:#0c1f38;border:1px solid #3a5a8c;border-radius:5px;color:#88bbdd;font-size:10.5px;padding:3px 8px;cursor:pointer;font-family:inherit;font-weight:bold">🔽 접기</button>
+      <div style="font-size:10px;letter-spacing:.22em;color:#88ffcc;text-align:center;margin-bottom:5px" id="mcBadge">MISSION COMPLETE</div>
+      <div style="font-size:16px;font-weight:bold;color:#aaffdd;text-align:center;margin-bottom:4px" id="mcTitle">🚨 미션 완수!</div>
+      <div style="font-size:11.5px;color:#bbd0c0;text-align:center;margin-bottom:12px;white-space:pre-line" id="mcBody"></div>
 
-      <div style="background:rgba(8,20,40,.7);border:1.5px solid #3a5a8c;border-radius:10px;padding:14px 18px">
-        <div style="font-size:11px;color:#88aacc;letter-spacing:.18em;text-align:center;margin-bottom:6px">🔗 3D 화면을 보며 확인해봐요</div>
-        <div style="font-size:10.5px;color:#7799bb;text-align:center;margin-bottom:12px">버튼을 누르면 3D 화면의 ⊥ 기호가 강조됩니다</div>
-        <div style="display:flex;align-items:stretch;justify-content:center;gap:8px">
-          <button id="mcHyp" style="flex:1;padding:14px 8px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <div style="font-size:18px;line-height:1">①</div>
+      <div style="background:rgba(8,20,40,.7);border:1.5px solid #3a5a8c;border-radius:9px;padding:10px 12px">
+        <div style="font-size:10px;color:#88aacc;letter-spacing:.14em;text-align:center;margin-bottom:4px">🔗 3D 화면을 보며 확인해봐요</div>
+        <div style="font-size:9.5px;color:#7799bb;text-align:center;margin-bottom:9px">버튼을 누르면 3D 화면의 ⊥ 기호가 강조됩니다</div>
+        <div style="display:flex;align-items:stretch;justify-content:center;gap:6px">
+          <button id="mcHyp" style="flex:1;padding:9px 5px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:6px;color:#bbd0e0;font-size:11.5px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px">
+            <div style="font-size:15px;line-height:1">①</div>
             <div>가정 조건 보기</div>
           </button>
-          <button id="mcCon" style="flex:1;padding:14px 8px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:7px;color:#bbd0e0;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <div style="font-size:18px;line-height:1">②</div>
+          <button id="mcCon" style="flex:1;padding:9px 5px;background:#0c1830;border:1.5px solid #4a6a90;border-radius:6px;color:#bbd0e0;font-size:11.5px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px">
+            <div style="font-size:15px;line-height:1">②</div>
             <div>결론 확인</div>
           </button>
         </div>
-        <div id="mcSumHint" style="margin-top:10px;text-align:center;font-size:10.5px;color:#7799bb;min-height:14px">👆 가정 조건부터 눌러보세요</div>
-        <div style="margin-top:8px;text-align:center;font-size:9.5px;color:#6688aa;letter-spacing:.05em">
-          <span style="color:#ffff00;font-size:11px">●</span> <span style="color:#ffff00">가정</span> &nbsp;·&nbsp;
-          <span style="color:#00ffff;font-size:11px">●</span> <span style="color:#00ffff">결론</span>
+        <div id="mcSumHint" style="margin-top:8px;text-align:center;font-size:9.5px;color:#7799bb;min-height:13px">👆 가정 조건부터 눌러보세요</div>
+        <div style="margin-top:6px;text-align:center;font-size:9px;color:#6688aa;letter-spacing:.05em">
+          <span style="color:#ffff00;font-size:10px">●</span> <span style="color:#ffff00">가정</span> &nbsp;·&nbsp;
+          <span style="color:#00ffff;font-size:10px">●</span> <span style="color:#00ffff">결론</span>
         </div>
       </div>
 
-      <button id="mcNext" style="display:block;width:100%;margin-top:18px;padding:12px;background:#0a3020;border:2px solid #44ffaa;border-radius:8px;color:#aaffdd;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .2s" disabled>
+      <button id="mcNext" style="display:block;width:100%;margin-top:12px;padding:9px;background:#0a3020;border:2px solid #44ffaa;border-radius:7px;color:#aaffdd;font-size:12.5px;font-weight:bold;cursor:pointer;font-family:inherit;letter-spacing:.03em;transition:all .2s" disabled>
         🔍 가정·결론을 모두 확인하면 다음 미션으로 →
       </button>
     </div>
   </div>
+
+  <!-- 🏆 복습 카드 접힘 상태 미니 버튼 -->
+  <button id="mcMini" style="display:none;position:fixed;top:50px;right:14px;z-index:150;background:#0a2818;border:1.5px solid #44ffaa;border-radius:20px;color:#aaffdd;font-size:11.5px;font-weight:bold;padding:8px 14px;cursor:pointer;font-family:inherit;box-shadow:0 0 14px rgba(68,255,170,.35);letter-spacing:.02em">🏆 복습 카드 펼치기 ▲</button>
 
   <style>
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -489,40 +493,6 @@ var L0=V3(0,0,2);
 var E1=V3(cs(R15),-sn(R15),0);
 var E2=V3(0,0,1);
 
-// 기하 모드 전용 좌표계 (Mission 3 시각화용)
-// l을 x축으로, H를 원점으로 정렬
-var toGeoCoord=function(p,h){
-  // h를 원점으로 이동
-  var rel=p.clone().sub(h);
-  
-  // l 방향을 x축으로 하는 좌표계
-  var ldir=LD.clone();
-  var pxy=rel.clone().projectOnPlane(PN);
-  var x=pxy.dot(ldir);
-  
-  // PN 방향을 고려한 z축 (높이)
-  var z=rel.dot(PN);
-  
-  // y축 (ldir와 수직, PN과 수직)
-  var ydir=ldir.clone().cross(PN).normalize();
-  var y=rel.dot(ydir);
-  
-  return V3(x,y,z);
-};
-
-var fromGeoCoord=function(geo,h){
-  // 역변환: 기하 좌표 → 원래 좌표
-  var ldir=LD.clone();
-  var ydir=ldir.clone().cross(PN).normalize();
-  
-  var p=h.clone()
-    .add(ldir.clone().multiplyScalar(geo.x))
-    .add(ydir.clone().multiplyScalar(geo.y))
-    .add(PN.clone().multiplyScalar(geo.z));
-  
-  return p;
-};
-
 var projA=function(P){return P.clone().sub(PN.clone().multiplyScalar(P.dot(PN)));};
 var ptA=function(u,v){return E1.clone().multiplyScalar(u).add(E2.clone().multiplyScalar(v));};
 var aTP=function(v){return v.length()<1e-6?90:Math.round(TMU.radToDeg(Math.asin(Math.min(1,Math.abs(v.clone().normalize().dot(PN))))));};
@@ -535,6 +505,25 @@ var cvs=document.getElementById('c3'),wrap=document.getElementById('cw');
 var rdr=new THREE.WebGLRenderer({canvas:cvs,antialias:true});
 rdr.setPixelRatio(Math.min(devicePixelRatio,1.5));rdr.shadowMap.enabled=true;
 var scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(52,1,.1,200);
+
+// ── 우주 별 배경 (화성 하늘) — fog:false로 안개 영향 없이 항상 보임 ──
+(function makeStars(){
+  var N=800,pos=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var r=90+Math.random()*50,th=Math.random()*Math.PI*2,ph=Math.acos(1-Math.random()*1.15);
+    pos[i*3]=r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1]=Math.max(r*Math.cos(ph),3);   // 지평선 위 하늘에만
+    pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  var dim=new THREE.Points(g,new THREE.PointsMaterial({color:0xcfe0ff,size:1.4,sizeAttenuation:false,transparent:true,opacity:.55,fog:false,depthWrite:false}));
+  var bright=new THREE.Points(g.clone(),new THREE.PointsMaterial({color:0xffffff,size:2.2,sizeAttenuation:false,transparent:true,opacity:.9,fog:false,depthWrite:false}));
+  // 밝은 별은 앞쪽 일부(1/7)만 그려 큰 별처럼 겹쳐 표현
+  bright.geometry.setDrawRange(0,Math.floor(N/7));
+  dim.renderOrder=-2;bright.renderOrder=-2;
+  scene.add(dim);scene.add(bright);
+})();
 var C={th:.82,ph:.76,r:13};
 var updCam=function(){cam.position.set(C.r*sn(C.ph)*sn(C.th),.5+C.r*cs(C.ph),C.r*sn(C.ph)*cs(C.th));cam.lookAt(0,.5,0);};
 scene.add(new THREE.AmbientLight(0xff5522,.5));
@@ -904,14 +893,6 @@ var cableAnim={
   endA:V3(0,0,0),
   endB:V3(0,0,0),
   target:null
-};
-
-var dropCableOnGround=function(centerX,centerZ){
-  var groundY=ayY(centerX,centerZ)+0.05;
-  return {
-    a:V3(centerX-0.5,groundY,centerZ),
-    b:V3(centerX+0.5,groundY,centerZ)
-  };
 };
 
 var dropCableFromP=function(P){
@@ -1333,10 +1314,22 @@ var showCompleteCard=function(mis){
     tHud([],'off');
     highlightRA([],'off');  // ⊥ 강조 해제
     mc.style.display='none';
+    document.getElementById('mcMini').style.display='none';
     document.body.classList.remove('show-summary');
     // 다음 미션 브리핑(transit) 표시
     showTransit(mis, mis+1);
   };
+  // ── 접기/펼치기: 3D 화면과 비교할 때 카드를 잠시 치워둘 수 있음 ──
+  var mini=document.getElementById('mcMini');
+  document.getElementById('mcMinBtn').onclick=function(){
+    mc.style.display='none';
+    mini.style.display='block';
+  };
+  mini.onclick=function(){
+    mini.style.display='none';
+    mc.style.display='flex';
+  };
+  mini.style.display='none';
   mc.style.display='flex';
   document.body.classList.add('show-summary');  // HUD를 transit 위로 띄우는 CSS와 호환
 };
