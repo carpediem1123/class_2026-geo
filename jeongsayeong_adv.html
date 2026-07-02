@@ -26,7 +26,6 @@ html,body{width:100%;height:100%;overflow:hidden;
   background:rgba(8,14,28,.93);border-right:1.5px solid #1e3060;
   display:flex;flex-direction:column;overflow:hidden;z-index:10}
 /* ── 심화 패널 ── */
-#advPanel{width:100%;height:100%;background:#0a1020;display:flex;flex-direction:column;overflow:hidden}
 .adv-tabs{display:flex;flex-shrink:0;border-bottom:2px solid #1e3060;background:#080e1c}
 .adv-tab{flex:1;padding:8px 3px;font-size:11px;font-weight:bold;color:#445577;
   background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
@@ -350,7 +349,7 @@ S′ = S × cosθ = ?</div>
 /* ══════════════════════════════════════
    심화문제 모듈 (SyntaxError 방지: 모든 문자열 단일행)
 ══════════════════════════════════════ */
-var advActive=false, advTab=0;
+var advTab=0;
 var advObjs=[], iPoints=[];
 var drawPhase=0, drawPicked=[], drawLines=[];
 var drawProjMesh=null;
@@ -449,34 +448,6 @@ window.switchAdvTab=function(n){
   else if(n===1) buildTetraScene();
   else buildBoxScene();
 };
-
-// ── 패널 열기/닫기 ───────────────────
-function openAdv(){
-  advActive=true;
-  // 기존 탭 UI 숨기기
-  document.getElementById('advPanel').style.display='flex';
-  document.getElementById('lp').style.display='none';
-  document.getElementById('hud').style.display='none';
-  document.getElementById('rp').style.display='none';
-  // p1/p2 content 숨기기 (개념탐구·미션탐구 내용이 남지 않도록)
-  document.getElementById('p1content').style.display='none';
-  var p2=document.getElementById('p2content');if(p2)p2.style.display='none';
-  document.getElementById('ph3ov').style.display='none';
-  document.getElementById('lp3inner').style.display='none';
-  switchAdvTab(0);
-}
-function closeAdv(){
-  advActive=false;
-  clearAdv();
-  document.getElementById('advPanel').style.display='none';
-  document.getElementById('lp').style.display='flex';
-  document.getElementById('hud').style.display='block';
-  document.getElementById('rp').style.display='flex';
-  if(typeof panelM!=='undefined') panelM.visible=true;
-  // 씬 완전 복원
-  setMode(marsMode); // marsMode 유지하며 복원
-  setPhase(1);
-}
 
 // ── QDB (모든 문자열 단일행, \n 없음) ──
 var QDB={
@@ -1051,15 +1022,6 @@ function buildCubeScene(){
   });
 
   updCam();
-}
-function showProjEFG(){
-  if(!_projMesh)return;
-  // 수선 점선 표시
-  _projLines.forEach(function(l){l.visible=true;});
-  // 정사영 삼각형 보이기
-  _projMesh.material.opacity=0.65;
-  _projMesh.visible=true;
-  document.getElementById('prog0').style.width='33%';
 }
 
 // ═══════════════════════════════════════
@@ -1691,6 +1653,24 @@ var canvas = document.getElementById('c3');
 var wrap = document.getElementById('cw');
 var scene = new THREE.Scene();
 var cam = new THREE.PerspectiveCamera(48, 1, .1, 200);
+
+// ── 우주 별 배경 — fog:false, clearAdv의 advObjs 추적과 무관하여 씬 전환에도 유지 ──
+(function makeStars(){
+  var N=800,pos=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var r=90+Math.random()*50,th=Math.random()*Math.PI*2,ph=Math.acos(1-Math.random()*1.15);
+    pos[i*3]=r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1]=Math.max(r*Math.cos(ph),3);
+    pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  var dim=new THREE.Points(g,new THREE.PointsMaterial({color:0xcfe0ff,size:1.4,sizeAttenuation:false,transparent:true,opacity:.5,fog:false,depthWrite:false}));
+  var bright=new THREE.Points(g.clone(),new THREE.PointsMaterial({color:0xffffff,size:2.2,sizeAttenuation:false,transparent:true,opacity:.85,fog:false,depthWrite:false}));
+  bright.geometry.setDrawRange(0,Math.floor(N/7));
+  dim.renderOrder=-2;bright.renderOrder=-2;
+  scene.add(dim);scene.add(bright);
+})();
 var rdr = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:false});
 rdr.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 rdr.shadowMap.enabled = false; // 그림자 완전 비활성화 (힌트광 그림자도 제거)
