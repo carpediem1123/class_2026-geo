@@ -8,8 +8,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a1628">
 <title>공간잇기 — KOSA-1 사령부</title>
+<!-- 폰트: @import(직렬 로딩) 대신 preconnect+link(병렬 로딩)로 초기 표시 단축 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
@@ -287,7 +290,20 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 <script>
 // ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
-var BUILD = '20260702b';
+var BUILD = '20260702d';
+
+// ── 선다운로드(prefetch): 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아둠 ──
+// 버튼 클릭 시점에는 이미 캐시에 있어 체감 로딩이 크게 줄어듭니다.
+(function prefetchModules(){
+  var files=['three.min.js','OrbitControls.js',
+    'perp_plane_class.html?v='+BUILD,'samsuseon.html?v='+BUILD,
+    'jeongsayeong.html?v='+BUILD,'jeongsayeong_adv.html?v='+BUILD];
+  files.forEach(function(f){
+    var l=document.createElement('link');
+    l.rel='prefetch'; l.href=f; l.as=(f.indexOf('.js')>-1?'script':'document');
+    document.head.appendChild(l);
+  });
+})();
 
 // iOS Safari 감지
 var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
