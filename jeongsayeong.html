@@ -288,7 +288,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
     <span class="ti">🛰 공간잇기 · 정사영</span>
     <button class="tab on" id="tab1">📐 개념탐구</button>
     <button id="tab3" class="tab">🔍 개념이해</button>
-    <button class="tab" id="tab2">🚀 미션탐구</button>
+    <button class="tab locked" id="tab2">🔒 미션탐구</button>
     <div style="width:1px;height:24px;background:#1e3060;margin:0 2px;flex-shrink:0"></div>
     <button class="hb on" id="bM">🪐 Mars</button>
     <button class="hb" id="bG">📐 기하</button>
@@ -2445,8 +2445,7 @@ window.addEventListener('message', function(e){
   if(!e.data) return;
   if(e.data.type === 'closeAdv') closeAdvIframe();
   if(e.data.type === 'advComplete'){
-    markStageDone(3);
-    lockMissionTab(false);
+    markStageDone(3);   // 개념이해 완수 → updateMissionLock()이 양쪽 조건 확인 후 해제
     // 개념탐구 좌측 하단에 '미션탐구로 →' 버튼 등장
     var gm2 = document.getElementById('goMission2');
     if(gm2){ gm2.style.display = 'block'; gm2.classList.add('blink-red'); }
@@ -2483,7 +2482,13 @@ document.getElementById('tab1').addEventListener('click',function(){
   setPhase(1, missionCompleted);
 });
 document.getElementById('tab2').addEventListener('click',function(){
-  if(this.disabled)return;
+  if(this.classList.contains('locked')){
+    var need=[];
+    if(!stageDone[1]) need.push('📐 개념탐구');
+    if(!stageDone[3]) need.push('🔍 개념이해');
+    alert('🔒 미션탐구는 아직 잠겨 있어요!\n\n'+need.join(' 와 ')+' 를 먼저 완료하면\n잠금이 해제됩니다. 개념을 다진 뒤 미션에 도전하세요!');
+    return;
+  }
   if(reflectLogBlocking())return;
   closeAdvIframe();
   resetFootAnim();  // P·P′ 애니메이션 잔상 제거
@@ -2498,24 +2503,49 @@ document.getElementById('mwinOk').addEventListener('click',function(){
   document.getElementById('mwin').style.display='none';
 });
 
-/* ── 단계 완수 표시(노란 테두리·글자) & 미션탐구 탭 잠금 ── */
+/* ── 단계 완수 표시(노란 테두리·글자) & 미션탐구 탭 잠금 ──
+   미션탐구는 📐개념탐구 와 🔍개념이해 를 "모두" 완료해야 열립니다.
+   sessionStorage에 저장해 새로고침·iOS 사령부 왕복에도 진행 유지 */
+var stageDone=(function(){
+  try{
+    var s=sessionStorage.getItem('kosa_jsy_stage');
+    if(s){var o=JSON.parse(s); if(o&&typeof o==='object') return o;}
+  }catch(e){}
+  return {1:false,2:false,3:false};
+})();
+
 function markStageDone(stage){
+  stageDone[stage]=true;
+  try{sessionStorage.setItem('kosa_jsy_stage',JSON.stringify(stageDone));}catch(e){}
   const id = stage===1?'tab1':(stage===2?'tab2':'tab3');
   const el = document.getElementById(id);
-  if(!el) return;
-  el.style.borderColor='#ffcc44';   // 노란 테두리
-  el.style.color='#ffee88';         // 노란 글자
+  if(el){
+    el.style.borderColor='#ffcc44';   // 노란 테두리
+    el.style.color='#ffee88';         // 노란 글자
+  }
+  updateMissionLock();
 }
-function lockMissionTab(lock){
+
+function updateMissionLock(){
   const t2=document.getElementById('tab2');
   if(!t2) return;
-  t2.disabled=lock;
-  t2.style.opacity = lock?'0.4':'1';
-  t2.style.cursor  = lock?'not-allowed':'pointer';
-  t2.style.filter  = lock?'saturate(.5)':'';
+  const open = stageDone[1] && stageDone[3];   // 두 단계 모두 완료 시에만 해제
+  t2.classList.toggle('locked', !open);
+  // 완수 하이라이트(노란 글자) 중이 아니면 라벨·자물쇠 갱신
+  t2.textContent = open ? '🚀 미션탐구' : '🔒 미션탐구';
 }
-// 시작 시: 공간잇기 완수 전까지 미션탐구 잠금
-lockMissionTab(true);
+
+// 시작 시: 저장된 진행 상태 복원 (완수 하이라이트 재적용 + 잠금 계산)
+(function restoreStageState(){
+  [1,2,3].forEach(function(s){
+    if(stageDone[s]){
+      const id = s===1?'tab1':(s===2?'tab2':'tab3');
+      const el=document.getElementById(id);
+      if(el){el.style.borderColor='#ffcc44';el.style.color='#ffee88';}
+    }
+  });
+  updateMissionLock();
+})();
 
 
 // iOS 직접 이동 모드: 사령부 복귀 버튼 표시
