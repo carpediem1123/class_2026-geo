@@ -8,10 +8,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a1628">
 <title>공간잇기 — KOSA-1 사령부</title>
-<!-- 폰트: @import(직렬 로딩) 대신 preconnect+link(병렬 로딩)로 초기 표시 단축 -->
+<!-- 폰트: 비차단 로딩 — 화면은 즉시 표시(시스템 폰트), 웹폰트는 도착하는 대로 교체(swap) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap"></noscript>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
@@ -20,13 +21,13 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
   position:fixed;top:0;left:0;right:0;bottom:0}
 
 /* ── 배경 그리드 ── */
-body::before{content:'';position:fixed;inset:0;pointer-events:none;
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;
   background-image:linear-gradient(rgba(40,80,140,.15) 1px,transparent 1px),
     linear-gradient(90deg,rgba(40,80,140,.15) 1px,transparent 1px);
   background-size:40px 40px;z-index:0}
 
 /* ── 우주 별 배경 (그리드 뒤 반짝임) ── */
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;
   background-image:
     radial-gradient(1.5px 1.5px at 18px 32px,rgba(255,255,255,.95),transparent),
     radial-gradient(1px 1px at 74px 118px,rgba(207,224,255,.8),transparent),
@@ -146,7 +147,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 #story{animation:fadeIn .4s ease both}
 
 /* ── 게임 오버레이 ── */
-#overlay{display:none;position:fixed;inset:0;z-index:9000;flex-direction:column;background:#000}
+#overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9000;flex-direction:column;background:#000}
 #overlay.active{display:flex}
 #ov-bar{flex-shrink:0;height:46px;background:#060e1c;border-bottom:1.5px solid #1a3060;
   display:flex;align-items:center;padding:0 16px;gap:14px}
@@ -290,19 +291,37 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 <script>
 // ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
-var BUILD = '20260702e';
+var BUILD = '20260704a';
 
-// ── 선다운로드(prefetch): 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아둠 ──
-// 버튼 클릭 시점에는 이미 캐시에 있어 체감 로딩이 크게 줄어듭니다.
+// ── 선다운로드: 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아 캐시에 저장 ──
+// [v20260704 수정] 이전 버전의 결함 해결:
+//   ① 모듈 접속 버튼을 누르면 진행 중인 선다운로드를 즉시 전부 중단 (대역폭 경쟁·중복 다운로드 방지)
+//   ② 2.5초 뒤 시작 — 도착하자마자 클릭하는 학생과 겹치지 않도록
+//   ③ 데이터 절약 모드·2G급 느린 회선에서는 아예 실행하지 않음
+var warmController = null;   // 진행 중인 다운로드 중단용 제어기
+var warmStopped = false;
+function stopWarming(){
+  warmStopped = true;
+  if(warmController){ try{ warmController.abort(); }catch(e){} warmController = null; }
+}
 (function prefetchModules(){
+  if(!window.fetch) return;
+  var c = navigator.connection;
+  if(c && (c.saveData || /2g/.test(c.effectiveType||''))) return;   // 느린 회선: 선다운로드 생략
   var files=['three.min.js','OrbitControls.js',
     'perp_plane_class.html?v='+BUILD,'samsuseon.html?v='+BUILD,
     'jeongsayeong.html?v='+BUILD,'jeongsayeong_adv.html?v='+BUILD];
-  files.forEach(function(f){
-    var l=document.createElement('link');
-    l.rel='prefetch'; l.href=f; l.as=(f.indexOf('.js')>-1?'script':'document');
-    document.head.appendChild(l);
-  });
+  setTimeout(function(){
+    if(warmStopped) return;
+    warmController = window.AbortController ? new AbortController() : null;
+    (function warm(i){
+      if(warmStopped || i>=files.length) return;
+      var opt = {cache:'force-cache'};
+      if(warmController) opt.signal = warmController.signal;
+      var nx = function(){ warm(i+1); };   // 성공·실패 모두 다음 파일로 (중단 여부는 재귀 첫 줄에서 확인)
+      fetch(files[i], opt).then(nx, nx);
+    })(0);
+  }, 2500);
 })();
 
 // iOS Safari 감지
@@ -310,6 +329,7 @@ var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 function openGame(file, title) {
+  stopWarming();                 // 선다운로드 즉시 중단 — 모듈 로딩에 대역폭 전부 양보
   file = file + '?v=' + BUILD;   // 캐시 우회 — 항상 최신 모듈 로드
   if (isIOS) {
     // iOS: 같은 탭에서 직접 이동 (WebGL iframe 제한 우회)
