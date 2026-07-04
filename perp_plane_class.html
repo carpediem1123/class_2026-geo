@@ -40,8 +40,7 @@
   #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
 
   /* ── 공간잇기 스토리 패널 (좌측) ── */
-    @media (max-width:700px){ #ctrlBadge{display:none!important} }  /* 좁은 화면: 배지 생략 */
-  #story-panel { position: absolute; top: 56px; left: 10px; width: 292px; z-index: 10;
+    #story-panel { position: absolute; top: 56px; left: 10px; width: 292px; z-index: 10;
     background: rgba(10, 16, 32, 0.94); border: 2px solid #1a2a50; border-radius: 8px;
     box-shadow: 0 0 20px rgba(0,0,0,0.6); overflow: hidden; }
   #story-head { padding: 10px 12px; background: rgba(20,30,60,.55); cursor: pointer;
@@ -299,9 +298,6 @@
 <!-- iOS 직접 이동 모드 전용: 사령부 복귀 버튼 — 우측 상단, 타 모듈(.hb)과 동일 디자인 -->
 <button id="bHub" onclick="window.location.href='index.html'" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:8500;width:auto;background:#162030;border:2px solid #2a3a4a;border-radius:7px;color:#88aacc;font-size:12px;padding:6px 10px;min-height:36px;line-height:1;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
 
-<!-- 화면 이름표: 수학실험실의 '화성 관제소로 복귀'가 어디로 돌아가는지 알려주는 정체성 배지 -->
-<div id="ctrlBadge" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 13px);left:200px;z-index:19;background:rgba(10,16,32,.85);border:1px solid #1a2a50;border-radius:14px;color:#7fa3cc;font-size:11px;font-weight:bold;padding:7px 12px;pointer-events:none;letter-spacing:.03em;white-space:nowrap">🛰 여기는 화성 관제소</div>
-
 <button id="lab-tab-btn" onclick="toggleLabPanel()">
   <div class="lab-tab-dot"></div>
   🔬 수학실험실
@@ -415,18 +411,21 @@
     <span class="sh-fold">접기 ▲▼</span>
   </div>
   <div id="story-body">
+    📡 <b>[긴급 교신 수신]</b><br>
+    "치지직… 여기는 <b>화성 관제소</b>. 들리는가, 복구 요원!
     자기 폭풍의 충격으로 거주 돔을 떠받치는 <b>메인 서포트 기둥(l)</b>이 기울어졌다.
-    기둥이 단 1°만 기울어도 돔의 하중이 한쪽으로 쏠려 <em>72시간 내 붕괴</em>한다.
+    기둥이 단 1°만 기울어도 돔의 하중이 한쪽으로 쏠려 <em>72시간 내 붕괴</em>한다…!"
     <br><br>
     문제는, 화성에는 '수직'을 알려줄 기준이 없다는 것!
     유일한 단서는 바닥 평면(α)에 깔린 <b>두 지지 레일 m, n</b>뿐.
     <br><br>
     기둥을 두 레일과 각각 직각으로 맞추면… 정말 <em>바닥 전체와 수직</em>이 될까?
     <div class="story-goal">
-      🎯 <b>복구 조건</b><br>
-      직선 l ⊥ m 그리고 l ⊥ n (두 직선만 확인!)<br>
-      ⇒ <b>l ⊥ 평면 α</b> 임을 검증하면<br>
-      돔 하중이 고르게 분산되어 기지 구조 복구 완료!
+      🎯 <b>복구 미션</b><br>
+      기둥 l이 <b>레일 m</b>, 그리고 <b>레일 n</b>과<br>
+      각각 직각이 되도록 조정하라!<br>
+      단 두 번의 직각 확인 — 그것만으로 충분한지는,<br>
+      요원이 직접 밝혀낸다.
     </div>
   </div>
 </div>
@@ -1025,21 +1024,23 @@ function drawProofTriangle(v1, v2, v3, colorHex) {
   return new THREE.Mesh(geom, mat);
 }
 
-function makeRightAngleMarker(vecDir, colorHex) {
+function makeRightAngleMarker(vecDir, colorHex, size, bold) {
   const marker = new THREE.Group();
-  const size = 0.35;
-  const p1 = new THREE.Vector3(size, 0, 0);
-  const p2 = new THREE.Vector3(size, size, 0);
-  const p3 = new THREE.Vector3(0, size, 0);
-  
-  const line = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([pO, p1, p2, p3]),
-    new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2.5 })
-  );
-  
+  size = size || 0.35;
+  const mkLine = function(s){
+    const p1 = new THREE.Vector3(s, 0, 0);
+    const p2 = new THREE.Vector3(s, s, 0);
+    const p3 = new THREE.Vector3(0, s, 0);
+    const mat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2.5 });
+    if (bold) { mat.depthTest = false; }   // 삼각형 면에 가려지지 않도록
+    const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pO, p1, p2, p3]), mat);
+    if (bold) ln.renderOrder = 999;
+    return ln;
+  };
+  marker.add(mkLine(size));
+  if (bold) { marker.add(mkLine(size*0.94)); marker.add(mkLine(size*1.06)); }  // 3중선 → 굵은 선 효과 (WebGL은 linewidth 미지원)
   const angle = Math.atan2(vecDir.z, vecDir.x);
-  line.rotation.y = -angle;
-  marker.add(line);
+  marker.children.forEach(function(l){ l.rotation.y = -angle; });
   return marker;
 }
 
@@ -1147,7 +1148,7 @@ function updateProofGeometryEngine(stepNum) {
     proofMeshGroup.add(triPCP_);
 
     proofMeshGroup.add(makeProofLine(pO, pC, 0xbe185d));
-    proofMeshGroup.add(makeRightAngleMarker(pC, '#be185d'));
+    proofMeshGroup.add(makeRightAngleMarker(pC, 0xffee00, 0.5, true));  // ∠POC 직각: 분홍 삼각형 위 고대비 노랑 + 굵은선 + 가림 방지
   }
 }
 
@@ -1441,10 +1442,9 @@ function toggleLabPanel() {
     tabBtn.querySelector('.lab-tab-dot').style.background = '#cc99ff';
     // 패널이 열리면 좌상단 탭 버튼이 .lab-header 제목과 겹치므로 숨김 (닫기는 패널 하단의 '화성 관제소 복귀' 버튼 사용)
     tabBtn.style.display = 'none';
-    // 수학실험실 진입 → 화성 조작 패널·스토리·관제소 배지 숨김
+    // 수학실험실 진입 → 화성 조작 패널·스토리 숨김
     var up=document.getElementById('ui-panel'); if(up) up.style.display='none';
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='none';
-    var cb=document.getElementById('ctrlBadge'); if(cb) cb.style.display='none';
     
     scene.background = bgColorLab;
     scene.fog = null; 
@@ -1460,10 +1460,9 @@ function toggleLabPanel() {
     tabBtn.classList.remove('active');
     tabBtn.querySelector('.lab-tab-dot').style.background = '#7744cc';
     tabBtn.style.display = 'flex';
-    // 화성 관제소 복귀 → 조작 패널·스토리·관제소 배지 다시 표시
+    // 화성 관제소 복귀 → 조작 패널·스토리 다시 표시
     var up=document.getElementById('ui-panel'); if(up) up.style.display='flex';
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='block';
-    var cb=document.getElementById('ctrlBadge'); if(cb) cb.style.display='block';
     
     scene.background = bgColorMain;
     scene.fog = new THREE.FogExp2(0x05070f, 0.03);
