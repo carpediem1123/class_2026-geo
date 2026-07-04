@@ -104,7 +104,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;ove
   border:1px solid #440800;border-radius:3px;padding:2px 5px;flex-shrink:0}
 .sa-info{flex:1;min-width:0}
 .sa-title{font-size:12px;color:#ffaa44;font-weight:bold;margin-bottom:1px}
-.sa-story{font-size:9.5px;color:#996633;line-height:1.5;white-space:pre-line}
+.sa-story{font-size:9.5px;color:#b98a4d;line-height:1.5;white-space:pre-line;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .sa-thm{flex-shrink:0;background:#06050d;border:1px solid #220a33;border-radius:5px;
   padding:4px 7px;text-align:center}
 .sa-thm-eq{font-size:9.5px;color:#aa66cc;line-height:1.7;white-space:pre-line}
@@ -918,15 +918,15 @@ var startCableInstall=function(target,startA,startB,endA,endB){
 var commActive=false;
 var commPulse=0;
 var mkRA=function(col){
-  // 직각 마커: 외곽선(굵게 보이도록 같은 라인을 살짝 어긋난 두 개로) + 채움 사각형
+  // 직각 마커: 외곽선 + 채움 사각형(평상시 숨김 — 결론 강조 시에만 완전히 채워 표시)
   var grp=new THREE.Group();
   var g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));
   var lineMat=new THREE.LineBasicMaterial({color:col,linewidth:3,transparent:true,opacity:.95});
   var l=new THREE.Line(g,lineMat);
-  // 채움: 작은 삼각형(직각 마커 사각형의 코너) — 노란 반투명
-  var fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));
-  fg.setIndex([0,1,2]);
-  var fillMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.35,side:THREE.DoubleSide,depthWrite:false});
+  // 채움: 직각 마커 사각형 전체(4꼭짓점 → 삼각형 2개) — 기본은 투명(숨김)
+  var fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(12),3));
+  fg.setIndex([0,1,2,0,2,3]);
+  var fillMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false});
   var fill=new THREE.Mesh(fg,fillMat);
   grp.add(l); grp.add(fill);
   grp.visible=false;
@@ -946,11 +946,12 @@ var mvRA=function(grp,piv,v1,v2,s){
   a[3]=piv.x+d1.x+d2.x;a[4]=piv.y+d1.y+d2.y;a[5]=piv.z+d1.z+d2.z;
   a[6]=piv.x+d2.x;a[7]=piv.y+d2.y;a[8]=piv.z+d2.z;
   grp._line.geometry.attributes.position.needsUpdate=true;
-  // 채움 삼각형 (피벗 + 두 끝점)
+  // 채움 정사각형 (피벗 → d1 → d1+d2 → d2 : 4꼭짓점, 완전 채움)
   var f=grp._fillGeo.attributes.position.array;
   f[0]=piv.x;f[1]=piv.y;f[2]=piv.z;
-  f[3]=piv.x+d1.x+d2.x;f[4]=piv.y+d1.y+d2.y;f[5]=piv.z+d1.z+d2.z;
-  f[6]=piv.x+d2.x;f[7]=piv.y+d2.y;f[8]=piv.z+d2.z;
+  f[3]=piv.x+d1.x;f[4]=piv.y+d1.y;f[5]=piv.z+d1.z;
+  f[6]=piv.x+d1.x+d2.x;f[7]=piv.y+d1.y+d2.y;f[8]=piv.z+d1.z+d2.z;
+  f[9]=piv.x+d2.x;f[10]=piv.y+d2.y;f[11]=piv.z+d2.z;
   grp._fillGeo.attributes.position.needsUpdate=true;
   grp._fillGeo.computeBoundingSphere();
 };
@@ -1005,33 +1006,33 @@ var QD={
 
 // ══ 미션 데이터 ══
 var MC={
-  1:{betaMsg:'PO와 OH가 결정하는 평면 β 등장!\nPO⊥l, OH⊥l → β⊥l 확인',
+  1:{betaMsg:'PO와 OH가 결정하는 평면 β 등장!\n평면 β는 직선 l과 수직일까? 그 이유는?',
      hud:[['PO⊥α','po'],['OH⊥l','oh'],['PH⊥l','ph'],null],hudInit:2,
      steps:[
       {l:'STEP 1',d:'PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,choice:'POl',hintPOl:1},
       {l:'STEP 2',d:'H를 조정하여 OH⊥l 달성하세요.',btn:'OH⊥l 달성!',cond:'oh'},
       {l:'STEP 3',d:'레일을 설치하세요.\n(OH 케이블 고정)',btn:'🔧 레일 설치!',auto:1,installOH:1},
-      {l:'STEP 4',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3},
+      {l:'STEP 4',d:'BETA',btn:'다음 단계로 →',auto:1,beta:1,revHud:3,choice:'betaWhy'},
       {l:'STEP 5',d:'평면 β 위의 직선인 PH와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,revPH:1,choice:'PHl',hintPH:1},
       {l:'STEP 6',d:'정리 ① 확인 완료!\nPH⊥l 이 발견되었습니다.\n이제 안전한 PH 통신 케이블을 설치합니다.',btn:'🔧 PH 케이블 설치!',auto:1,installPH:1},
       {l:'STEP 7',d:'통신 회선 연결 완료.\n데이터 송신을 시작합니다.',btn:'📡 통신 송출 시작!',auto:1,commStart:1,final:1},
     ]
-  },  2:{betaMsg:'PO와 PH가 결정하는 평면 β 등장!\nPO⊥l, PH⊥l → β⊥l 확인',
+  },  2:{betaMsg:'PO와 PH가 결정하는 평면 β 등장!\n평면 β는 직선 l과 수직일까? 그 이유는?',
      hud:[['PO⊥α','po'],['PH⊥l','ph'],['OH⊥l','oh'],null],hudInit:2,
      steps:[
       {l:'STEP 1',d:'PO⊥α 조건에서 PO와 평면 α 위의 한 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,choice:'POl',hintPOl:1},
       {l:'STEP 2',d:'PH가 직선l과 수직이 되도록 조정하세요.',btn:'PH⊥l 달성!',cond:'ph'},
-      {l:'STEP 3',d:'BETA',btn:'β⊥l 확인!',auto:1,beta:1,revHud:3,revOHdim2bright:1},
+      {l:'STEP 3',d:'BETA',btn:'다음 단계로 →',auto:1,beta:1,revHud:3,revOHdim2bright:1,choice:'betaWhy'},
       {l:'STEP 4',d:'평면 β 위의 직선인 OH와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,revOH:1,choice:'OHl',hintOH:1},
       {l:'STEP 5',d:'정리 ② 확인 완료!\nOH⊥l 이 발견되었습니다.\n이제 안전한 OH 지지대를 설치합니다.',btn:'🔧 OH 지지대 설치!',auto:1,installOH2:1},
       {l:'STEP 6',d:'안테나 지지대 보수 완료!\n신호를 발사하세요.',btn:'📡 신호 발사!',auto:1,commStart:1,final:1}
     ]},
-  3:{betaMsg:'PH와 OH가 결정하는 β 등장!\nPH⊥l, OH⊥l → β⊥l\nPO ⊥ β 면 내의 모든 직선 → PO⊥α!',
+  3:{betaMsg:'PH와 OH가 결정하는 평면 β 등장!\n평면 β는 직선 l과 수직일까? 그 이유는?',
      hud:[['PH⊥l','ph'],['OH⊥l','oh'],['PO⊥OH','pooh'],['PO⊥α','po']],hudInit:3,
      steps:[
       {l:'STEP 1',d:'[기어1] 전력선과 수직\nH를 조정하여 PH⊥l 을 달성하세요.',btn:'기어① 맞물림(PH⊥l)!',cond:'ph'},
       {l:'STEP 2',d:'[기어2] 지지대와 수직\nO(v)를 조정하여 OH⊥l 을 달성하세요.',btn:'기어② 맞물림(OH⊥l)!',cond:'oh'},
-      {l:'STEP 3',d:'두 기어가 만드는 평면 확인\nPH⊥l, OH⊥l 이므로 β⊥l\n(β : PH와 OH가 결정하는 평면)',btn:'기어 평면 확인!',auto:1,beta:1},
+      {l:'STEP 3',d:'BETA',btn:'다음 단계로 →',auto:1,beta:1,choice:'betaWhy'},
       {l:'STEP 4',d:'PO ∈ β 이고 β⊥l 일 때, PO와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,hlPO:1,choice:'POl',hintPOl:1},
       {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
       {l:'STEP 6',d:'3개 기어 완전 맞물림!\n\n📐 직선과 평면이 수직일 조건:\n  평면 위 서로 다른 두 직선과 모두 수직이면 평면과 수직!\n\nPO⊥l 이고 PO⊥OH 이므로\n→ PO⊥α 자동 성립! (필요충분조건)\n\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
@@ -1355,6 +1356,7 @@ var applyRAHighlight=function(){
     if(!state){
       if(grp._origColor!==undefined) grp._line.material.color.setHex(grp._origColor);
       if(grp._origFillColor!==undefined && grp._fill) grp._fill.material.color.setHex(grp._origFillColor);
+      if(grp._fill) grp._fill.material.opacity=0;   // 강조 해제 → 채움 숨김 복원
       return;
     }
     if(grp._origColor===undefined) grp._origColor = grp._line.material.color.getHex();
@@ -1365,12 +1367,15 @@ var applyRAHighlight=function(){
       grp._line.material.color.setHex(0xffff00);  // 순노랑 (빨간 배경 대비 강화)
       grp._line.material.opacity=1;
       grp._line.material.transparent=true;
-      if(grp._fill){ grp._fill.material.opacity=0; }
+      if(grp._fill){ grp._fill.material.opacity=0; }          // 가정: 선만 굵게(크기 확대), 채움 없음
     }else if(state==='con'){
       grp._line.material.color.setHex(0x00ffff);  // 순시안 (대비 강화)
       grp._line.material.opacity=1;
       grp._line.material.transparent=true;
-      if(grp._fill){ grp._fill.material.opacity=0; }
+      if(grp._fill){                                          // 결론: 내부 정사각형 완전 채움
+        grp._fill.material.color.setHex(0x00ffff);
+        grp._fill.material.opacity=.5;
+      }
     }
   });
 };
@@ -1584,15 +1589,32 @@ var buildSteps=function(){
 
       // 🔍 객관식 선택지 (정답 노출 없는 발견 단계)
       if(active && !done && s.choice){
+        var isWhy=(s.choice==='betaWhy');
         var qWrap=document.createElement('div');
-        qWrap.style.cssText='margin-top:8px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:4px;width:100%';
-        var opts=[{k:'수직',sym:'⊥',ok:true},{k:'평행',sym:'∥',ok:false},{k:'만남',sym:'×',ok:false}];
+        qWrap.style.cssText=isWhy
+          ? 'margin-top:8px;display:flex;flex-direction:column;gap:5px;width:100%'
+          : 'margin-top:8px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:4px;width:100%';
+        var opts;
+        if(isWhy){
+          // β⊥l의 "이유"를 묻는 능동 확인 — 모듈01-1(직선과 평면의 수직) 정리와 개념 연결
+          opts=[
+            {k:'β 위에서 만나는 두 직선이 모두 l과 수직이므로',ok:true},
+            {k:'β가 바닥 평면 α와 수직이므로',ok:false},
+            {k:'β 위의 직선 하나만 l과 수직이면 충분하므로',ok:false}
+          ];
+        }else{
+          opts=[{k:'수직',sym:'⊥',ok:true},{k:'평행',sym:'∥',ok:false},{k:'만남',sym:'×',ok:false}];
+        }
         // 보기 순서 셔플 (정답 위치가 매번 같지 않게)
         opts.sort(function(){return Math.random()-.5;});
         opts.forEach(function(o){
           var ob=document.createElement('button');
-          ob.innerHTML='<div style="font-size:14px;line-height:1">'+o.sym+'</div><div style="font-size:9.5px;line-height:1.3;margin-top:3px;letter-spacing:-.02em">'+o.k+'</div>';
-          ob.style.cssText='flex:1 1 0;min-width:0;width:0;padding:7px 2px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s;box-sizing:border-box';
+          ob.innerHTML=isWhy
+            ? '<div style="font-size:10.5px;line-height:1.45;word-break:keep-all;text-align:left">'+o.k+'</div>'
+            : '<div style="font-size:14px;line-height:1">'+o.sym+'</div><div style="font-size:9.5px;line-height:1.3;margin-top:3px;letter-spacing:-.02em">'+o.k+'</div>';
+          ob.style.cssText=isWhy
+            ? 'width:100%;padding:8px 10px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s;box-sizing:border-box;text-align:left'
+            : 'flex:1 1 0;min-width:0;width:0;padding:7px 2px;background:#0c1822;border:1.5px solid #2a4060;border-radius:5px;color:#bbd0e0;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .15s;box-sizing:border-box';
           (function(id,ok,btn){
             btn.onclick=function(){
               if(ok){
@@ -1969,10 +1991,10 @@ var updScene=function(){
     if(st==='con') return 1.05;
     return .55;  // 기본 크기도 키움 (M3 STEP 5 가시성)
   };
-  if(raO.visible)mvRA(raO,O,POv.clone().negate(),E1, raSize('po'));
+  if(raO.visible)mvRA(raO,O,POv.clone().negate(),(ST.mis===3?PN.clone().cross(OHv).normalize():E1), raSize('po'));  // M3 결론(PO⊥α): OH와 수직인 α내 방향 → 가정(PO⊥OH) 기호와 겹치지 않는 위치
   if(raH_OH.visible)mvRA(raH_OH,H,OHv.clone().negate(),LD, raSize('oh'));  // l의 +방향(좌측) — PH 마커와 반대편
   if(raH_PH.visible)mvRA(raH_PH,H,PHv.clone().negate(),LD.clone().negate(), raSize('ph'));  // l의 -방향(우측)
-  if(raO_POOH.visible)mvRA(raO_POOH,O,POv,OHv, raSize_POOH());
+  if(raO_POOH.visible)mvRA(raO_POOH,O,POv.clone().negate(),OHv, raSize_POOH());  // 방향 반전: POv는 P→O(아래) 벡터라 그대로 쓰면 기호가 지면 아래에 그려짐 → 삼각형 POH 내부(∠O)에 표시
   // 케이블 설치 완료 파동 (STEP 6): 설치 직후 1.5초간 강한 글로우
   if(cableInstallPulse>0){
     var ciEl=(Date.now()-cableInstallPulse)/1500;
@@ -2442,7 +2464,7 @@ var SHEET_URL = 'https://script.google.com/macros/s/AKfycbxFeI4Qxi3F8o6dmyzXB6T2
 document.getElementById('trReflect').addEventListener('click', function(){
   document.getElementById('reflectBox').style.display = 'flex';
 });
-// 좌측 미션 스토리 접기/펴기 (작은 화면 공간 확보)
+// 좌측 미션 스토리 접기/펴기 — 📂 버튼으로만 (제목 터치는 제외: 아이패드에서 스크롤하려다 접히는 오작동 방지)
 (function(){
   var sa=document.getElementById('storyActive');
   if(sa){ sa.style.position='relative';
@@ -2452,9 +2474,10 @@ document.getElementById('trReflect').addEventListener('click', function(){
       st.style.display = hidden?'':'none';
       if(fd) fd.textContent = hidden?'📂 접기':'📂 펴기';
     };
-    var t1=document.getElementById('saTitle'), t2=document.getElementById('saFold');
-    if(t1) t1.addEventListener('click',toggle);
+    var t2=document.getElementById('saFold');
     if(t2) t2.addEventListener('click',toggle);
+    var t1=document.getElementById('saTitle');
+    if(t1){ t1.style.cursor=''; t1.removeAttribute('title'); }
   }
 })();
 // 상단 메뉴 성찰로그 버튼 (미션 다시보기 후에도 언제든 접근 가능)
