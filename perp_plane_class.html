@@ -295,6 +295,9 @@
 </head>
 <body>
 
+<!-- iOS 직접 이동 모드 전용: 사령부 복귀 버튼 (PC/갤럭시의 iframe 모드에서는 상단 복귀 바가 있어 숨김 유지) -->
+<button id="bHub" onclick="window.location.href='index.html'" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:200px;z-index:8500;width:auto;background:#160b04;border:1.5px solid #88401a;color:#ff9355;font-size:12px;font-weight:bold;padding:9px 14px;border-radius:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
+
 <button id="lab-tab-btn" onclick="toggleLabPanel()">
   <div class="lab-tab-dot"></div>
   🔬 수학실험실
@@ -1493,6 +1496,18 @@ function animate() {
 }
 
 animate();
+
+// ── iOS 직접 이동 모드: 사령부 복귀 버튼 표시 ──
+// iframe(PC·갤럭시) 안에서는 부모 사령부의 복귀 바가 있으므로 단독 실행일 때만 표시
+(function(){
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var standalone = (window.self === window.top);
+  if (standalone && (isIOS || sessionStorage.getItem('kosa_return'))) {
+    var btn = document.getElementById('bHub');
+    if (btn) btn.style.display = '';
+  }
+})();
 </script>
 </body>
 </html>
