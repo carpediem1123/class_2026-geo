@@ -40,6 +40,7 @@
   #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
 
   /* ── 공간잇기 스토리 패널 (좌측) ── */
+    @media (max-width:700px){ #ctrlBadge{display:none!important} }  /* 좁은 화면: 배지 생략 */
   #story-panel { position: absolute; top: 56px; left: 10px; width: 292px; z-index: 10;
     background: rgba(10, 16, 32, 0.94); border: 2px solid #1a2a50; border-radius: 8px;
     box-shadow: 0 0 20px rgba(0,0,0,0.6); overflow: hidden; }
@@ -295,8 +296,11 @@
 </head>
 <body>
 
-<!-- iOS 직접 이동 모드 전용: 사령부 복귀 버튼 (PC/갤럭시의 iframe 모드에서는 상단 복귀 바가 있어 숨김 유지) -->
-<button id="bHub" onclick="window.location.href='index.html'" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:200px;z-index:8500;width:auto;background:#160b04;border:1.5px solid #88401a;color:#ff9355;font-size:12px;font-weight:bold;padding:9px 14px;border-radius:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
+<!-- iOS 직접 이동 모드 전용: 사령부 복귀 버튼 — 우측 상단, 타 모듈(.hb)과 동일 디자인 -->
+<button id="bHub" onclick="window.location.href='index.html'" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:8500;width:auto;background:#162030;border:2px solid #2a3a4a;border-radius:7px;color:#88aacc;font-size:12px;padding:6px 10px;min-height:36px;line-height:1;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
+
+<!-- 화면 이름표: 수학실험실의 '화성 관제소로 복귀'가 어디로 돌아가는지 알려주는 정체성 배지 -->
+<div id="ctrlBadge" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 13px);left:200px;z-index:19;background:rgba(10,16,32,.85);border:1px solid #1a2a50;border-radius:14px;color:#7fa3cc;font-size:11px;font-weight:bold;padding:7px 12px;pointer-events:none;letter-spacing:.03em;white-space:nowrap">🛰 여기는 화성 관제소</div>
 
 <button id="lab-tab-btn" onclick="toggleLabPanel()">
   <div class="lab-tab-dot"></div>
@@ -1437,9 +1441,10 @@ function toggleLabPanel() {
     tabBtn.querySelector('.lab-tab-dot').style.background = '#cc99ff';
     // 패널이 열리면 좌상단 탭 버튼이 .lab-header 제목과 겹치므로 숨김 (닫기는 패널 하단의 '화성 관제소 복귀' 버튼 사용)
     tabBtn.style.display = 'none';
-    // 수학실험실 진입 → 화성 조작 패널·스토리 숨김
+    // 수학실험실 진입 → 화성 조작 패널·스토리·관제소 배지 숨김
     var up=document.getElementById('ui-panel'); if(up) up.style.display='none';
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='none';
+    var cb=document.getElementById('ctrlBadge'); if(cb) cb.style.display='none';
     
     scene.background = bgColorLab;
     scene.fog = null; 
@@ -1455,9 +1460,10 @@ function toggleLabPanel() {
     tabBtn.classList.remove('active');
     tabBtn.querySelector('.lab-tab-dot').style.background = '#7744cc';
     tabBtn.style.display = 'flex';
-    // 화성 관제소 복귀 → 조작 패널·스토리 다시 표시
+    // 화성 관제소 복귀 → 조작 패널·스토리·관제소 배지 다시 표시
     var up=document.getElementById('ui-panel'); if(up) up.style.display='flex';
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='block';
+    var cb=document.getElementById('ctrlBadge'); if(cb) cb.style.display='block';
     
     scene.background = bgColorMain;
     scene.fog = new THREE.FogExp2(0x05070f, 0.03);
@@ -1506,6 +1512,9 @@ animate();
   if (standalone && (isIOS || sessionStorage.getItem('kosa_return'))) {
     var btn = document.getElementById('bHub');
     if (btn) btn.style.display = '';
+    // 사령부 버튼이 우측 상단을 차지하므로 조작 패널을 그 아래로 내림 (겹침 방지)
+    var up = document.getElementById('ui-panel');
+    if (up) up.style.top = 'calc(env(safe-area-inset-top,0px) + 54px)';
   }
 })();
 </script>
