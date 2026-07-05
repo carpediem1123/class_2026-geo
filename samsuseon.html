@@ -760,7 +760,7 @@ var stepGhostAnim=function(){
   var C=ghostAnim.F.clone().addScaledVector(ghostAnim.off,e);
   mvLS(ghostLn,C.clone().addScaledVector(LD,-ghostAnim.half),C.clone().addScaledVector(LD,ghostAnim.half));
   ghostLn.line.visible=true;
-  if(slideT>=1){                                                  // 도착: O 위에 ⊥ 90° 마커
+  if(slideT>=1 && window._ghostReveal){                           // 도착: ⊥ 90° 마커 — 힌트 3회차부터만 (그 전엔 학생이 스스로 판단)
     ghostMark.position.copy(ghostAnim.O.clone().addScaledVector(LD,.7).add(V3(0,.45,0)));
     ghostMark.visible=true;
   }
@@ -995,7 +995,7 @@ var QD={
      saThm:'PO⊥α, PH⊥l\n→ OH⊥l'},
   3:{badge:'MISSION 03',title:'🔧 쓰러진 안테나 복구 작전',
      log:'대규모 지진으로 KOSA-1 메인 안테나\n기둥(PO)이 완전히 쓰러졌다!\n\n지구와의 통신이 완전 두절된 상태.\n기둥을 지면에 수직으로 다시 세워야\n통신장비를 완전 복구할 수 있습니다.\n\n3개의 수직 조건을 모두 달성하라!',
-     alert:'⚠  PH⊥l, OH⊥l, PO⊥OH → PO⊥α 자동 성립!',
+     alert:'⚠  발견 완료: PO⊥l, PO⊥OH → PO⊥α! 삼수선의 정리 ③',
      objs:['전력선과 수직 (PH⊥l)','지지대와 수직 (OH⊥l)','기어 맞물림 (PO⊥OH)','기둥 수직 고정 (PO⊥α)'],
      thm:'PH⊥l\nOH⊥l\nPO⊥OH\n──────\n∴ PO⊥α',
      hint:'기둥 복구율: 3개 수직 조건의 정확도에 달림',
@@ -1035,7 +1035,7 @@ var MC={
       {l:'STEP 3',d:'BETA',btn:'다음 단계로 →',auto:1,beta:1,choice:'betaWhy'},
       {l:'STEP 4',d:'PO ∈ β 이고 β⊥l 일 때, PO와 직선 l의 관계는?\n🔄 시점을 돌려가며 관찰해 보세요.',btn:'다음 단계로 →',auto:1,hlPO:1,choice:'POl',hintPOl:1},
       {l:'STEP 5',d:'[기어3] 지지대와 수직\nO(u)를 조정하여 PO⊥OH 을 달성하세요.',btn:'기어③ 맞물림(PO⊥OH)!',cond:'all3'},
-      {l:'STEP 6',d:'3개 기어 완전 맞물림!\n\n📐 직선과 평면이 수직일 조건:\n  평면 위 서로 다른 두 직선과 모두 수직이면 평면과 수직!\n\nPO⊥l 이고 PO⊥OH 이므로\n→ PO⊥α 자동 성립! (필요충분조건)\n\n삼수선의 정리 ③ ✓',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4}
+      {l:'STEP 6',d:'3개 기어 완전 맞물림!\n지금까지 확인한 것: PO⊥l, PO⊥OH\n\n그렇다면 기둥 PO는 바닥 평면 α와도 수직일까?\n(α : 직선 l과 OH가 놓인 평면)\n왜 그럴까?',btn:'🎉 기둥 고정 완료!',auto:1,revPOA:1,final:1,revHud:4,choice:'alphaWhy'}
     ]}
 };
 
@@ -1305,7 +1305,7 @@ var showCompleteCard=function(mis){
     cb.style.borderColor='#44ffaa';cb.style.background='#0a3020';cb.style.color='#aaffdd';
     cb.style.transform='scale(1.05)';cb.style.fontSize='15px';
     highlightRA([sm.hudCon],'con');
-    document.getElementById('mcSumHint').textContent='🎉 가정으로부터 결론이 자동 성립! 3D 화면에 결론 ⊥가 크게 강조되었어요';
+    document.getElementById('mcSumHint').textContent='🎉 가정으로부터 결론이 이어졌어요! 3D 화면에 결론 ⊥가 크게 강조되었어요';
     checkReady();
   };
   nextBtn.onclick=function(){
@@ -1367,7 +1367,10 @@ var applyRAHighlight=function(){
       grp._line.material.color.setHex(0xffff00);  // 순노랑 (빨간 배경 대비 강화)
       grp._line.material.opacity=1;
       grp._line.material.transparent=true;
-      if(grp._fill){ grp._fill.material.opacity=0; }          // 가정: 선만 굵게(크기 확대), 채움 없음
+      if(grp._fill){                                          // 가정: 노란 채움 — 조작 화면(채움 없음)과 확연히 구분
+        grp._fill.material.color.setHex(0xffff00);
+        grp._fill.material.opacity=.45;
+      }
     }else if(state==='con'){
       grp._line.material.color.setHex(0x00ffff);  // 순시안 (대비 강화)
       grp._line.material.opacity=1;
@@ -1589,13 +1592,20 @@ var buildSteps=function(){
 
       // 🔍 객관식 선택지 (정답 노출 없는 발견 단계)
       if(active && !done && s.choice){
-        var isWhy=(s.choice==='betaWhy');
+        var isWhy=(s.choice==='betaWhy'||s.choice==='alphaWhy');
         var qWrap=document.createElement('div');
         qWrap.style.cssText=isWhy
           ? 'margin-top:8px;display:flex;flex-direction:column;gap:5px;width:100%'
           : 'margin-top:8px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:4px;width:100%';
         var opts;
-        if(isWhy){
+        if(s.choice==='alphaWhy'){
+          // M3 결론(PO⊥α)의 "이유"를 묻는 능동 확인 — 자동 성립 선언 대신 학생이 근거를 선택
+          opts=[
+            {k:'α 위에서 만나는 두 직선 l, OH가 모두 PO와 수직이므로',ok:true},
+            {k:'PO가 평면 β와 수직이므로',ok:false},
+            {k:'PO가 α 위의 직선 OH와만 수직이면 충분하므로',ok:false}
+          ];
+        }else if(isWhy){
           // β⊥l의 "이유"를 묻는 능동 확인 — 모듈01-1(직선과 평면의 수직) 정리와 개념 연결
           opts=[
             {k:'β 위에서 만나는 두 직선이 모두 l과 수직이므로',ok:true},
@@ -1630,7 +1640,9 @@ var buildSteps=function(){
                 if(!msg){
                   msg=document.createElement('div');msg.id='wrongMsg_'+id;
                   msg.style.cssText='margin-top:6px;padding:5px 8px;font-size:11px;color:#ff9977;text-align:center;background:rgba(255,100,68,.08);border:1px solid rgba(255,100,68,.3);border-radius:4px';
-                  msg.textContent='다시 생각해 보세요. 막히면 아래 힌트 버튼을 활용!';
+                  msg.textContent=(s.choice==='betaWhy'||s.choice==='alphaWhy')
+                    ? '다시 생각해 보세요. 💡 힌트: 1단계 모듈에서 발견한 정리 — 직선이 평면과 수직이 되려면, 평면 위의 직선 "몇 개"와 수직이면 됐었나요?'
+                    : '다시 생각해 보세요. 막히면 아래 힌트 버튼을 활용!';
                   // qWrap 다음에 삽입 (가로 영역 밖)
                   if(qWrap.parentNode) qWrap.parentNode.insertBefore(msg, qWrap.nextSibling);
                 }
@@ -1649,6 +1661,12 @@ var buildSteps=function(){
         hb.style.cssText='margin-top:6px;width:100%;padding:8px;background:#1a1a2e;border:1.5px dashed #8866cc;border-radius:6px;color:#bb99ff;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.02em';
         var tgt = s.hintPH?'PH':(s.hintOH?'OH':'O');
         hb.onclick=function(){
+          // 힌트 사용 횟수 추적 (미션·단계별) — 3회차부터 도착 지점 ⊥90° 표시 허용
+          // 1~2회차: 점선의 '이동'만 보여주고 수직 여부 판단은 학생 몫으로 남김
+          ST.hintN = ST.hintN || {};
+          var hk = ST.mis + '-' + idx;
+          ST.hintN[hk] = (ST.hintN[hk]||0) + 1;
+          window._ghostReveal = (ST.hintN[hk] >= 3);
           // STEP 5(hintPH): PH 점선이 P에서 H 방향으로 천천히 그어짐 (단일 애니메이션)
           // 그 외(hintPOl·hintOH): 직선 l 평행이동 ghostL 애니메이션
           var label;
