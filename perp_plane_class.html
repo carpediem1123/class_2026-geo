@@ -1246,15 +1246,18 @@ function setupBlankInteraction() {
     box.dataset.bound = '1';
     var inp = box.querySelector('.lab-blank-in');
     var hint = box.querySelector('.lab-blank-hint');
-    // ── 정규화(화이트리스트 방식) ──
-    // 따옴표 종류를 나열해 지우는 대신, "정답에 쓰이는 글자(영문·한글·숫자)만 남기고 나머지는 전부 삭제".
-    // 이렇게 하면 곧은따옴표·둥근따옴표·프라임은 물론, 아이패드가 몰래 끼워넣는
-    // 특수공백·제어문자 등 눈에 안 보이는 글자까지 한 번에 제거되어 P'·P′·P가 모두 같아짐.
+    // ── 정규화 ──
+    // [핵심] 따옴표(프라임)는 '삭제'가 아니라 '표준화'한다.
+    //   삭제하면 BP' 와 BP 가 똑같아져 구별 불가 → P와 P'(프라임)는 서로 다른 점이므로 반드시 구별해야 함.
+    //   따라서 곧은/둥근/프라임 등 모든 따옴표류는 하나의 곧은따옴표(')로 '변환'만 하고 개수는 보존한다.
+    //   눈에 안 보이는 유령문자(제로폭 문자·특수공백)만 별도로 제거한다.
+    var QUOTES = /[\u0027\u2018\u2019\u201A\u201B\u2032\u00B4\u0060\uFF07\u02B9\u02BC\u2035]/g; // 따옴표·프라임류 → '
+    var GHOST  = /[\u200B-\u200D\uFEFF\u00A0\s]/g;  // 제로폭·BOM·비분리공백·일반공백 → 제거
     var norm = function(s){
-      return (s||'').replace(/[^A-Za-z0-9\uAC00-\uD7A3]/g,'').toLowerCase();  // 영문/숫자/한글 외 전부 제거 + 소문자화
+      return (s||'').replace(GHOST,'').replace(QUOTES,"'").toLowerCase();
     };
     var normCase = function(s){  // 대소문자까지 정확히 비교(표기 코칭 판정용)
-      return (s||'').replace(/[^A-Za-z0-9\uAC00-\uD7A3]/g,'');
+      return (s||'').replace(GHOST,'').replace(QUOTES,"'");
     };
     var answersRaw = (box.dataset.answer || '').split('|').map(function(a){return a.trim();});
     inp.addEventListener('input', function(){
