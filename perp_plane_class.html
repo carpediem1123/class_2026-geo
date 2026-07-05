@@ -1246,20 +1246,21 @@ function setupBlankInteraction() {
     box.dataset.bound = '1';
     var inp = box.querySelector('.lab-blank-in');
     var hint = box.querySelector('.lab-blank-hint');
-    var answers = (box.dataset.answer || '').split('|').map(function(a){return a.trim().toLowerCase();});
+    // 따옴표류 통일: 곧은따옴표·프라임·iOS 스마트구두점(둥근따옴표)·억음부호까지 전부 흡수
+    var normQ = function(s){ return s.trim().replace(/\s+/g,'').replace(/['\u2032\u2019\u2018\u201B\u00B4\u0060]/g,"'"); };
+    var answersRaw = (box.dataset.answer || '').split('|').map(function(a){return a.trim();});
     inp.addEventListener('input', function(){
-      var v = this.value.trim().toLowerCase()
-        .replace(/\s+/g,'').replace(/['′]/g,"'");  // 따옴표 정규화
-      var ok = answers.some(function(a){
-        return a.replace(/\s+/g,'').replace(/['′]/g,"'") === v;
-      });
+      var raw = this.value;
+      var okExact = answersRaw.some(function(a){ return normQ(a) === normQ(raw); });                       // 대소문자까지 정확
+      var ok = okExact || answersRaw.some(function(a){ return normQ(a).toLowerCase() === normQ(raw).toLowerCase(); });  // 관용 인정
       if (ok) {
         this.style.borderColor = '#44ffaa';
         this.style.color = '#aaffdd';
         this.style.background = '#0a3020';
-        if (hint) hint.innerHTML = '🎉 정답!';
+        if (hint) hint.innerHTML = okExact ? '🎉 정답!'
+          : '🎉 정답! ✍️ 표기 팁: 점의 이름은 <b>대문자</b>, 직선의 이름은 <b>소문자</b>로 써요. 정확한 표기: <b>'+answersRaw[0]+'</b>';
         hint.className = 'lab-blank-hint ok';
-      } else if (v.length > 0) {
+      } else if (normQ(raw).length > 0) {
         this.style.borderColor = '#ff8844';
         this.style.color = '#ffaa88';
         this.style.background = '#1a0800';
