@@ -380,16 +380,25 @@
       </div>
     </div>
     <div class="lab-step-card" data-lab-step="7">
-      <strong style="color:#ff00ff;">5. 이등변삼각형 결론 및 완증</strong><br><br>
-      앞 단계에서 CP = CP'을 얻었습니다.<br>
-      두 변의 길이가 같은 삼각형 PCP'은 어떤 삼각형일까요?
-      <div class="lab-blank-q" data-step="7" data-answer="이등변|이등변삼각형">
-        <span class="lab-blank-eq">△PCP'은 <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"> 삼각형</span>
+      <strong style="color:#ff00ff;">5. 이등변삼각형 발견 → 완증</strong><br><br>
+      두 직각삼각형 △PAC와 △P'AC가 <strong>합동</strong>이므로,
+      대응하는 각인 <strong>∠POC와 ∠P'OC</strong>의 크기를 비교하면?
+      <div class="lab-blank-q" data-step="7a" data-answer="같다|같음|=|동일|같다.">
+        <span class="lab-blank-eq">∠POC <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"> ∠P'OC</span>
         <div class="lab-blank-hint"></div>
       </div>
-      점 O가 밑변 PP'의 <strong>중점</strong>이므로 이등변삼각형의 성질에 의해 중선 OC ⊥ PP', 즉 <strong>직선 k ⊥ 직선 l</strong>!<br><br>
-      평면 α 위의 <strong>임의의</strong> 직선 k에 대해 성립하므로<br>
-      <strong style="color:#ff88ff; font-size:14px;">직선 l ⊥ 평면 α 증명 완료!</strong>
+      두 각이 같고, 그 합이 평각(180°)이므로 각각 <strong>90°</strong>!<br>
+      따라서 <strong>선분 OC ⊥ 직선 l</strong> 입니다.<br><br>
+      그런데 OC는 평면 α 위의 <strong>임의의</strong> 직선 k였습니다.
+      그렇다면 직선 l은 평면 α와 어떤 관계일까요?
+      <div class="lab-blank-q" data-step="7b" data-answer="수직|수직이다|⊥|직교|수직이다.|l⊥α">
+        <span class="lab-blank-eq">직선 l <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"> 평면 α</span>
+        <div class="lab-blank-hint"></div>
+      </div>
+      <div id="proof-final-msg" style="display:none; margin-top:6px; padding:8px 10px; background:rgba(255,0,255,.12); border:1px solid #ff44cc; border-radius:6px; text-align:center;">
+        <strong style="color:#ff88ff; font-size:14px;">🎉 직선 l ⊥ 평면 α — 증명 완료!</strong><br>
+        <span style="font-size:11px; color:#ffbbee;">평면 위 임의의 직선과 수직 ⇒ 평면과 수직</span>
+      </div>
     </div>
   </div>
 
@@ -1222,10 +1231,12 @@ function goLabStep(n) {
   document.getElementById('btn-lab-prev').disabled = currentLabStep === 1;
   const nextBtn = document.getElementById('btn-lab-next');
   if (currentLabStep === totalLabSteps) {
-    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : '증명 완료!';
+    var finBox = document.querySelector('.lab-blank-q[data-step="7b"]');
+    var solved = proofCompleted || (finBox && finBox.dataset.solved === '1');
+    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : (solved ? '🎉 증명 완성 — 기둥 고정!' : '✏️ 빈칸을 채우면 증명 완성');
     nextBtn.style.background = '#1a4a2a';
     nextBtn.style.color = '#44ff88';
-    nextBtn.disabled = proofCompleted;   // 마지막 단계: 클릭 가능 → 증명 완료 연출
+    nextBtn.disabled = proofCompleted || !solved;   // 최종 빈칸을 스스로 채워야 완증 버튼 활성화
   } else {
     nextBtn.textContent = '다음 단계 ▶';
     nextBtn.style.background = '';
@@ -1271,11 +1282,23 @@ function setupBlankInteraction() {
         if (hint) hint.innerHTML = okExact ? '🎉 정답!'
           : '🎉 정답! ✍️ 표기 팁: 점의 이름은 <b>대문자</b>, 직선의 이름은 <b>소문자</b>로 써요. 정확한 표기: <b>'+answersRaw[0]+'</b>';
         hint.className = 'lab-blank-hint ok';
+        box.dataset.solved = '1';   // 이 빈칸 통과 기록
+        // 7단계 최종 빈칸(l⊥α) 정답 → 증명 완료 메시지 노출 + '증명 완성' 버튼 활성화
+        if (box.dataset.step === '7b') {
+          var fin = document.getElementById('proof-final-msg');
+          if (fin) fin.style.display = 'block';
+          var nb = document.getElementById('btn-lab-next');
+          if (nb) { nb.disabled = false; nb.textContent = '🎉 증명 완성 — 기둥 고정!'; }
+        }
       } else if (norm(raw).length > 0) {
         this.style.borderColor = '#ff8844';
         this.style.color = '#ffaa88';
-        this.style.background = '#1a0800';
-        if (hint) hint.innerHTML = '💡 합동인 두 삼각형의 대응되는 변(또는 각)을 생각해보세요.';
+        box.dataset.solved = '';
+        var stp = box.dataset.step;
+        var warnMsg = (stp==='7a') ? '💡 합동인 두 삼각형에서 대응하는 각의 크기는 어떨까요?'
+          : (stp==='7b') ? '💡 평면 위 <b>임의의</b> 직선과 모두 수직이면, 직선과 평면의 관계는?'
+          : '💡 합동인 두 삼각형의 대응되는 변(또는 각)을 생각해보세요.';
+        if (hint) hint.innerHTML = warnMsg;
         hint.className = 'lab-blank-hint warn';
       } else {
         this.style.borderColor = '#ffdd66';
@@ -1407,8 +1430,18 @@ function startKRotationDemo() {
 }
 
 function labNav(dir) {
-  // 마지막 단계에서 '증명 완료!' 클릭 → k ⊥ PO(l) 깜빡임 + 복귀 버튼 유도
-  if (dir === 1 && currentLabStep === totalLabSteps && !proofCompleted) { completeProof(); return; }
+  // 마지막 단계에서 '증명 완성' 클릭 → 단, 최종 빈칸(l⊥α)을 스스로 채운 경우에만 완증 처리
+  if (dir === 1 && currentLabStep === totalLabSteps && !proofCompleted) {
+    var finBox = document.querySelector('.lab-blank-q[data-step="7b"]');
+    if (finBox && finBox.dataset.solved !== '1') {
+      var fh = finBox.querySelector('.lab-blank-hint');
+      if (fh) { fh.innerHTML = '✏️ 빈칸을 채워 스스로 증명을 완성해 보세요!'; fh.className = 'lab-blank-hint warn'; }
+      var fin = finBox.querySelector('.lab-blank-in');
+      if (fin) { fin.style.borderColor = '#ffdd66'; fin.focus(); }
+      return;
+    }
+    completeProof(); return;
+  }
   goLabStep(currentLabStep + dir);
 }
 
@@ -1473,7 +1506,15 @@ function toggleLabPanel() {
     tabBtn.querySelector('.lab-tab-dot').style.background = '#7744cc';
     tabBtn.style.display = 'flex';
     // 화성 관제소 복귀 → 조작 패널·스토리 다시 표시
-    var up=document.getElementById('ui-panel'); if(up) up.style.display='flex';
+    var up=document.getElementById('ui-panel');
+    if(up){
+      up.style.display='flex';
+      // 아이패드(사령부 복귀 버튼이 있는 단독 실행)에서는 패널을 우측 상단 버튼 아래로 내려 겹침 방지
+      var hub=document.getElementById('bHub');
+      if(hub && hub.style.display !== 'none'){
+        up.style.top = 'calc(env(safe-area-inset-top,0px) + 54px)';
+      }
+    }
     var sp=document.getElementById('story-panel'); if(sp) sp.style.display='block';
     
     scene.background = bgColorMain;
