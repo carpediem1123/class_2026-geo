@@ -656,8 +656,8 @@ var lsPO=mkLS(0x5599ff);
 // ── 개념잇기: 직선 l 평행이동 애니메이션 (PO⊥l 직관 확인) ──
 // PO⊥α의 정의는 "평면 위 모든 직선과 수직" — l이 O를 지나지 않아도
 // 평행이동하면 이루는 각이 보존되므로 PO⊥l 임을 눈으로 보여준다.
-var ghostLn=mkLS(0xffcc44);
-ghostLn.mat.dashSize=.28;ghostLn.mat.gapSize=.18;ghostLn.line.visible=false;
+var ghostLn=mkLS(0xffe600);
+ghostLn.mat.dashSize=.34;ghostLn.mat.gapSize=.12;ghostLn.line.visible=false;  // 대시 굵게·간격 좁게 → 배경에 묻히지 않게 선명하게
 var ghostMark=(function(){
   var c=document.createElement('canvas');c.width=96;c.height=64;
   var x=c.getContext('2d');x.font='bold 40px Courier New';x.fillStyle='#ffdd55';x.fillText('⊥',6,46);
