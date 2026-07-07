@@ -35,7 +35,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 .adv-tab{flex:1;padding:8px 3px;font-size:11px;font-weight:bold;color:#7799bb;
   background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .adv-tab.on{color:#88ccff;border-bottom-color:#5588ff;background:#0d1630}
-.adv-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:9px 12px;padding-bottom:calc(140px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
+.adv-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:9px 12px;padding-bottom:calc(200px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
 .adv-card{background:#091525;border:1.5px solid #1e3060;border-radius:8px;
   padding:9px 11px;flex-shrink:0;overflow:visible;word-break:keep-all}
 .adv-card.ok-card{border-color:#22aa44}
@@ -357,20 +357,22 @@ S′ = S × cosθ = ?</div>
 var advTab=0;
 
 // ── 아이패드 안정 스크롤: scrollIntoView는 iOS에서 불안정하므로 스크롤 컨테이너를 직접 이동 ──
-// 대상 요소가 속한 .adv-scroll 컨테이너를 찾아, 요소가 중앙에 오도록 scrollTop을 부드럽게 조정한다.
+// 대상 요소를 화면 '위쪽 1/3' 지점으로 끌어올린다. (중앙으로 하면 마지막 요소가 하단 경계에
+//  걸려 안 보이는 경우가 있어, 위쪽에 두고 아래 여백을 남기는 방식이 더 안정적)
 function advScrollTo(el){
   if(!el) return;
   var box = el.closest ? el.closest('.adv-scroll') : null;
   if(!box){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} return; }
-  // 두 번 시도: 즉시 + 레이아웃 확정 후(버튼이 막 display:block 된 경우 대비)
   var doScroll=function(){
-    var target = el.offsetTop - box.clientHeight/2 + el.offsetHeight/2;
+    // 요소를 컨테이너 위쪽 약 1/3 지점에 배치 → 그 아래로 힌트 버튼 등이 보일 공간 확보
+    var target = el.offsetTop - box.clientHeight*0.32;
     target = Math.max(0, Math.min(target, box.scrollHeight - box.clientHeight));
     try{ box.scrollTo({top:target, behavior:'smooth'}); }
     catch(e){ box.scrollTop = target; }   // 구형 사파리 폴백
   };
   doScroll();
   setTimeout(doScroll, 60);
+  setTimeout(doScroll, 260);   // 힌트 버튼이 막 display된 뒤 높이 반영까지 한 번 더
 }
 
 // ═══ 단계형 잠금해제: 기본개념 → 심화① → 심화② 순서 강제 ═══
