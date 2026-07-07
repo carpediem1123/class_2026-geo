@@ -2114,6 +2114,10 @@ var setMars=function(m){
     C.ph=Math.PI/4;  // 45도 (yz 평면 각도)
     C.r=12;
     updCam();
+  } else {
+    // 화성 모드 복귀: 카메라를 명시적으로 갱신해 슬라이더 조작이 즉시 반영되도록
+    // (기하 모드에서 고정됐던 시점이 남아 슬라이더 변화가 안 보이던 문제 해결)
+    updCam();
   }
   
   document.getElementById('bM').textContent=m?'🪐 Mars':'📐 Geo';
