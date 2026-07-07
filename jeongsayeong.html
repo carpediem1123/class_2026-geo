@@ -429,11 +429,17 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 3: 이유 & 결과 -->
           <div class="iq-card" id="iq3">
             <div class="iq-tt">Step 4  왜 45°일까?</div>
-            <div class="iq-bd" id="iq3body">✅ θ=45°에서 에너지 효율 최대!
+            <div class="iq-bd" id="iq3body">🔍 Side View를 관찰해 봅시다!
 
-💡 지면 -15° 기울기 + 태양 30° 고도 = 수평 기준 45°
-패널을 45°로 세우면 빛과 패널이 수직(90°)이 되어 직사광선을 정면으로 받아요.
-(Side View에서 확인!)</div>
+빛은 경사면(α)과 <strong>30°</strong>를 이루며 내리쬡니다.
+그리고 경사면은 수평에서 <strong>15°</strong> 기울어져 있어요.
+
+그렇다면 빛은 <strong>수평</strong>과 몇 도를 이룰까요?
+　빛–경사면 30° ＋ 경사면–수평 15° ＝ ?
+
+패널이 이 빛과 <strong>수직(90°)</strong>이 되려면,
+패널을 수평에서 몇 도로 세워야 할까요?
+(오른쪽 Side View에서 30°를 직접 확인하며 생각해 보세요!)</div>
             <button class="gobtn" id="iq3btn" style="margin:8px 0 0">공식 찾기 →</button>
           </div>
 
@@ -834,10 +840,8 @@ function makeSolarT(){
   ctx.strokeStyle='rgba(100,160,255,.9)';ctx.lineWidth=1.5;
   for(let i=0;i<=10;i++){ctx.beginPath();ctx.moveTo(i*cw,0);ctx.lineTo(i*cw,CH);ctx.stroke();}
   for(let j=0;j<=10;j++){ctx.beginPath();ctx.moveTo(0,j*rh);ctx.lineTo(CW,j*rh);ctx.stroke();}
-  ctx.fillStyle='rgba(180,220,255,.9)';ctx.font='bold 18px monospace';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('태양열패널',CW/2,CH/2-12);
-  ctx.fillText('S=100',CW/2,CH/2+12);
+  // 패널 표면 글자('태양열패널/S=100')는 제거 — 패널이 기울 때 우측 Side View 영역과 겹쳐 보이는 문제 방지.
+  // 패널의 정체는 격자 태양전지 무늬로 충분히 전달되며, S=100 정보는 좌측 HUD·우측 뷰에 이미 표시됨.
   return new THREE.CanvasTexture(c);
 }
 const matSolar=new THREE.MeshStandardMaterial({map:makeSolarT(),side:THREE.DoubleSide,roughness:.25,metalness:.3});
@@ -1607,11 +1611,31 @@ function drawSideP2(ctx,W,H,t){
     ctx.lineTo(ex-rdx*10+nx*4,ey-rdy*10+ny*4);
     ctx.lineTo(ex-rdx*10-nx*4,ey-rdy*10-ny*4);ctx.closePath();ctx.fill();
   }
-  // 태양 고도 레이블
-  
-  ctx.fillStyle='#ffee44';ctx.font='bold 14px Courier New';
-  ctx.fillText('Side View',8,20);
-  ctx.fillText('빛과 화성면이 이루는 각:30°',8,48);
+  // 태양 고도 레이블 — 'Side View' 제목은 HTML 라벨(.vt)에 이미 있으므로 캔버스에는 각도 안내만
+  ctx.fillStyle='#ffee44';ctx.font='bold 12px Courier New';
+  ctx.fillText('빛과 화성면(α)이 이루는 각: 30°',8,20);
+
+  // ── 빛과 경사면 α가 이루는 30° 각을 '경사면 위 한 점'에서 호로 직접 표시 ──
+  // 경사면 위쪽(왼쪽) 한 점을 잡아, 그 점에서 α방향과 빛의 반대방향 사이 각(=30°)을 그린다.
+  (function drawAngle30(){
+    // 경사면 위 기준점 P0: 힌지에서 왼쪽-위로 약간 (화면 안)
+    var u = aLen*0.5;
+    var p0x = ox - u, p0y = oy - u*s15/c15;
+    if(p0x<12) { p0x=12; p0y=oy-(ox-12)*s15/c15; }
+    // 경사면을 따라 오른쪽-아래로 향하는 방향 = ev = (c15, s15)
+    var aAng = Math.atan2(ev[1], ev[0]);
+    // 빛이 '올라오는' 방향(광선의 반대) = (-rdx, -rdy) ; 광선은 (cos45, sin45)로 내려오므로 올라오는 쪽은 왼쪽-위
+    var rUpAng = Math.atan2(-Math.sin(45*DEG), -Math.cos(45*DEG));
+    ctx.strokeStyle='rgba(255,238,68,.9)';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.arc(p0x,p0y,20,aAng,rUpAng,true);ctx.stroke();
+    var mid=(aAng+rUpAng)/2;
+    ctx.fillStyle='#ffee44';ctx.font='bold 11px Courier New';
+    ctx.fillText('30°',p0x+26*Math.cos(mid)-8,p0y+26*Math.sin(mid)+4);
+    // 그 점에서 빛 광선 한 줄기를 강조(경사면에 실제로 닿는 광선)
+    ctx.strokeStyle='rgba(255,220,50,.6)';ctx.lineWidth=1.4;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(p0x,p0y);ctx.lineTo(p0x-Math.cos(45*DEG)*46,p0y-Math.sin(45*DEG)*46);ctx.stroke();
+    ctx.setLineDash([]);
+  })();
 
   // ── 패널 방향 계산 (수평에서 시작) ──
   // canvas 좌표계: 오른쪽 +x, 아래 +y
@@ -1665,8 +1689,23 @@ function drawSideP2(ctx,W,H,t){
     if(shLenPx>4){
       ctx.strokeStyle='rgba(255,160,0,.92)';ctx.lineWidth=5;
       ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(shExC,shEyC);ctx.stroke();
-      ctx.strokeStyle='rgba(255,220,50,.45)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
-      ctx.beginPath();ctx.moveTo(ptx,pty);ctx.lineTo(shExC,shEyC);ctx.stroke();
+      // ── 투영 점선: 패널 끝(S)에서 '빛 방향(45°)과 평행하게' 내려가 그림자 끝(S')과 만남 ──
+      // 정사영은 빛이 평행하게 내리쬐는 것이므로, 이 점선은 반드시 광선과 같은 기울기(45°)여야 한다.
+      // 패널 끝에서 광선 방향(rdx,rdy)으로 진행 → 경사면(α) 직선과 만나는 교점을 계산해 그 지점까지 긋는다.
+      var rayD=[Math.cos(45*DEG), Math.sin(45*DEG)];   // 빛 방향 (오른쪽-아래, side view의 광선과 동일)
+      // 경사면 α 위의 점: (ox,oy) + u*(ev[0],ev[1]) / 광선 위의 점: (ptx,pty) + v*(rayD[0],rayD[1])
+      // 두 직선의 교점 (ptx + v*rayDx = ox + u*evx,  pty + v*rayDy = oy + u*evy) 를 v에 대해 풂
+      var det = rayD[0]*(-ev[1]) - rayD[1]*(-ev[0]);
+      var hitX=shExC, hitY=shEyC;   // 기본값(안전)
+      if(Math.abs(det)>1e-6){
+        var v = ((ox-ptx)*(-ev[1]) - (oy-pty)*(-ev[0]))/det;
+        hitX = ptx + v*rayD[0];
+        hitY = pty + v*rayD[1];
+        // 캔버스 밖으로 나가면 클램프
+        if(hitX>W-8){ var kk=(W-8-ptx)/rayD[0]; hitX=W-8; hitY=pty+kk*rayD[1]; }
+      }
+      ctx.strokeStyle='rgba(255,220,50,.7)';ctx.lineWidth=1.8;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(ptx,pty);ctx.lineTo(hitX,hitY);ctx.stroke();
       ctx.setLineDash([]);
     }
     // 그림자 넓이 표시 — oblSp 기준으로 Top View·HUD와 동일한 값
