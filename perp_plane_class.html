@@ -798,6 +798,11 @@ function updateLogic() {
       }
     }
   }
+  else if (state === 'STEP_SUMMARY') {
+    // 수학실험실에서 복귀한 자유 관찰 상태 — 슬라이더로 기둥을 계속 조작할 수 있게 반영
+    antennaGroup.rotation.z = -currentZ;
+    antennaGroup.rotation.x = currentX;
+  }
   else if (state === 'STEP2_VIEW') {
     statusBox.innerHTML = `❓ 다른 측면에서 관측 중입니다.<br>기둥(l)이 정말로 지면 및 지지대와 수직입니까?`;
     statusBox.style.color = "#ffaa00";
@@ -1524,6 +1529,8 @@ function toggleLabPanel() {
     state = 'STEP_SUMMARY';
     lineM.visible = true; lineN.visible = true; lineG.visible = true;
     antennaGroup.visible = true; terrain.visible = true;
+    document.getElementById('sliderZ').disabled = false;   // 복귀 후 슬라이더 조작 가능하게
+    document.getElementById('sliderX').disabled = false;
     while (proofMeshGroup.children.length > 0) {
       proofMeshGroup.remove(proofMeshGroup.children[0]);
     }
