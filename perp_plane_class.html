@@ -1484,6 +1484,31 @@ function completeProof() {
 function toggleLabPanel() {
   let panel = document.getElementById('lab-panel');
   let tabBtn = document.getElementById('lab-tab-btn');
+
+  // 실험실을 '닫으려는' 경우(=복귀): 증명을 완수하지 않았으면 막는다.
+  // 이유: 직선⊥평면의 '필요충분조건(평면 위 두 직선과 수직)'을 학생이 증명으로 스스로 발견하도록 유도.
+  if (labOpen && !proofCompleted) {
+    var lh = document.getElementById('lab-proof-lock-msg');
+    if(!lh){
+      lh=document.createElement('div');
+      lh.id='lab-proof-lock-msg';
+      lh.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);'+
+        'background:linear-gradient(135deg,#2a1a0a,#1a0e04);border:2px solid #ffaa44;'+
+        'border-radius:12px;padding:18px 22px;color:#ffcc88;font-size:13.5px;font-weight:bold;'+
+        'text-align:center;z-index:99999;box-shadow:0 6px 30px rgba(0,0,0,.6);max-width:300px;line-height:1.6;';
+      document.body.appendChild(lh);
+    }
+    lh.innerHTML='🔒 아직 증명이 끝나지 않았어요!<br><br>'+
+      '<span style="font-weight:400;font-size:12px;color:#eebb88">마지막 단계까지 빈칸을 채워 '+
+      '<b>l ⊥ 평면 α</b> 증명을 완성하면<br>화성 관제소로 돌아갈 수 있어요.<br>'+
+      '스스로 증명을 완성해 보세요! 💪</span>';
+    lh.style.display='block';
+    clearTimeout(lh._t);
+    lh._t=setTimeout(function(){ lh.style.display='none'; },3600);
+    return;   // 복귀 차단
+  }
+
+  let wasOpen = labOpen;
   labOpen = !labOpen;
 
   if (labOpen) {
