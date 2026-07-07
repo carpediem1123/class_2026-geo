@@ -105,6 +105,13 @@
   }
   #lab-tab-btn:hover { background: rgba(40, 20, 80, 0.95); border-color: #aa77ff; color: #ddaaff; box-shadow: 0 0 18px rgba(170, 119, 255, 0.4); }
   #lab-tab-btn.active { background: rgba(60, 20, 120, 0.95); border-color: #cc99ff; color: #eeddff; }
+  /* 잠금 상태: 미션 완료 전 — 흐리게 표시 (자물쇠) */
+  #lab-tab-btn.lab-locked { border-color: #445566; color: #667788; box-shadow: none; opacity: 0.72; }
+  #lab-tab-btn.lab-locked .lab-tab-dot { background: #556677; animation: none; }
+  #lab-tab-btn.lab-locked:hover { background: rgba(8,4,24,.92); border-color: #556677; color: #7788aa; box-shadow: none; }
+  /* 해제 순간: 금색 반짝임으로 "이제 갈 수 있어요" 강조 */
+  #lab-tab-btn.lab-justUnlocked { border-color: #ffcc44; color: #ffe088; box-shadow: 0 0 16px rgba(255,204,68,.6); animation: labUnlockFlash 1s ease-in-out 3; }
+  @keyframes labUnlockFlash { 0%,100%{box-shadow:0 0 16px rgba(255,204,68,.6)} 50%{box-shadow:0 0 26px rgba(255,204,68,.95); border-color:#ffee88} }
   .lab-tab-dot { width: 8px; height: 8px; border-radius: 50%; background: #7744cc; flex-shrink: 0; animation: labPulse 2s infinite; }
   @keyframes labPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
@@ -298,9 +305,9 @@
 <!-- iOS 직접 이동 모드 전용: 사령부 복귀 버튼 — 우측 상단, 타 모듈(.hb)과 동일 디자인 -->
 <button id="bHub" onclick="window.location.href='index.html'" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:8500;width:auto;background:#162030;border:2px solid #2a3a4a;border-radius:7px;color:#88aacc;font-size:12px;padding:6px 10px;min-height:36px;line-height:1;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
 
-<button id="lab-tab-btn" onclick="toggleLabPanel()">
+<button id="lab-tab-btn" class="lab-locked" onclick="toggleLabPanel()">
   <div class="lab-tab-dot"></div>
-  🔬 수학실험실
+  <span id="lab-tab-label">🔒 수학실험실</span>
 </button>
 
 <div id="lab-panel">
@@ -478,7 +485,7 @@
     </div>
     
     <div class="btn-container">
-      <button class="btn-warning" onclick="toggleLabPanel(); modal.style.display='none'; modal.style.opacity='0';">🔬 수학실험실에서 교과서 증명 보기</button>
+      <button class="btn-warning" onclick="unlockLabPanel(); toggleLabPanel(); modal.style.display='none'; modal.style.opacity='0';">🔬 수학실험실에서 교과서 증명 보기</button>
       <button class="btn-success" onclick="goNext()">┄┄▶ 다음 개념 잇기: 삼수선의 정리</button>
       <button onclick="goHub()">◀ 사령부로 복귀</button>
     </div>
@@ -929,6 +936,7 @@ dynamicBtnContainer.addEventListener('click', (e) => {
       document.getElementById('controls').style.display = 'none';
       dynamicBtnContainer.innerHTML = '';
       guideText.innerText = "기둥이 완벽히 수직 고정되었습니다. 무한히 회전하는 가상 광선 g선이 실시간으로 직각을 그리는지 감상하세요.";
+      unlockLabPanel();   // 🔓 미션 완료 → 수학실험실 잠금 해제
     }
   } 
   else if (target.id === 'btn-quiz-submit') {
@@ -1481,9 +1489,58 @@ function completeProof() {
   goLabStep(totalLabSteps);  // 버튼 상태 갱신 (✅ 증명 완료!)
 }
 
+// 🔓 미션 완료 시 수학실험실 잠금 해제 — 버튼을 정상(🔬)으로 되돌리고 금색으로 반짝여 안내
+var labUnlocked = false;
+function unlockLabPanel(){
+  if(labUnlocked) return;   // 중복 실행 방지
+  labUnlocked = true;
+  var btn = document.getElementById('lab-tab-btn');
+  var label = document.getElementById('lab-tab-label');
+  if(!btn) return;
+  btn.classList.remove('lab-locked');
+  if(label) label.textContent = '🔬 수학실험실';
+  // 금색 반짝임으로 '이제 증명하러 갈 수 있어요' 강조 (3회 후 정상 보라색으로)
+  btn.classList.add('lab-justUnlocked');
+  setTimeout(function(){ btn.classList.remove('lab-justUnlocked'); }, 3200);
+  // 안내 토스트
+  var t = document.createElement('div');
+  t.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 58px);left:10px;'+
+    'background:linear-gradient(135deg,#2a2000,#1a1400);border:2px solid #ffcc44;'+
+    'border-radius:10px;padding:10px 14px;color:#ffe088;font-size:12px;font-weight:bold;'+
+    'z-index:9998;box-shadow:0 4px 16px rgba(255,204,68,.4);max-width:220px;line-height:1.5;'+
+    'opacity:0;transition:opacity .4s ease;';
+  t.innerHTML='🔓 수학실험실이 열렸어요!<br><span style="font-weight:400;font-size:11px;color:#ddbb66">이제 "왜 수직이 되는지" 증명하러 가볼까요?</span>';
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.style.opacity='1'; });
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },500); }, 4200);
+}
+
 function toggleLabPanel() {
   let panel = document.getElementById('lab-panel');
   let tabBtn = document.getElementById('lab-tab-btn');
+
+  // 미션 완료 전(잠금 상태): 실험실 진입 차단 + 친절한 안내
+  // 이유: '관제소에서 현상을 먼저 체험 → 그 이유를 증명'이라는 발견학습 순서를 지키기 위함.
+  if (!labOpen && tabBtn.classList.contains('lab-locked')) {
+    var lm = document.getElementById('lab-locked-msg');
+    if(!lm){
+      lm=document.createElement('div');
+      lm.id='lab-locked-msg';
+      lm.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);'+
+        'background:linear-gradient(135deg,#0a1830,#08101e);border:2px solid #5588cc;'+
+        'border-radius:12px;padding:18px 22px;color:#aaccff;font-size:13.5px;font-weight:bold;'+
+        'text-align:center;z-index:99999;box-shadow:0 6px 30px rgba(0,0,0,.6);max-width:310px;line-height:1.6;';
+      document.body.appendChild(lm);
+    }
+    lm.innerHTML='🔒 수학실험실은 아직 잠겨 있어요!<br><br>'+
+      '<span style="font-weight:400;font-size:12px;color:#99bbdd">먼저 <b>화성 관제소 미션</b>을 완료해 보세요.<br>'+
+      '기둥을 두 지지대와 수직으로 맞춰 <b>기지를 복구</b>하면,<br>'+
+      '"왜 그렇게 되는지" 증명하러 갈 수 있어요! 🛠️</span>';
+    lm.style.display='block';
+    clearTimeout(lm._t);
+    lm._t=setTimeout(function(){ lm.style.display='none'; },3600);
+    return;   // 진입 차단
+  }
 
   // 실험실을 '닫으려는' 경우(=복귀): 증명을 완수하지 않았으면 막는다.
   // 이유: 직선⊥평면의 '필요충분조건(평면 위 두 직선과 수직)'을 학생이 증명으로 스스로 발견하도록 유도.
