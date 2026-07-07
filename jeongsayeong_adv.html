@@ -1582,49 +1582,55 @@ function buildBoxScene(){
           requestAnimationFrame(growLine);
         } else {
           cone.visible=true;
+          revealShadow();   // ★ 점선이 끝점에 '도달한 뒤에야' 그림자(수선의 발)를 밝힘 — 답이 먼저 보이는 착각 방지
           setTimeout(function(){
             scene.remove(dashL); scene.remove(cone);
           }, 2800);
         }
       })();
+    } else {
+      revealShadow();  // 점선 대상이 없는 예외 상황: 즉시 그림자 표시
     }
 
-    // ── ③ DirectionalLight 페이드인 → EFGH에 그림자 생성 ──
-    if(!window._hintLights || !window._hintLights[pt]) return;
-    var light = window._hintLights[pt];
-    light.intensity = 0;
-    var t0 = Date.now(), fadeDur = 500;
-    (function fadeIn(){
-      var p = Math.min((Date.now()-t0)/fadeDur, 1);
-      light.intensity = p * 3.0;
-      if(p < 1){ requestAnimationFrame(fadeIn); }
-      else {
-        // ── ③ 수선의 발 위치 마커 깜빡임 ──
-        var marker = window._footMarkers && window._footMarkers[pt];
-        if(marker){
-          marker.material.opacity = 1;
+    // ── ③ 점선 도달 후: 그 끝점(수선의 발)의 마커만 '파란불로 커지며' 밝힘 ──
+    // (공유 DirectionalLight로 그림자를 만들면 A·F·C 그림자가 동시에 생기므로, 해당 마커만 점등)
+    function revealShadow(){
+      var marker = window._footMarkers && window._footMarkers[pt];
+      if(!marker) return;
+      marker.material.opacity = 1;
+      marker.material.color.setHex(0x00ccff);
+      marker.material.emissive.setHex(0x00ccff);
+      // 커지는 등장 애니메이션 (0 → 1.4배) + 점등
+      var t0 = Date.now(), popDur = 420;
+      var baseS = 1;
+      (function pop(){
+        var p = Math.min((Date.now()-t0)/popDur, 1);
+        var sc = 0.2 + (1.4-0.2)*p;   // 작게 시작 → 크게
+        marker.scale.set(sc, sc, sc);
+        marker.material.emissiveIntensity = p * 1.6;
+        if(p < 1){ requestAnimationFrame(pop); }
+        else {
+          // 도달 강조: 깜빡임 후 사라짐
           var blinkT0 = Date.now(), blinkDur = 2400;
           (function blink(){
             var bp = (Date.now()-blinkT0);
             if(bp < blinkDur){
-              // 0.4초 주기로 깜빡임
-              marker.material.emissiveIntensity = (Math.sin(bp/400*Math.PI*2) > 0) ? 1.5 : 0.2;
+              marker.material.emissiveIntensity = (Math.sin(bp/400*Math.PI*2) > 0) ? 1.6 : 0.4;
               requestAnimationFrame(blink);
             } else {
-              marker.material.opacity = 0;
-              marker.material.emissiveIntensity = 0;
-              // 빛도 페이드아웃
               var t1=Date.now();
               (function fadeOut(){
                 var q=Math.min((Date.now()-t1)/400,1);
-                light.intensity=3.0*(1-q);
+                marker.material.opacity = 1-q;
+                marker.material.emissiveIntensity = 1.6*(1-q);
                 if(q<1) requestAnimationFrame(fadeOut);
+                else { marker.scale.set(baseS,baseS,baseS); }
               })();
             }
           })();
         }
-      }
-    })();
+      })();
+    }
   };
 
   document.addEventListener('click',function(e){
