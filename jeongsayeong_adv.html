@@ -557,26 +557,26 @@ var QDB={
     ans:'b',
     ok:'정답! △DBC = 9√3\n한 변 6인 정삼각형: 넓이 = <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×36 = 9√3',
     ng:{
-      a:'6√3은 한 변 4인 정삼각형 넓이예요. 변=6 → <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×36 = 9√3!',
+      a:'6√3이 나온 과정을 다시 볼까요? 한 변 a인 정삼각형 넓이 = <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×a². 여기서 a=6이면 <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×36 = ?',
       c:'12√3은 너무 커요. 정삼각형 넓이 공식: <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×a²',
-      d:'18√3은 훨씬 커요. a=6 → <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×36 = 9√3!'
+      d:'18√3은 너무 커요. <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×6² = <span class="frac"><span class="num">√3</span><span class="den">4</span></span>×36 = ?'
     }
   },
   '1q3':{
     ans:'b',
     ok:'정답! △M′BC = 6√3\nM′은 DG 중점 → △M′BC = △DBC × <span class="frac"><span class="num">2</span><span class="den">3</span></span> = 9√3 × <span class="frac"><span class="num">2</span><span class="den">3</span></span> = 6√3',
     ng:{
-      a:'3√3은 △DBC의 13인데, M′BC는 DBC의 23예요!',
-      c:'4√3은 어떻게 나왔나요? M′BC = 9√3 × 23 = 6√3',
-      d:'9√32는 절반이에요. 무게중심 비율을 다시 확인하세요!'
+      a:'3√3은 △DBC의 <span class="frac"><span class="num">1</span><span class="den">3</span></span>이에요. M′은 무게중심 G와 어떤 위치 관계였죠? 밑변 BC는 그대로인데 높이가 어떻게 변하는지 생각해 보세요!',
+      c:'4√3이 나온 과정을 점검해 볼까요? M′은 DG의 중점 → 높이 비율을 따져보면 △M′BC = △DBC × <span class="frac"><span class="num">2</span><span class="den">3</span></span> = 9√3 × <span class="frac"><span class="num">2</span><span class="den">3</span></span> = ?',
+      d:'<span class="frac"><span class="num">9√3</span><span class="den">2</span></span>는 절반(<span class="frac"><span class="num">1</span><span class="den">2</span></span>)을 곱한 값이에요. M′의 위치에서 나오는 비율은 <span class="frac"><span class="num">1</span><span class="den">2</span></span>이 아니에요. 무게중심의 성질을 다시 확인!'
     }
   },
   '2q0':{
     ans:'a',
     ok:'✅ 정답! 넓이가 작아진 타원이에요.<br>정사영 공식: S′ = S·cosθ = 4π × <span class="frac"><span class="num">√2</span><span class="den">2</span></span> &lt; 4π<br>한 방향(단축)만 cos45°배로 줄어들어요.',
     ng:{
-      b:'❌ 이 정사영에서는 넓이가 줄어요.<br>S′ = S·cosθ = 4π·cos45° &lt; 4π<br>(역정사영은 커질 수 있지만, 여기선 원→기울어진 면)',
-      c:'❌ 원의 정사영이 원이 되려면 두 평면이 평행해야 해요.<br>AFGD는 ABCD와 45° 기울어져 있어요!'
+      b:'🤔 정말 커질까요? 3D 화면을 돌려서 <b>빛이 어느 방향으로</b> 원을 비추는지 관찰해 보세요. 빛과 나란한 방향의 길이는 어떻게 될까요? 공간잇기 힌트로 수선의 발을 직접 내려 봐도 좋아요!',
+      c:'🤔 모양이 그대로일까요? 두 평면(원이 있는 면과 그림자가 생기는 면)이 <b>서로 어떤 각</b>을 이루는지 3D 화면에서 관찰해 보세요. 기울어져 있다면 그림자는 어떻게 될까요?'
     },
     hint_a: true,
     hint:true
@@ -1315,7 +1315,7 @@ window.showTetraHint0 = function(){
       (function blink(){
         var bp=Date.now()-bt;
         if(bp<2400){mk.material.opacity=(Math.sin(bp/400*Math.PI*2)>0)?1.0:0.1;requestAnimationFrame(blink);}
-        else{mk.material.opacity=0.8; scene.remove(dl);}
+        else{mk.material.opacity=0; scene.remove(dl);}   // step1의 M'와 동일하게: 깜빡임 후 완전히 사라짐 (답 잔존 방지)
       })();
     }
   })();
