@@ -431,17 +431,21 @@ S'/S 값을 보며 다음 중 [?]에
 
           <!-- Step 3: 이유 & 결과 -->
           <div class="iq-card" id="iq3">
-            <div class="iq-tt">Step 3  왜 45°일까?</div>
-            <div class="iq-bd" id="iq3body">🔍 <strong>Side View</strong>에서 각을 하나씩 확인해요!
+            <div class="iq-tt">Step 3  왜 45°였을까?</div>
+            <div class="iq-bd" id="iq3body">방금 눈으로 잡은 45° — 우연일까요? <strong>Side View</strong>의 두 각으로 확인해 봐요.
 
 ① 경사면은 수평에서 <strong>15°</strong> 기울어짐
 ② 빛은 경사면과 <strong>30°</strong>로 내리쬠
-　→ 그럼 빛은 수평과? <strong>15°+30° = 45°</strong>
 
-패널이 빛을 <strong>정면(90°)</strong>으로 받으려면,
-빛(수평 45°)과 수직이 되어야 해요.
-　→ 패널은 수평에서 <strong>45°</strong>! ✨</div>
-            <button class="gobtn" id="iq3btn" style="margin:8px 0 0">공식 찾기 →</button>
+그렇다면 빛은 <strong>수평</strong>과 몇 도를 이룰까요?
+(Side View에서 두 각을 이어서 보세요!)</div>
+            <div class="sel-btns" style="margin-top:8px">
+              <button class="sel-btn lightPick" data-v="30">30°</button>
+              <button class="sel-btn lightPick" data-v="45">45°</button>
+              <button class="sel-btn lightPick" data-v="60">60°</button>
+            </div>
+            <div id="iq3msg" style="display:none" class="qmsg"></div>
+            <button class="gobtn" id="iq3btn" style="margin:8px 0 0;display:none">공식 찾기 →</button>
           </div>
 
           <!-- Step 4: 공식 선택 -->
@@ -1595,11 +1599,7 @@ function drawSideP2(ctx,W,H,t){
     ctx.lineTo(ex-rdx*10+nx*4,ey-rdy*10+ny*4);
     ctx.lineTo(ex-rdx*10-nx*4,ey-rdy*10-ny*4);ctx.closePath();ctx.fill();
   }
-  // 태양 고도 레이블 — 'Side View' 제목(하늘색)은 HTML 라벨(.vt) 상단에 있으므로,
-  // 겹치지 않도록 이 노란 안내문은 캔버스 '하단'에 배치
-  ctx.fillStyle='#ffee44';ctx.font='bold 11px Courier New';
-  ctx.textAlign='left';
-  ctx.fillText('☀ 빛-경사면 30°  📐 경사-수평 15°',8,H-8);
+  // (범례 텍스트 제거 — 30°·15°는 그림 속 호에 직접 라벨되므로 하단 중복 표기가 '그림자 넓이'와 겹치던 문제 해소)
 
   // ── 빛과 경사면 α가 이루는 30° 각: '가장 왼쪽 광선'이 경사면과 만나는 지점의 '내각'으로 표시 ──
   (function drawAngle30(){
@@ -1687,7 +1687,7 @@ function drawSideP2(ctx,W,H,t){
     ctx.stroke();
     ctx.fillStyle='#5aff8c';ctx.font='bold 11px Courier New';ctx.textAlign='center';
     var lblx=ptx+(pDir[0]+lDir[0])*mkS*1.8, lbly=pty+(pDir[1]+lDir[1])*mkS*1.8;
-    if(lblx>10&&lblx<W-10&&lbly>10&&lbly<H-10) ctx.fillText('90°',lblx,lbly);
+    if(lblx>10&&lblx<W-10&&lbly>10&&lbly<H-36) ctx.fillText('90°',lblx,lbly);   // 하단 '그림자 넓이' 줄 침범 방지
     ctx.textAlign='left';
   }
 
@@ -1965,6 +1965,28 @@ document.getElementById('iq3btn').addEventListener('click',()=>{
   // iq4로 스크롤
   document.getElementById('iq4').scrollIntoView({behavior:'smooth',block:'start'});
 });
+// [발견형] Step 3 — 빛-수평 각을 학생이 직접 결합 (15°+30°)
+document.querySelectorAll('.lightPick').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.lightPick').forEach(b=>b.classList.remove('chosen'));
+    this.classList.add('chosen');
+    const v=this.dataset.v;
+    const msg=document.getElementById('iq3msg');
+    msg.style.display='block';
+    if(v==='45'){
+      msg.className='qmsg qok';
+      msg.textContent='✅ 발견! 경사 15° + 빛-경사면 30° = 빛-수평 45°.\n패널이 빛과 정면(90°)이 되려면 빛과 수직 — 그래서 Step 2에서 잡은 각이 바로 45°였던 거예요! Side View의 90° 표시를 확인해 보세요.';
+      document.getElementById('iq3btn').style.display='block';
+    }else if(v==='30'){
+      msg.className='qmsg qno';
+      msg.textContent='🤔 30°는 빛과 "경사면"의 각이에요. 경사면 자체도 수평에서 기울어져 있죠 — 두 각을 합쳐 보세요!';
+    }else{
+      msg.className='qmsg qno';
+      msg.textContent='🤔 60°는 너무 커요. Side View에서 수평선부터 광선까지, 15°와 30°가 어떻게 쌓이는지 보세요!';
+    }
+  });
+});
+
 // [리팩토링] Step 4 — 정사영 공식: "어느 두 면 사이의 각에 cos을 곱하는가" 하나에 집중
 // 선택 즉시 판정 (별도 확인 버튼 제거 — 동선 압축)
 document.querySelectorAll('.cosPick').forEach(btn=>{
