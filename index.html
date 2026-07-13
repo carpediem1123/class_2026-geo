@@ -49,9 +49,9 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
 /* ── 헤더 ── */
 #hd{flex-shrink:0;background:#06101e;border-bottom:2px solid #1e3a6a;
-  padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+  padding:9px 20px;display:flex;align-items:center;justify-content:space-between}
 .hd-left{display:flex;flex-direction:column;gap:3px}
-.hd-title{font-size:19px;color:#cfe6ff;font-weight:900;letter-spacing:.02em}
+  .hd-title{font-size:17px;color:#cfe6ff;font-weight:900;letter-spacing:.02em}
 .hd-title .dashes{color:#5599ff;font-weight:400}
 .hd-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:#6f9ecf;letter-spacing:.08em}
 .hd-right{display:flex;gap:16px;align-items:center}
@@ -65,16 +65,16 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
 /* ── 메인 콘텐츠 ── */
 #main{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;
-  gap:16px;padding:16px 24px;min-height:0;overflow:hidden}
+  gap:10px;padding:10px 18px;min-height:0;overflow:hidden}
 
 /* ── 스토리 배너 ── */
 #story{grid-column:1/-1;background:#08162c;border:1.5px solid #2a4a80;
-  border-left:4px solid #5599ff;border-radius:8px;padding:14px 20px;
-  display:flex;align-items:flex-start;gap:16px}
+  border-left:4px solid #5599ff;border-radius:8px;padding:9px 16px;
+  display:flex;align-items:flex-start;gap:12px;max-height:90px;overflow:hidden}
 .story-icon{font-size:28px;flex-shrink:0;margin-top:2px}
 .story-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:#5f8fc5;
-  letter-spacing:.15em;margin-bottom:4px}
-.story-body{font-size:13px;color:#d6e6fb;line-height:1.7;word-break:keep-all}
+  letter-spacing:.15em;margin-bottom:2px}
+  .story-body{font-size:12px;color:#d6e6fb;line-height:1.7;word-break:keep-all}
 .story-body b{color:#8ec3ff;font-weight:700}
 .story-body em{color:#ffd34a;font-style:normal;font-weight:700}
 
@@ -82,32 +82,32 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 .mod{background:#07111f;border:1.5px solid #1a3060;border-radius:10px;
   display:flex;flex-direction:column;overflow:hidden;min-height:0}
 
-.mod-header{padding:15px 18px 13px;flex-shrink:0}
+.mod-header{padding:10px 14px 9px;flex-shrink:0}
 .mod-tag{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;
   margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .tag-dot{width:8px;height:8px;border-radius:50%}
-.mod-title{font-size:20px;font-weight:900;line-height:1.2;margin-bottom:6px}
+.mod-title{font-size:17px;font-weight:900;line-height:1.2;margin-bottom:4px}
 .mod-desc{font-size:12px;line-height:1.7;word-break:keep-all}
 
 /* ── 미션 목록 ── */
-.missions{flex:1;border-top:1px solid #101e38;padding:12px 18px;
-  display:flex;flex-direction:column;gap:9px;overflow-y:auto}
+.missions{flex:1;border-top:1px solid #101e38;padding:8px 14px;
+  display:flex;flex-direction:column;gap:6px;overflow-y:auto}
 .mission{display:flex;align-items:flex-start;gap:10px}
 .m-num{font-family:'Share Tech Mono',monospace;font-size:10px;flex-shrink:0;
   padding:3px 7px;border-radius:3px;margin-top:1px;font-weight:bold}
 .m-name{font-size:12.5px;font-weight:700;margin-bottom:1px}
-.m-detail{font-size:11px;line-height:1.45;word-break:keep-all}
+  .m-detail{font-size:10.5px;line-height:1.45;word-break:keep-all}
 
 /* ── 접속 버튼 ── */
-.mod-btn{flex-shrink:0;margin:0 18px;padding:11px;border-radius:6px;
+.mod-btn{flex-shrink:0;margin:0 14px;padding:9px;border-radius:6px;
   text-align:center;font-family:'Share Tech Mono',monospace;font-size:13px;
   letter-spacing:.06em;font-weight:bold;border:none;cursor:pointer;
   transition:all .18s;display:block;width:calc(100% - 36px)}
-.btn-row{flex-shrink:0;display:flex;gap:10px;margin:0 18px 16px}
+.btn-row{flex-shrink:0;display:flex;gap:8px;margin:0 14px 10px}
 .btn-row .mod-btn{flex:1;margin:0;width:auto;padding:9px 6px;line-height:1.35}
 .btn-sub{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10.5px;
   font-weight:700;letter-spacing:0;opacity:.85;margin-top:2px}
-.mod-last{margin-bottom:16px}
+.mod-last{margin-bottom:10px}
 
 /* ═ 모듈1 — 주황-적색 테마 (수직의 세계) ═ */
 .mod-red .mod-header{background:linear-gradient(135deg,#150500 0%,#0a0200 100%)}
@@ -291,7 +291,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
 <script>
 // ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
-var BUILD = '20260706a';
+var BUILD = '20260706c';
 
 // ── 선다운로드: 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아 캐시에 저장 ──
 // [v20260704 수정] 이전 버전의 결함 해결:
