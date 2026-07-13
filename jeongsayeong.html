@@ -415,11 +415,10 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 3: 에너지 최대 효율 각도 찾기 -->
           <div class="iq-card" id="iq2">
             <div class="iq-tt">Step 2  직각의 순간을 포착하라! 🔒</div>
-            <div class="iq-bd">이번엔 손이 아니라 <strong>눈</strong>의 승부!
-패널이 자동으로 회전합니다. 오른쪽 <strong>Side View</strong>를 주시하다가,
-빛과 패널이 <strong>직각(⊥)</strong>이 되는 바로 그 순간 🔒 버튼을 누르세요!
+            <div class="iq-bd">이번엔 <strong>눈</strong>의 승부! 패널이 자동으로 회전합니다.
+오른쪽 <strong>Side View</strong>에서 빛과 패널이 <strong>직각(⊥)</strong>이 되는 순간, 🔒 버튼을 누르세요!
 <button class="gobtn" id="energyInfoBtn" 
-  style="margin:8px 0;padding:8px;font-size:12px;background:#0a1828;border-color:#3366aa">[읽을거리📖]에너지효율의 원리
+  style="margin:8px 0;padding:8px;font-size:12px;background:#0a1828;border-color:#3366aa">[읽을거리📖] 왜 직각일 때 효율 100%일까?
 </button></div>
             <div style="display:flex;gap:8px;align-items:stretch;margin-top:4px">
               <button class="gobtn" id="sweepBtn" style="flex:1;margin:0">▶ 자동 탐색 시작</button>
@@ -433,17 +432,15 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 3: 이유 & 결과 -->
           <div class="iq-card" id="iq3">
             <div class="iq-tt">Step 3  왜 45°일까?</div>
-            <div class="iq-bd" id="iq3body">🔍 Side View를 관찰해 봅시다!
+            <div class="iq-bd" id="iq3body">🔍 <strong>Side View</strong>에서 각을 하나씩 확인해요!
 
-빛은 경사면(α)과 <strong>30°</strong>를 이루며 내리쬡니다.
-그리고 경사면은 수평에서 <strong>15°</strong> 기울어져 있어요.
+① 경사면은 수평에서 <strong>15°</strong> 기울어짐
+② 빛은 경사면과 <strong>30°</strong>로 내리쬠
+　→ 그럼 빛은 수평과? <strong>15°+30° = 45°</strong>
 
-그렇다면 빛은 <strong>수평</strong>과 몇 도를 이룰까요?
-　빛–경사면 30° ＋ 경사면–수평 15° ＝ ?
-
-패널이 이 빛과 <strong>수직(90°)</strong>이 되려면,
-패널을 수평에서 몇 도로 세워야 할까요?
-(오른쪽 Side View에서 30°를 직접 확인하며 생각해 보세요!)</div>
+패널이 빛을 <strong>정면(90°)</strong>으로 받으려면,
+빛(수평 45°)과 수직이 되어야 해요.
+　→ 패널은 수평에서 <strong>45°</strong>! ✨</div>
             <button class="gobtn" id="iq3btn" style="margin:8px 0 0">공식 찾기 →</button>
           </div>
 
@@ -1568,10 +1565,10 @@ function drawSideP2(ctx,W,H,t){
   const lblAx=Math.min(clampedAx2-2,W-22),lblAy=Math.min(clampedAy2+14,H-5);
   ctx.fillStyle='#cc7722';ctx.font='bold 13px Courier New';ctx.fillText('α',lblAx,lblAy);
 
-  // -15° 호 (수평↔α)
-  ctx.strokeStyle='rgba(200,120,30,.75)';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.arc(ox,oy,22,0,15*DEG,false);ctx.stroke();
-  ctx.fillStyle='#cc9944';ctx.font='9.5px Courier New';ctx.fillText('-15°',ox+25,oy+8);
+  // 15° 호 (수평↔α) — 더 크고 선명하게 (기존엔 작아서 잘 안 보였음)
+  ctx.strokeStyle='rgba(255,180,60,.95)';ctx.lineWidth=2.2;
+  ctx.beginPath();ctx.arc(ox,oy,34,0,15*DEG,false);ctx.stroke();
+  ctx.fillStyle='#ffcc66';ctx.font='bold 12px Courier New';ctx.fillText('15°',ox+38,oy+13);
 
   // ── 태양 광선 (수평 기준 45° 위에서, 왼쪽 위 → 오른쪽 아래) ──
   // canvas 좌표: 오른쪽 +x, 아래 +y
@@ -1598,30 +1595,37 @@ function drawSideP2(ctx,W,H,t){
     ctx.lineTo(ex-rdx*10+nx*4,ey-rdy*10+ny*4);
     ctx.lineTo(ex-rdx*10-nx*4,ey-rdy*10-ny*4);ctx.closePath();ctx.fill();
   }
-  // 태양 고도 레이블 — 'Side View' 제목은 HTML 라벨(.vt)에 이미 있으므로 캔버스에는 각도 안내만
-  ctx.fillStyle='#ffee44';ctx.font='bold 12px Courier New';
-  ctx.fillText('빛과 화성면(α)이 이루는 각: 30°',8,20);
+  // 태양 고도 레이블 — 'Side View' 제목(하늘색)은 HTML 라벨(.vt) 상단에 있으므로,
+  // 겹치지 않도록 이 노란 안내문은 캔버스 '하단'에 배치
+  ctx.fillStyle='#ffee44';ctx.font='bold 11px Courier New';
+  ctx.textAlign='left';
+  ctx.fillText('☀ 빛-경사면 30°  📐 경사-수평 15°',8,H-8);
 
-  // ── 빛과 경사면 α가 이루는 30° 각을 '경사면 위 한 점'에서 호로 직접 표시 ──
-  // 경사면 위쪽(왼쪽) 한 점을 잡아, 그 점에서 α방향과 빛의 반대방향 사이 각(=30°)을 그린다.
+  // ── 빛과 경사면 α가 이루는 30° 각: '가장 왼쪽 광선'이 경사면과 만나는 지점의 '내각'으로 표시 ──
   (function drawAngle30(){
-    // 경사면 위 기준점 P0: 힌지에서 왼쪽-위로 약간 (화면 안)
-    var u = aLen*0.5;
-    var p0x = ox - u, p0y = oy - u*s15/c15;
-    if(p0x<12) { p0x=12; p0y=oy-(ox-12)*s15/c15; }
-    // 경사면을 따라 오른쪽-아래로 향하는 방향 = ev = (c15, s15)
-    var aAng = Math.atan2(ev[1], ev[0]);
-    // 빛이 '올라오는' 방향(광선의 반대) = (-rdx, -rdy) ; 광선은 (cos45, sin45)로 내려오므로 올라오는 쪽은 왼쪽-위
-    var rUpAng = Math.atan2(-Math.sin(45*DEG), -Math.cos(45*DEG));
-    ctx.strokeStyle='rgba(255,238,68,.9)';ctx.lineWidth=1.8;
-    ctx.beginPath();ctx.arc(p0x,p0y,20,aAng,rUpAng,true);ctx.stroke();
-    var mid=(aAng+rUpAng)/2;
-    ctx.fillStyle='#ffee44';ctx.font='bold 11px Courier New';
-    ctx.fillText('30°',p0x+26*Math.cos(mid)-8,p0y+26*Math.sin(mid)+4);
-    // 그 점에서 빛 광선 한 줄기를 강조(경사면에 실제로 닿는 광선)
-    ctx.strokeStyle='rgba(255,220,50,.6)';ctx.lineWidth=1.4;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(p0x,p0y);ctx.lineTo(p0x-Math.cos(45*DEG)*46,p0y-Math.sin(45*DEG)*46);ctx.stroke();
-    ctx.setLineDash([]);
+    // 가장 왼쪽 광선(k=-1)의 시작점에서 광선 방향으로 진행 → 경사면과 만나는 교점 계산
+    var lx = ox-1.5*sc-1.0*sc, ly = oy-2.5*sc-0.5*sc;   // 왼쪽 광선 시작점
+    // 광선: (lx,ly) + s*(rdx,rdy) / 경사면: (ox,oy) + u*(ev[0],ev[1])
+    var det = rdx*(-ev[1]) - rdy*(-ev[0]);
+    var hitX, hitY;
+    if(Math.abs(det)>1e-6){
+      var s = ((ox-lx)*(-ev[1]) - (oy-ly)*(-ev[0]))/det;
+      hitX = lx + s*rdx; hitY = ly + s*rdy;
+    } else { hitX=ox; hitY=oy; }
+    // 교점이 화면·경사면 범위 밖이면 힌지 근처로 폴백
+    if(hitX<10||hitX>W-10||hitY<10||hitY>H-14){ hitX=ox-aLen*0.4; hitY=oy-aLen*0.4*s15/c15; }
+    // 내각: 교점에서 '경사면 위쪽 방향'(-ev)과 '빛이 올라오는 방향'(-rd) 사이
+    var aUp = Math.atan2(-ev[1], -ev[0]);       // 경사면 왼쪽-위 방향
+    var rUp = Math.atan2(-rdy, -rdx);           // 빛 올라오는 방향(왼쪽-위)
+    ctx.strokeStyle='rgba(255,238,68,.95)';ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.arc(hitX,hitY,24,aUp,rUp,false);ctx.stroke();
+    var mid=(aUp+rUp)/2;
+    ctx.fillStyle='#ffee44';ctx.font='bold 13px Courier New';ctx.textAlign='center';
+    ctx.fillText('30°',hitX+34*Math.cos(mid),hitY+34*Math.sin(mid)+4);
+    ctx.textAlign='left';
+    // 교점 강조 점
+    ctx.fillStyle='rgba(255,238,68,.9)';
+    ctx.beginPath();ctx.arc(hitX,hitY,2.5,0,Math.PI*2);ctx.fill();
   })();
 
   // ── 패널 방향 계산 (수평에서 시작) ──
@@ -1664,6 +1668,27 @@ function drawSideP2(ctx,W,H,t){
       ctx.fillStyle='#ccdeff';ctx.font='bold 13px Courier New';
       ctx.fillText('θ='+Math.round(t/DEG)+'°',lx-16,ly+4);
     }
+  }
+
+  // ── 빛⊥패널 직각(90°) 표시: 패널이 45°에 도달하면 패널 끝에서 빛과의 직각 기호 표시 ──
+  // (step3의 네 각 중 '빛-패널 90°'를 그림에 드러냄)
+  if(Math.abs(t/DEG - 45) < 3){
+    // 패널 끝(ptx,pty)에서 빛 방향(rd)과 패널 방향(pd)이 이루는 직각 마커
+    var mkS = 11;
+    var pDir = [pd[0], pd[1]];              // 패널 방향(힌지→끝)
+    var lDir = [-rdx, -rdy];                // 빛이 오는 쪽(위)
+    var c1x = ptx + pDir[0]*mkS, c1y = pty + pDir[1]*mkS;
+    var c2x = ptx + lDir[0]*mkS, c2y = pty + lDir[1]*mkS;
+    ctx.strokeStyle='rgba(90,255,140,.95)';ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(c1x,c1y);
+    ctx.lineTo(c1x+lDir[0]*mkS, c1y+lDir[1]*mkS);
+    ctx.lineTo(c2x, c2y);
+    ctx.stroke();
+    ctx.fillStyle='#5aff8c';ctx.font='bold 11px Courier New';ctx.textAlign='center';
+    var lblx=ptx+(pDir[0]+lDir[0])*mkS*1.8, lbly=pty+(pDir[1]+lDir[1])*mkS*1.8;
+    if(lblx>10&&lblx<W-10&&lbly>10&&lbly<H-10) ctx.fillText('90°',lblx,lbly);
+    ctx.textAlign='left';
   }
 
   // ── 그림자 (α 위에 사선 투영, 오른쪽-아래 방향) ──
