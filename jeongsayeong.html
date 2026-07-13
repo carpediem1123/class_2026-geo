@@ -380,9 +380,25 @@ S'/S 값을 보며 다음 중 [?]에
         <!-- ══ Phase 2 콘텐츠 ══ -->
         <div id="p2content" style="display:none;flex-direction:column">
           <!-- Step 0: 예상하기 (슬라이더 있지만 그림자 숨김) -->
+          <!-- 📡 미션 브리핑 (스토리텔링 — 왜 경사면·빛의 각도인가) -->
+          <div class="iq-card show" id="iqBrief">
+            <div class="iq-tt" style="color:#ffaa44">📡 긴급 교신 — 미션 브리핑</div>
+            <div class="iq-bd">"대원님, 현재 기지는 <strong>15° 기울어진 언덕(경사면 α)</strong> 위에 있습니다.
+태양광선도 경사면과 <strong>30°</strong>로 비스듬히 내리쬐고 있군요!
+패널이 태양빛을 가장 <strong>수직으로</strong> 받아 효율 100%가 되는
+최적의 각도 θ를 찾아내십시오!"</div>
+            <div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;font-size:10.5px;font-weight:bold">
+              <span style="background:#1a1000;border:1px solid #aa6600;color:#ffcc44;padding:4px 8px;border-radius:10px">📐 경사면 15°</span>
+              <span style="background:#1a1000;border:1px solid #aa6600;color:#ffcc44;padding:4px 8px;border-radius:10px">☀️ 빛–경사면 30°</span>
+              <span style="background:#0a2015;border:1px solid #22aa44;color:#55ff88;padding:4px 8px;border-radius:10px">🎯 목표: 효율 100%의 θ</span>
+            </div>
+          </div>
+
+          <!-- Step 1: 예상 → 즉시 관찰 (기존 Step1+2 통합, 왔다갔다 동선 제거) -->
           <div class="iq-card show active" id="iq0">
-            <div class="iq-tt">Step 1  예상하기</div>
-            <div class="iq-bd">패널을 0°→90°로 세울 때 바닥의 그림자 크기는 어떻게 변할까요?</div>
+            <div class="iq-tt">Step 1  예상하고, 바로 관찰!</div>
+            <div class="iq-bd">패널을 0°→90°로 세울 때 바닥 그림자(S′)의 크기는 어떻게 변할까요?
+예상을 고르는 순간 <strong>그림자가 나타나고</strong> 슬라이더로 바로 확인할 수 있어요.</div>
             <div class="pred-grid">
               <button class="pbtn" data-ans="grow">① 계속 커진다</button>
               <button class="pbtn" data-ans="shrink">② 계속 작아진다</button>
@@ -391,44 +407,32 @@ S'/S 값을 보며 다음 중 [?]에
             </div>
             <div id="pred-msg" style="display:none;margin-top:8px;font-size:12.5px;
                 color:#aabbdd;line-height:1.6;padding:7px;background:#0a1425;border-radius:6px"></div>
-            <button class="gobtn" id="iq0btn" style="margin:8px 0 0;display:none">태양은 어디에?</button>
-            <button class="gobtn" id="finalAnswerCheck" style="margin:8px 0 0;display:none">✅ 최종답 확인</button>
+            <button class="gobtn" id="predConfirm" style="margin:8px 0 0;display:none">✓ 내 예상 확정!</button>
             <div id="shadowDescMsg" style="display:none;margin-top:7px;font-size:12.5px;
                 padding:7px;border-radius:6px;line-height:1.5"></div>
-            <button class="gobtn" id="iq1btn" style="margin:8px 0 0;display:none">Step 3으로 →</button>
-          </div>
-
-          <!-- Step 2: 탐구 (그림자 공개) -->
-          <div class="iq-card" id="iq1">
-            <div class="iq-tt">Step 2  그림자 직접 확인!</div>
-            <div class="iq-bd">슬라이더로 패널을 움직이며 그림자 변화를 관찰한 뒤, Step 1로 돌아가 답을 다시 골라보세요.</div>
-            <button class="gobtn" id="shadowShowBtn" style="margin:5px 0 0">그림자 보기 👁️</button>
-            <button class="gobtn" id="backToStep1Btn" style="margin:5px 0 0;display:none">← Step 1로 돌아가기</button>
           </div>
 
           <!-- Step 3: 에너지 최대 효율 각도 찾기 -->
           <div class="iq-card" id="iq2">
-            <div class="iq-tt">Step 3  언제 에너지 효율이 최대일까?</div>
-            <div class="iq-bd">에너지 효율이 최대가 되는 패널 각도를 찾아보세요.
+            <div class="iq-tt">Step 2  직각의 순간을 포착하라! 🔒</div>
+            <div class="iq-bd">이번엔 손이 아니라 <strong>눈</strong>의 승부!
+패널이 자동으로 회전합니다. 오른쪽 <strong>Side View</strong>를 주시하다가,
+빛과 패널이 <strong>직각(⊥)</strong>이 되는 바로 그 순간 🔒 버튼을 누르세요!
 <button class="gobtn" id="energyInfoBtn" 
   style="margin:8px 0;padding:8px;font-size:12px;background:#0a1828;border-color:#3366aa">[읽을거리📖]에너지효율의 원리
 </button></div>
-<div class="ang-row" style="flex-direction: column; align-items: stretch;">
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <button type="button" class="msl-btn" id="angMinus" style="width:30px;height:30px;font-size:15px" aria-label="1도 감소">−</button>
-        <input type="range" id="angInput" min="0" max="135" step="1" value="0" style="flex:1;">
-        <button type="button" class="msl-btn" id="angPlus" style="width:30px;height:30px;font-size:15px" aria-label="1도 증가">+</button>
-    </div>
-    <div class="msl-val" style="margin-top:6px">현재 각도 <span class="ang-unit" id="vtAngInput">0°</span></div>
-    <button class="ang-check" id="angCheck" style="margin-top:5px;">정답 확인</button>
-</div>
+            <div style="display:flex;gap:8px;align-items:stretch;margin-top:4px">
+              <button class="gobtn" id="sweepBtn" style="flex:1;margin:0">▶ 자동 탐색 시작</button>
+              <button class="ang-check" id="lockBtn" disabled style="flex:1;margin:0;font-size:14px;font-weight:bold">🔒 지금 고정!</button>
+            </div>
+            <div class="msl-val" style="margin-top:8px;text-align:center">현재 각도 <span class="ang-unit" id="vtAngInput">0°</span></div>
             <div id="angMsg" style="display:none;margin-top:7px;font-size:12.5px;
                 padding:7px;border-radius:6px"></div>
           </div>
 
           <!-- Step 3: 이유 & 결과 -->
           <div class="iq-card" id="iq3">
-            <div class="iq-tt">Step 4  왜 45°일까?</div>
+            <div class="iq-tt">Step 3  왜 45°일까?</div>
             <div class="iq-bd" id="iq3body">🔍 Side View를 관찰해 봅시다!
 
 빛은 경사면(α)과 <strong>30°</strong>를 이루며 내리쬡니다.
@@ -445,36 +449,20 @@ S'/S 값을 보며 다음 중 [?]에
 
           <!-- Step 4: 공식 선택 -->
           <div class="iq-card" id="iq4">
-            <div class="iq-tt">Step 5  그림자 넓이 공식 발견</div>
-            <div class="iq-bd">θ=45°일 때 그림자 넓이는 200.
-<strong>S' = 100 [?] [?] [?°] = 200</strong> 이 되는 조합을 찾아보세요.
+            <div class="iq-tt">Step 4  정사영 공식 발견</div>
+            <div class="iq-bd">θ=45°일 때: 패널 S=100, 그림자 S′=200 — 그림자가 더 커요!
+그렇다면 뒤집어 생각하면… <strong>패널이 그림자의 정사영</strong>인 셈이죠.
 
-💡 힌트: 수평 기준 45° + 경사면 15° = ?°</div>
-            <div style="margin-top:8px">
-              <div style="font-size:11px;color:#6688bb;margin-bottom:4px">연산자</div>
-              <div class="sel-btns">
-                <button class="sel-btn" data-g="op" data-v="mul">×</button>
-                <button class="sel-btn" data-g="op" data-v="div">÷</button>
-              </div>
+정사영 공식의 핵심: <strong>어느 두 면 사이의 각</strong>에 cos을 곱하는가?
+
+<strong style="font-size:14px">S = S′ × cos( □° )</strong>　□에 들어갈 각을 고르세요.</div>
+            <div class="sel-btns" style="margin-top:8px">
+              <button class="sel-btn cosPick" data-v="30">30°<br><small style="font-weight:400">빛–경사면</small></button>
+              <button class="sel-btn cosPick" data-v="45">45°<br><small style="font-weight:400">패널–수평</small></button>
+              <button class="sel-btn cosPick" data-v="60">60°<br><small style="font-weight:400">패널면–경사면 α</small></button>
             </div>
-            <div style="margin-top:7px">
-              <div style="font-size:11px;color:#6688bb;margin-bottom:4px">삼각함수</div>
-              <div class="sel-btns">
-                <button class="sel-btn" data-g="fn" data-v="cos">cos</button>
-                <button class="sel-btn" data-g="fn" data-v="sin">sin</button>
-              </div>
-            </div>
-            <div style="margin-top:7px">
-              <div style="font-size:11px;color:#6688bb;margin-bottom:4px">각도 (빛과 패널의 각도)</div>
-              <div class="sel-btns">
-                <button class="sel-btn" data-g="ang" data-v="30">30°</button>
-                <button class="sel-btn" data-g="ang" data-v="45">45°</button>
-                <button class="sel-btn" data-g="ang" data-v="60">60°</button>
-              </div>
-            </div>
-            <div class="sel-result" id="selResult">S' = S ×/÷ ? = ?</div>
+            <div class="sel-result" id="selResult">S = S′ × cos( ? )</div>
             <div id="selMsg" style="display:none" class="qmsg"></div>
-            <button class="gobtn" id="selCheck" style="margin:6px 0 0">확인!</button>
           </div>
 
           <!-- 미션 영역 -->
@@ -1166,7 +1154,6 @@ function updUI(t){
   }else{
     setT('hudSp',oblSp(t));
   }
-  if(selOp&&selFn&&selAng)updateSelResult();
 }
 
 /* ═══ 미션 판정 ═══════════════════════════════════════════ */
@@ -1833,39 +1820,39 @@ document.querySelectorAll('.pbtn').forEach(btn=>{
     const msg=document.getElementById('pred-msg');
     msg.style.display='block';
 
-    if(step1Mode === 'initial'){
-      // 처음 답하기: 피드백 후 '태양은 어디에?' 버튼
-      const isOk=(predAns==='both');
-      msg.textContent=isOk?'👍 좋은 예상이에요! 이제 직접 확인해보세요.':'정말 그런지 아래 버튼을 눌러, 빛의 방향을 고려해 볼까요?';
-      document.getElementById('iq0btn').style.display='block';
-      document.getElementById('finalAnswerCheck').style.display='none';
-      document.getElementById('shadowDescMsg').style.display='none';
-      document.getElementById('iq1btn').style.display='none';
-    } else {
-      // 다시 답하기: '최종답 확인' 버튼으로 전환
-      finalAns = predAns;
-      const isOk=(predAns==='both');
-      msg.textContent=isOk?'👍 좋은 예상이에요! 최종답을 확인해보세요.':'이게 맞을까요? 최종답 확인 버튼을 눌러보세요.';
-      document.getElementById('iq0btn').style.display='none';
-      document.getElementById('finalAnswerCheck').style.display='block';
-      document.getElementById('shadowDescMsg').style.display='none';
-      document.getElementById('iq1btn').style.display='none';
+    // [리팩토링] 예상을 고르는 '즉시' 그림자·광선 공개 + 슬라이더 활성 (Step1·2 통합 — 확인 버튼 왕복 제거)
+    predPicked = predAns;
+    if(!shadowVisible){
+      shadowVisible = true;
+      flashLight();                                   // 태양 광선을 잠깐 비춰 방향 인지
+      document.getElementById('sl').max = 165;        // 관찰용 슬라이더 범위 개방
+      updScene(theta);
     }
+    msg.textContent = '👁 그림자(S′)가 나타났어요! 왼쪽 패널 슬라이더(θ)를 0°→90°로 움직이며 그림자 변화를 직접 관찰하세요. 생각이 확정되면 [✓ 내 예상 확정!] — 바뀌면 다른 보기를 다시 골라도 됩니다.';
+    document.getElementById('predConfirm').style.display='block';
+    document.getElementById('shadowDescMsg').style.display='none';
   });
 });
 
-document.getElementById('iq0btn').addEventListener('click',()=>{
-  // '태양은 어디에?' → 광선을 잠깐만 보여주고 자동으로 끔 (지속 X)
-  flashLight();
-
-  // Step1→Step2 이동 (그림자 숨김 상태로)
-  shadowVisible=false;
-  iqStep=1;
-  document.getElementById('iq0').classList.remove('active');
-  document.getElementById('iq1').classList.add('show','active');
-  document.getElementById('shadowShowBtn').style.display='block';
-  document.getElementById('backToStep1Btn').style.display='none';
-  updScene(theta);
+// [리팩토링] 예상 확정 → 판정 (오답이어도 답 미공개 — 재관찰로 스스로 발견하도록)
+let predPicked=null;
+document.getElementById('predConfirm').addEventListener('click',()=>{
+  const vmsg=document.getElementById('shadowDescMsg');
+  vmsg.style.display='block';
+  if(predPicked==='both'){
+    vmsg.style.cssText='display:block;margin-top:7px;font-size:12.5px;padding:7px;border-radius:6px;line-height:1.5;background:#0a2015;color:#55ff88;border:1px solid #22aa44';
+    vmsg.textContent='✅ 정답! θ가 커질수록 그림자가 먼저 커졌다가 작아져요. (패널보다 커지는 순간도 있죠!)';
+    document.getElementById('predConfirm').style.display='none';
+    setTimeout(()=>{
+      iqStep=3;
+      document.getElementById('iq0').classList.remove('active');
+      document.getElementById('iq2').classList.add('show','active');
+      document.getElementById('iq2').scrollIntoView({behavior:'smooth',block:'start'});
+    },900);
+  }else{
+    vmsg.style.cssText='display:block;margin-top:7px;font-size:12.5px;padding:7px;border-radius:6px;line-height:1.5;background:#200a0a;color:#ff9988;border:1px solid #aa2222';
+    vmsg.textContent='🤔 정말 그럴까요? 슬라이더를 0°부터 끝까지 천천히 움직이며 그림자 넓이(우측 수치)를 다시 관찰해 보세요. 생각이 바뀌면 위 보기를 다시 고르면 됩니다!';
+  }
 });
 
 // 광선 잠깐 보여주기 (태양은 어디에 전용) — 지속 광선이 켜져 있으면 그대로 둠
@@ -1887,84 +1874,52 @@ function flashLight(){
   }, 2600);
 }
 
-// Step 2: 그림자 보기 버튼
-document.getElementById('shadowShowBtn').addEventListener('click',()=>{
-  shadowVisible = true;
+// [리팩토링] Step 2 — 자동 스윕 + 🔒 락: '빛⊥패널'의 순간을 눈으로 포착
+// (개념탐구에서 이미 슬라이더 수동 조작을 경험했으므로, 미션에서는 관찰·타이밍 게임으로 차별화)
+let sweepOn=false, sweepDeg=0, sweepDir=1, sweepRAF=null, sweepLastT=0;
+function sweepFrame(ts){
+  if(!sweepOn)return;
+  if(!sweepLastT)sweepLastT=ts;
+  const dt=Math.min((ts-sweepLastT)/1000, .05); sweepLastT=ts;
+  sweepDeg += sweepDir*26*dt;                 // 초당 26° — 눈으로 따라갈 수 있는 속도
+  if(sweepDeg>=135){sweepDeg=135;sweepDir=-1;}
+  if(sweepDeg<=0){sweepDeg=0;sweepDir=1;}
+  theta=sweepDeg*DEG;
+  document.getElementById('vtAngInput').textContent=Math.round(sweepDeg)+'°';
+  document.getElementById('sl').value=Math.round(sweepDeg);
   updScene(theta);
-  document.getElementById('shadowShowBtn').style.display='none';
-  document.getElementById('backToStep1Btn').style.display='block';
-});
-
-// Step 2: Step 1로 돌아가기 → Step1 선택 초기화, retry 모드로
-document.getElementById('backToStep1Btn').addEventListener('click',()=>{
-  step1Mode = 'retry';
-  finalAns = null;
-  // Step1 UI 초기화
-  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('picked'));
-  document.getElementById('pred-msg').style.display='none';
-  document.getElementById('iq0btn').style.display='none';
-  document.getElementById('finalAnswerCheck').style.display='none';
-  document.getElementById('shadowDescMsg').style.display='none';
-  document.getElementById('iq1btn').style.display='none';
-  // Step2 숨기고 Step1로 이동
-  document.getElementById('iq1').classList.remove('active');
-  document.getElementById('iq0').classList.add('active');
-  iqStep=0;
-});
-
-// 최종답 확인
-document.getElementById('finalAnswerCheck').addEventListener('click',()=>{
-  const msg = document.getElementById('shadowDescMsg');
-  msg.style.display = 'block';
-
-  if(finalAns === 'both'){
-    msg.textContent = '✅ 정답입니다! θ가 커질수록 그림자가 먼저 커졌다가 작아져요!\n(패널보다 더 커지는 순간이 있어요! Side View에서 확인!)';
-    msg.style.background = '#0a2015';
-    msg.style.color = '#55ff88';
-    msg.style.border = '1px solid #22aa44';
-    document.getElementById('iq1btn').style.display='block';
-  } else {
-    msg.textContent = '❌ 아쉽네요. 정답은 "③ 커졌다 작아진다" 입니다.\nθ가 커질수록 그림자가 먼저 커졌다가 작아져요!';
-    msg.style.background = '#200a0a';
-    msg.style.color = '#ff8888';
-    msg.style.border = '1px solid #aa2222';
-    setTimeout(()=>{
-      document.getElementById('iq1btn').style.display='block';
-    }, 1500);
+  sweepRAF=requestAnimationFrame(sweepFrame);
+}
+document.getElementById('sweepBtn').addEventListener('click',function(){
+  if(this.disabled)return;
+  sweepOn=!sweepOn;
+  const lockBtn=document.getElementById('lockBtn');
+  if(sweepOn){
+    sweepLastT=0; lockBtn.disabled=false;
+    this.textContent='⏸ 일시 정지';
+    sweepRAF=requestAnimationFrame(sweepFrame);
+  }else{
+    this.textContent='▶ 자동 탐색 재개';
+    if(sweepRAF)cancelAnimationFrame(sweepRAF);
   }
-  document.getElementById('finalAnswerCheck').style.display='none';
 });
-
-// Step 1 → Step 3
-document.getElementById('iq1btn').addEventListener('click',()=>{
-  shadowVisible=true;
-  iqStep=3;
-  document.getElementById('sl').max=165;
-  document.getElementById('iq0').classList.remove('active');
-  document.getElementById('iq1').classList.remove('show','active');
-  document.getElementById('iq2').classList.add('show','active');
-  updScene(theta);
-});
-// Step 3: angInput 슬라이더 변경 시 화면 업데이트
-document.getElementById('angInput').addEventListener('input',function(){
-  const val=parseInt(this.value);
-  theta=val*DEG;
-  document.getElementById('sl').value=val;
-  document.getElementById('vtAngInput').textContent=val+'°';
-  updScene(theta);
-});
-// Step 3: 에너지 효율 최대 각도 확인
-document.getElementById('angCheck').addEventListener('click',()=>{
-  const val=parseInt(document.getElementById('angInput').value);
+document.getElementById('lockBtn').addEventListener('click',function(){
+  if(this.disabled)return;
+  sweepOn=false; if(sweepRAF)cancelAnimationFrame(sweepRAF);
+  const val=Math.round(sweepDeg);
   const msg=document.getElementById('angMsg');
   msg.style.display='block';
-  
-  if(Math.abs(val-45)<1){
-    msg.style.cssText='background:#0a2015;color:#55ff88;border:1px solid #22aa44;border-radius:6px;padding:7px;font-size:12.5px;margin-top:7px';
-    msg.textContent=`✅ 정답! θ=${val}°에서 에너지 효율 최대!\n\nSide View에서 확인해보세요!`;
-    theta=45*DEG;
+  if(Math.abs(val-45)<=3){
+    // 성공: 45°로 스냅 (±3° 허용 — 타이밍 게임의 공정한 오차 범위)
+    theta=45*DEG; sweepDeg=45;
     document.querySelectorAll('.thsl').forEach(s=>s.value=45);
+    document.getElementById('vtAngInput').textContent='45°';
     updScene(theta);
+    msg.style.cssText='background:#0a2015;color:#55ff88;border:1px solid #22aa44;border-radius:6px;padding:7px;font-size:12.5px;margin-top:7px';
+    msg.textContent='🔒 직각 포착 성공! θ=45° — 패널이 빛을 정면으로 받아 효율 100%!\nSide View의 ⊥ 순간을 정확히 잡으셨어요!';
+    this.disabled=true;
+    document.getElementById('sweepBtn').disabled=true;
+    document.getElementById('sweepBtn').textContent='✅ 탐색 완료';
     setTimeout(()=>{
       iqStep=4;
       document.getElementById('iq2').classList.remove('active');
@@ -1972,9 +1927,9 @@ document.getElementById('angCheck').addEventListener('click',()=>{
       document.getElementById('iq3').scrollIntoView({behavior:'smooth',block:'start'});
     },1200);
   }else{
+    const eff=Math.max(0,Math.cos((val-45)*DEG))*100;
     msg.style.cssText='background:#200a0a;color:#ff8888;border:1px solid #aa2222;border-radius:6px;padding:7px;font-size:12.5px;margin-top:7px';
-    const hint=val<45?'💡 더 올려보세요!':val<=90?'💡 너무 세웠어요!':'💡 패널이 뒤로 넘어갔어요.';
-    msg.textContent=`θ=${val}°는 최대가 아니에요.\n${hint}`;
+    msg.textContent=`θ=${val}° — 아직 직각이 아니에요 (효율 ${eff.toFixed(0)}%).\nSide View에서 빛과 패널이 ⊥가 되는 순간을 노려, [▶ 재개] 후 다시 도전!`;
   }
 });
 // Step 4 → Step 5
@@ -1985,70 +1940,47 @@ document.getElementById('iq3btn').addEventListener('click',()=>{
   // iq4로 스크롤
   document.getElementById('iq4').scrollIntoView({behavior:'smooth',block:'start'});
 });
-// 선택자 버튼
-document.querySelectorAll('.sel-btn').forEach(btn=>{
+// [리팩토링] Step 4 — 정사영 공식: "어느 두 면 사이의 각에 cos을 곱하는가" 하나에 집중
+// 선택 즉시 판정 (별도 확인 버튼 제거 — 동선 압축)
+document.querySelectorAll('.cosPick').forEach(btn=>{
   btn.addEventListener('click',function(){
-    const g=this.dataset.g,v=this.dataset.v;
-    document.querySelectorAll(`.sel-btn[data-g="${g}"]`).forEach(b=>b.classList.remove('chosen'));
+    document.querySelectorAll('.cosPick').forEach(b=>b.classList.remove('chosen'));
     this.classList.add('chosen');
-    if(g==='op')selOp=v;else if(g==='fn')selFn=v;else if(g==='ang')selAng=v;
-    updateSelResult();
-  });
-});
-function updateSelResult(){
-  if(!selOp||!selFn||!selAng){setT('selResult',"S' = S × ? = ?");return;}
-  const ar=parseInt(selAng)*DEG;
-  const tv=selFn==='cos'?Math.cos(ar):Math.sin(ar);
-  const res=selOp==='mul'?S_AREA*tv:S_AREA/tv;
-  const op=selOp==='mul'?'×':'÷';
-  document.getElementById('selResult').textContent=`S' = 100 ${op} ${selFn}(${selAng}°) = ${res.toFixed(1)}`;
-  document.getElementById('selResult').style.color=Math.abs(res-70.7)<1?'#44ff88':'#ffcc44';
-}
-document.getElementById('selCheck').addEventListener('click',()=>{
-  const msg=document.getElementById('selMsg');msg.style.display='block';
-  if(!selOp||!selFn||!selAng){msg.className='qmsg qno';msg.textContent='모든 항목을 선택하세요!';return;}
-  const ar=parseInt(selAng)*DEG;
-  const tv=selFn==='cos'?Math.cos(ar):Math.sin(ar);
-  const res=selOp==='mul'?S_AREA*tv:S_AREA/tv;
-  
-  // 정답: ÷ cos 60°
-  if(selOp==='div'&&selFn==='cos'&&selAng==='60'){
-    msg.className='qmsg qok';
-    msg.textContent='✅ 정답! S\'=S÷cos(60°)=200\n\n💡 수평 기준 패널 45° + 경사면 15° = 60°\n→ 경사면과 패널 사이 각도 60°\n\nS\'/S = 1/cos(경사면과 패널 각도)\n→ 패널보다 그림자가 2배 커요!';
-    setTimeout(()=>{
-      // 패널을 0°(수평)로 리셋
-      theta = 0;
-      document.getElementById('sl').value = 0;
-      updScene(theta);
-      
-      // 미션 영역 표시
-      document.getElementById('iq4').classList.remove('active');
-      document.getElementById('missionArea').style.display='flex';
-      document.getElementById('missionArea').style.flexDirection='column';
-      missionActive=true;
-      
-      // 안내 메시지
+    const v=this.dataset.v;
+    const line=document.getElementById('selResult');
+    const msg=document.getElementById('selMsg');
+    msg.style.display='block';
+    if(v==='60'){
+      line.textContent='S = S′ × cos(60°)  →  100 = 200 × ½ ✓';
+      line.style.color='#44ff88';
+      msg.className='qmsg qok';
+      msg.textContent='✅ 발견! 패널은 그림자를 패널면으로 정사영한 도형!\n두 면(패널면 ↔ 경사면 α)이 이루는 각 = 패널 45° + 경사 15° = 60°\n정사영 공식 S = S′·cos(이면각), 완벽해요!';
       setTimeout(()=>{
-        const hint = document.getElementById('missionHint');
-        hint.style.animation = 'pulse 1.5s ease-in-out 3';
-      }, 500);
-    },700);
-  }else if(selOp==='div'&&selFn==='cos'&&selAng==='45'){
-    msg.className='qmsg qno';
-    msg.textContent='아쉬워요! ÷ cos는 맞지만...\n각도를 다시 생각해보세요!\n💡 힌트: 45° + 15° = ?°';
-  }else if(selOp==='div'&&selFn==='cos'&&selAng==='30'){
-    msg.className='qmsg qno';
-    msg.textContent='÷ cos는 맞지만 각도가 달라요!\n💡 힌트: 패널 45° + 경사 15° = ?°';
-  }else if(selOp==='mul'){
-    msg.className='qmsg qno';
-    msg.textContent='곱하기(×)가 아니라 나누기(÷)예요!\n그림자가 패널보다 크니까요!';
-  }else if(selFn==='sin'){
-    msg.className='qmsg qno';
-    msg.textContent='sin이 아니라 cos를 사용해야 해요!\n빛과 패널 사이 각도에는 cos!';
-  }else{
-    msg.className='qmsg qno';
-    msg.textContent=`다시 생각해보세요!\n💡 힌트: ÷, cos, 60°`;
-  }
+        // 패널을 0°(수평)로 리셋 후 최종 전력 복구 미션 개방 (기존 완료 시퀀스 유지)
+        theta = 0;
+        document.getElementById('sl').value = 0;
+        updScene(theta);
+        document.getElementById('iq4').classList.remove('active');
+        document.getElementById('missionArea').style.display='flex';
+        document.getElementById('missionArea').style.flexDirection='column';
+        missionActive=true;
+        setTimeout(()=>{
+          const hint = document.getElementById('missionHint');
+          hint.style.animation = 'pulse 1.5s ease-in-out 3';
+        }, 500);
+      },900);
+    }else if(v==='45'){
+      line.textContent='S = S′ × cos(45°) = 200 × 0.71 = 141.4 …?';
+      line.style.color='#ffcc44';
+      msg.className='qmsg qno';
+      msg.textContent='🤔 계산하면 100이 안 나오네요.\n45°는 패널과 "수평"이 이루는 각이에요.\n정사영에 필요한 건 두 "면"(패널면 ↔ 경사면 α) 사이의 각!';
+    }else{
+      line.textContent='S = S′ × cos(30°) = 200 × 0.87 = 173.2 …?';
+      line.style.color='#ffcc44';
+      msg.className='qmsg qno';
+      msg.textContent='🤔 계산하면 100이 안 나오네요.\n30°는 "빛"과 경사면이 이루는 각이에요.\n패널면과 경사면 α가 이루는 각을 Side View에서 찾아보세요!';
+    }
+  });
 });
 
 /* ═══ Phase 1 객관식 ══════════════════════════════════════ */
@@ -2265,7 +2197,7 @@ function nudgeTheta(delta){
 }
 (function(){
   // 개념탐구 θ / 미션탐구 각도 슬라이더 -/+ 버튼 (태블릿 미세조작용)
-  [['slMinus','sl',-1],['slPlus','sl',1],['angMinus','angInput',-1],['angPlus','angInput',1]].forEach(function(c){
+  [['slMinus','sl',-1],['slPlus','sl',1]].forEach(function(c){   // angMinus/angPlus는 스윕·락 게임 전환으로 제거됨
     var b=document.getElementById(c[0]);
     if(b)b.addEventListener('click',function(){
       var s=document.getElementById(c[1]);
@@ -2342,24 +2274,29 @@ document.getElementById('acceptBtn').addEventListener('click',()=>{
   shadowVisible=false;iqStep=0;predAns=null;selOp=null;selFn=null;selAng=null;
   missionActive=false;missionDone=false;
   step1Mode='initial';finalAns=null;
-  // UI 초기화
-  ['iq1','iq2','iq3','iq4'].forEach(id=>{
-    const el=document.getElementById(id);el.classList.remove('show','active');
+  // UI 초기화 (리팩토링된 미션탐구: 브리핑+통합 Step1 / 스윕·락 / cosPick)
+  ['iq2','iq3','iq4'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.classList.remove('show','active');
   });
   document.getElementById('iq0').classList.add('show','active');
-  document.getElementById('iq0btn').style.display='none';
   document.getElementById('pred-msg').style.display='none';
-  document.getElementById('shadowShowBtn').style.display='block';
-  document.getElementById('backToStep1Btn').style.display='none';
-  document.getElementById('finalAnswerCheck').style.display='none';
+  document.getElementById('predConfirm').style.display='none';
   document.getElementById('shadowDescMsg').style.display='none';
   document.getElementById('angMsg').style.display='none';
-  document.getElementById('angInput').value='';
+  // 스윕·락 게임 상태 리셋
+  predPicked=null;
+  sweepOn=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); sweepDeg=0; sweepDir=1; sweepLastT=0;
+  const swB=document.getElementById('sweepBtn');
+  if(swB){ swB.disabled=false; swB.textContent='▶ 자동 탐색 시작'; }
+  const lkB=document.getElementById('lockBtn');
+  if(lkB){ lkB.disabled=true; }
+  document.getElementById('vtAngInput').textContent='0°';
+  // 공식 발견 리셋
   document.getElementById('selMsg').style.display='none';
-  document.getElementById('selResult').textContent="S' = S × ? = ?";
-  document.querySelectorAll('.sel-btn,.pbtn').forEach(b=>b.classList.remove('chosen','picked'));
+  document.getElementById('selResult').textContent='S = S′ × cos( ? )';
+  document.getElementById('selResult').style.color='';
+  document.querySelectorAll('.cosPick,.pbtn').forEach(b=>b.classList.remove('chosen','picked'));
   document.getElementById('missionArea').style.display='none';
-  document.getElementById('iq1btn').style.display='none';
   phase=2;
   gnd1.visible=false;grid1.visible=false;hinge1.visible=false;
   gnd1Mars.visible=false;rockG1.visible=false;
