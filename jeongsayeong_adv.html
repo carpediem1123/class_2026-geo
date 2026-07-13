@@ -364,15 +364,19 @@ function advScrollTo(el){
   var box = el.closest ? el.closest('.adv-scroll') : null;
   if(!box){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} return; }
   var doScroll=function(){
-    // 요소를 컨테이너 위쪽 약 1/3 지점에 배치 → 그 아래로 힌트 버튼 등이 보일 공간 확보
-    var target = el.offsetTop - box.clientHeight*0.32;
+    // getBoundingClientRect로 '실제 화면상' 위치 차이를 계산 (offsetTop은 중첩 요소에서 부정확)
+    var elRect = el.getBoundingClientRect();
+    var boxRect = box.getBoundingClientRect();
+    // 요소를 컨테이너 위쪽 약 28% 지점에 두도록 현재 스크롤에서 이동할 양
+    var delta = (elRect.top - boxRect.top) - box.clientHeight*0.28;
+    var target = box.scrollTop + delta;
     target = Math.max(0, Math.min(target, box.scrollHeight - box.clientHeight));
     try{ box.scrollTo({top:target, behavior:'smooth'}); }
     catch(e){ box.scrollTop = target; }   // 구형 사파리 폴백
   };
   doScroll();
-  setTimeout(doScroll, 60);
-  setTimeout(doScroll, 260);   // 힌트 버튼이 막 display된 뒤 높이 반영까지 한 번 더
+  setTimeout(doScroll, 80);
+  setTimeout(doScroll, 300);   // 힌트 버튼이 막 display된 뒤 높이 반영까지 한 번 더
 }
 
 // ═══ 단계형 잠금해제: 기본개념 → 심화① → 심화② 순서 강제 ═══
