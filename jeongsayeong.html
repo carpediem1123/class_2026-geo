@@ -319,7 +319,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
               <input type="range" class="thsl" id="sl" min="0" max="90" step="1" value="0" style="flex:1">
               <button type="button" class="msl-btn" id="slPlus" style="width:28px;height:28px;font-size:15px" aria-label="1도 증가">+</button>
             </div>
-            <div class="msl-val">현재 각도 <span class="tv" id="vt">0°</span></div>
+            <div class="msl-val">현재 각도<small style="color:#6688bb">(수평 기준)</small> <span class="tv" id="vt">0°</span></div>
           </div>
         </div>
 
@@ -424,7 +424,7 @@ S'/S 값을 보며 다음 중 [?]에
               <button class="gobtn" id="sweepBtn" style="flex:1;margin:0">▶ 자동 탐색 시작</button>
               <button class="ang-check" id="lockBtn" disabled style="flex:1;margin:0;font-size:14px;font-weight:bold">🔒 지금 고정!</button>
             </div>
-            <div class="msl-val" style="margin-top:8px;text-align:center">현재 각도 <span class="ang-unit" id="vtAngInput">0°</span></div>
+            <div class="msl-val" style="margin-top:8px;text-align:center">현재 각도<small style="color:#6688bb">(수평 기준)</small> <span class="ang-unit" id="vtAngInput">0°</span></div>
             <div id="angMsg" style="display:none;margin-top:7px;font-size:12.5px;
                 padding:7px;border-radius:6px"></div>
           </div>
@@ -492,7 +492,7 @@ S'/S 값을 보며 다음 중 [?]에
                   <input type="range" class="thsl" id="mSl" min="0" max="90" step="1" value="0">
                   <button type="button" class="msl-btn" id="mslPlus" aria-label="1도 증가">+</button>
                 </div>
-                <div class="msl-val">현재 각도 <span id="mSlVal">0°</span></div>
+                <div class="msl-val">현재 각도<small style="color:#6688bb">(수평 기준)</small> <span id="mSlVal">0°</span></div>
               </div>
             </div>
 
@@ -1617,11 +1617,15 @@ function drawSideP2(ctx,W,H,t){
     // 내각: 교점에서 '경사면 위쪽 방향'(-ev)과 '빛이 올라오는 방향'(-rd) 사이
     var aUp = Math.atan2(-ev[1], -ev[0]);       // 경사면 왼쪽-위 방향
     var rUp = Math.atan2(-rdy, -rdx);           // 빛 올라오는 방향(왼쪽-위)
-    ctx.strokeStyle='rgba(255,238,68,.95)';ctx.lineWidth=2.2;
-    ctx.beginPath();ctx.arc(hitX,hitY,24,aUp,rUp,false);ctx.stroke();
+    // 각의 두 '팔'(경사면 방향·광선 방향)을 실선으로 그려 어느 두 선 사이의 각인지 명확히
+    ctx.strokeStyle='rgba(255,238,68,.95)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(hitX,hitY);ctx.lineTo(hitX+Math.cos(aUp)*40,hitY+Math.sin(aUp)*40);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(hitX,hitY);ctx.lineTo(hitX+Math.cos(rUp)*40,hitY+Math.sin(rUp)*40);ctx.stroke();
+    ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.arc(hitX,hitY,22,aUp,rUp,false);ctx.stroke();
     var mid=(aUp+rUp)/2;
-    ctx.fillStyle='#ffee44';ctx.font='bold 13px Courier New';ctx.textAlign='center';
-    ctx.fillText('30°',hitX+34*Math.cos(mid),hitY+34*Math.sin(mid)+4);
+    ctx.fillStyle='#ffee44';ctx.font='bold 12px Courier New';ctx.textAlign='center';
+    ctx.fillText('30°',hitX+31*Math.cos(mid),hitY+31*Math.sin(mid)+4);   // 두 팔 사이(내각) 위치
     ctx.textAlign='left';
     // 교점 강조 점
     ctx.fillStyle='rgba(255,238,68,.9)';
@@ -1654,7 +1658,7 @@ function drawSideP2(ctx,W,H,t){
   ctx.fillText('S',Math.min(ptx+5,W-20),Math.max(pty,14));
 
   // ── θ 호 (수평 ↔ 패널) ──
-  if(t>.01){
+  if(t>.01 && !window._q3active){   // Step3 물음 중엔 숨김
     const arcR=44;
     const horizA = 0;                      // 수평 = 0°
     const pdA = Math.atan2(pd[1], pd[0]);  // 패널 각도
@@ -1672,10 +1676,10 @@ function drawSideP2(ctx,W,H,t){
 
   // ── 빛⊥패널 직각(90°) 표시: 패널이 45°에 도달하면 패널 끝에서 빛과의 직각 기호 표시 ──
   // (step3의 네 각 중 '빛-패널 90°'를 그림에 드러냄)
-  if(Math.abs(t/DEG - 45) < 3){
+  if(Math.abs(t/DEG - 45) < 3 && !window._q3active){   // Step3 물음 중엔 숨김
     // 패널 끝(ptx,pty)에서 빛 방향(rd)과 패널 방향(pd)이 이루는 직각 마커
     var mkS = 11;
-    var pDir = [pd[0], pd[1]];              // 패널 방향(힌지→끝)
+    var pDir = [-pd[0], -pd[1]];            // 패널 끝→힌지 방향 (직각을 삼각형 '안쪽'에 그리기 위함)
     var lDir = [-rdx, -rdy];                // 빛이 오는 쪽(위)
     var c1x = ptx + pDir[0]*mkS, c1y = pty + pDir[1]*mkS;
     var c2x = ptx + lDir[0]*mkS, c2y = pty + lDir[1]*mkS;
@@ -1941,12 +1945,13 @@ document.getElementById('lockBtn').addEventListener('click',function(){
     document.getElementById('vtAngInput').textContent='45°';
     updScene(theta);
     msg.style.cssText='background:#0a2015;color:#55ff88;border:1px solid #22aa44;border-radius:6px;padding:7px;font-size:12.5px;margin-top:7px';
-    msg.textContent='🔒 직각 포착 성공! θ=45° — 패널이 빛을 정면으로 받아 효율 100%!\n…그런데 눈으로 잡은 이 45°, 정말 최적일까요? 다음 단계에서 수학으로 입증합니다!';
+    msg.textContent='🔒 포착 성공! θ=45°, 효율 100%!\n이 45° — 우연일까요? 수학으로 입증해 봅시다!';
     this.disabled=true;
     document.getElementById('sweepBtn').disabled=true;
     document.getElementById('sweepBtn').textContent='✅ 탐색 완료';
     setTimeout(()=>{
       iqStep=4;
+      window._q3active=true;   // Step3 물음 동안 Side View의 θ·90° 라벨 숨김 (답 유출 방지)
       document.getElementById('iq2').classList.remove('active');
       document.getElementById('iq3').classList.add('show','active');
       document.getElementById('iq3').scrollIntoView({behavior:'smooth',block:'start'});
@@ -1974,15 +1979,16 @@ document.querySelectorAll('.lightPick').forEach(btn=>{
     const msg=document.getElementById('iq3msg');
     msg.style.display='block';
     if(v==='45'){
+      window._q3active=false;   // 정답 → 그림에 45°·90°가 '확인 보상'으로 등장
       msg.className='qmsg qok';
-      msg.textContent='✅ 발견! 경사 15° + 빛-경사면 30° = 빛-수평 45°.\n패널이 빛과 정면(90°)이 되려면 빛과 수직 — 그래서 Step 2에서 잡은 각이 바로 45°였던 거예요! Side View의 90° 표시를 확인해 보세요.';
+      msg.textContent='✅ 15°+30° = 45°!\n빛⊥패널이 되려면 패널도 수평에서 45° — Step 2의 그 각! (그림에 45°·90°가 나타났어요)';
       document.getElementById('iq3btn').style.display='block';
     }else if(v==='30'){
       msg.className='qmsg qno';
-      msg.textContent='🤔 30°는 빛과 "경사면"의 각이에요. 경사면 자체도 수평에서 기울어져 있죠 — 두 각을 합쳐 보세요!';
+      msg.textContent='🤔 30°는 빛-경사면의 각. 경사면도 기울어져 있죠 — 두 각을 합쳐요!';
     }else{
       msg.className='qmsg qno';
-      msg.textContent='🤔 60°는 너무 커요. Side View에서 수평선부터 광선까지, 15°와 30°가 어떻게 쌓이는지 보세요!';
+      msg.textContent='🤔 60°는 너무 커요. 수평선→경사면(15°)→광선(+30°), 어떻게 쌓이나요?';
     }
   });
 });
@@ -2341,7 +2347,7 @@ document.getElementById('acceptBtn').addEventListener('click',()=>{
   document.getElementById('shadowDescMsg').style.display='none';
   document.getElementById('angMsg').style.display='none';
   // 스윕·락 게임 상태 리셋
-  predPicked=null;
+  predPicked=null; window._q3active=false;
   sweepOn=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); sweepDeg=0; sweepDir=1; sweepLastT=0;
   const swB=document.getElementById('sweepBtn');
   if(swB){ swB.disabled=false; swB.textContent='▶ 자동 탐색 시작'; }
