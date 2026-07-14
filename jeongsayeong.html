@@ -1569,10 +1569,15 @@ function drawSideP2(ctx,W,H,t){
   const lblAx=Math.min(clampedAx2-2,W-22),lblAy=Math.min(clampedAy2+14,H-5);
   ctx.fillStyle='#cc7722';ctx.font='bold 13px Courier New';ctx.fillText('α',lblAx,lblAy);
 
-  // 15° 호 (수평↔α) — 더 크고 선명하게 (기존엔 작아서 잘 안 보였음)
+  // 15° 호 (수평↔α): 호는 제자리, 숫자는 좁은 쐐기 밖(경사면 아래)에 두고 지시선으로 연결
   ctx.strokeStyle='rgba(255,180,60,.95)';ctx.lineWidth=2.2;
   ctx.beginPath();ctx.arc(ox,oy,34,0,15*DEG,false);ctx.stroke();
-  ctx.fillStyle='#ffcc66';ctx.font='bold 12px Courier New';ctx.fillText('15°',ox+38,oy+13);
+  const l15x=ox+34*Math.cos(7.5*DEG), l15y=oy+34*Math.sin(7.5*DEG);   // 호 중앙점
+  ctx.strokeStyle='rgba(255,180,60,.9)';ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(ox+48,oy+34);ctx.lineTo(l15x+3,l15y+3);ctx.stroke();   // 지시선(숫자→호)
+  ctx.fillStyle='#ffcc66';
+  ctx.beginPath();ctx.moveTo(l15x,l15y);ctx.lineTo(l15x+8,l15y+2);ctx.lineTo(l15x+3,l15y+8);ctx.closePath();ctx.fill();  // 화살촉
+  ctx.font='bold 13px Courier New';ctx.fillText('15°',ox+42,oy+46);   // 경사면 아래, 어두운 배경 위
 
   // ── 태양 광선 (수평 기준 45° 위에서, 왼쪽 위 → 오른쪽 아래) ──
   // canvas 좌표: 오른쪽 +x, 아래 +y
@@ -1607,7 +1612,7 @@ function drawSideP2(ctx,W,H,t){
   // ── 빛과 경사면 α가 이루는 30° 각: '가장 왼쪽 광선'이 경사면과 만나는 지점의 '내각'으로 표시 ──
   (function drawAngle30(){
     // 가장 왼쪽 광선(k=-1)의 시작점에서 광선 방향으로 진행 → 경사면과 만나는 교점 계산
-    var lx = ox-1.5*sc-4.0*sc, ly = oy-2.5*sc-2.0*sc;   // 가장 왼쪽 광선(k=-4) 시작점 — 회전축 왼쪽에서 30° 표시
+    var lx = ox-1.5*sc-3.0*sc, ly = oy-2.5*sc-1.5*sc;   // 왼쪽 광선(k=-3) 시작점 — 라벨이 화면 안에 온전히 들어오는 위치
     // 광선: (lx,ly) + s*(rdx,rdy) / 경사면: (ox,oy) + u*(ev[0],ev[1])
     var det = rdx*(-ev[1]) - rdy*(-ev[0]);
     var hitX, hitY;
@@ -1616,7 +1621,7 @@ function drawSideP2(ctx,W,H,t){
       hitX = lx + s*rdx; hitY = ly + s*rdy;
     } else { hitX=ox; hitY=oy; }
     // 교점이 화면·경사면 범위 밖이면 힌지 근처로 폴백
-    if(hitX<10||hitX>W-10||hitY<10||hitY>H-14){ hitX=ox-aLen*0.4; hitY=oy-aLen*0.4*s15/c15; }
+    if(hitX<34||hitX>W-10||hitY<10||hitY>H-14){ hitX=ox-aLen*0.4; hitY=oy-aLen*0.4*s15/c15; }   // 라벨 공간(왼쪽 34px) 확보
     // 내각: 교점에서 '경사면 위쪽 방향'(-ev)과 '빛이 올라오는 방향'(-rd) 사이
     var aUp = Math.atan2(-ev[1], -ev[0]);       // 경사면 왼쪽-위 방향
     var rUp = Math.atan2(-rdy, -rdx);           // 빛 올라오는 방향(왼쪽-위)
