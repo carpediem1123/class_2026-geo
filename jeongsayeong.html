@@ -1684,7 +1684,7 @@ function drawSideP2(ctx,W,H,t){
 
   // ── 빛⊥패널 직각(90°) 표시: 패널이 45°에 도달하면 패널 끝에서 빛과의 직각 기호 표시 ──
   // (step3의 네 각 중 '빛-패널 90°'를 그림에 드러냄)
-  if(Math.abs(t/DEG - 45) < 3 && !window._q3active){   // Step3 물음 중엔 숨김
+  if(Math.abs(t/DEG - 45) < 0.5 && !window._q3active){   // 정확히 45°(락 성공 스냅)일 때만 — 47° 등에서 90°가 뜨는 오류 방지
     // 패널 끝(ptx,pty)에서 빛 방향(rd)과 패널 방향(pd)이 이루는 직각 마커
     var mkS = 11;
     var pDir = [-pd[0], -pd[1]];            // 패널 끝→힌지 방향 (직각을 삼각형 '안쪽'에 그리기 위함)
