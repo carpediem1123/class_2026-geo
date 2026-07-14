@@ -1579,20 +1579,23 @@ function drawSideP2(ctx,W,H,t){
   // 광선이 왼쪽 위에서 오른쪽 아래로 내려옴
   const rdx=Math.cos(45*DEG),rdy=Math.sin(45*DEG);  // 오른쪽-아래 방향
   ctx.strokeStyle='rgba(255,220,50,.5)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
-  // 패널 근처에만 3개 광선 그리기
-  for(let k=-1;k<=1;k++){
-    const startX=ox-1.5*sc+k*1.0*sc;
-    const startY=oy-2.5*sc+k*0.5*sc;
-    const endX=startX+rdx*3.5*sc,endY=startY+rdy*3.5*sc;
-    if(startX<4||endX>W-4)continue;
-    ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(endX,endY);ctx.stroke();
+  // 광선 6개 (회전축 왼쪽으로 3개 추가) — 화면 밖 구간은 건너뛰지 않고 경계에서 잘라 그림
+  for(let k=-4;k<=1;k++){
+    let sx=ox-1.5*sc+k*1.0*sc, sy=oy-2.5*sc+k*0.5*sc;
+    let ex=sx+rdx*4.2*sc,      ey=sy+rdy*4.2*sc;
+    if(sx<4){ const tc=(4-sx)/rdx; sx=4; sy+=tc*rdy; }          // 왼쪽 경계 클리핑
+    if(sy<14){ const tc=(14-sy)/rdy; sy=14; sx+=tc*rdx; }       // 위쪽 경계 클리핑
+    if(ex>W-4){ const tc=(ex-(W-4))/rdx; ex=W-4; ey-=tc*rdy; }  // 오른쪽 경계
+    if(ey>H-40){ const tc=(ey-(H-40))/rdy; ey=H-40; ex-=tc*rdx; } // 아래(그림자 넓이 줄 보호)
+    if(ex<=sx) continue;
+    ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();
   }
   ctx.setLineDash([]);
   // 광선 화살표 머리 (각 광선 끝에)
   ctx.fillStyle='rgba(255,220,50,.82)';
   for(let k=-1;k<=1;k++){
-    const ex=ox-1.5*sc+k*1.0*sc+rdx*3.5*sc;
-    const ey=oy-2.5*sc+k*0.5*sc+rdy*3.5*sc;
+    const ex=ox-1.5*sc+k*1.0*sc+rdx*4.2*sc;
+    const ey=oy-2.5*sc+k*0.5*sc+rdy*4.2*sc;
     if(ex<6||ex>W-6||ey<6||ey>H-20)continue;
     const nx=-rdy,ny=rdx;
     ctx.beginPath();ctx.moveTo(ex,ey);
@@ -1604,7 +1607,7 @@ function drawSideP2(ctx,W,H,t){
   // ── 빛과 경사면 α가 이루는 30° 각: '가장 왼쪽 광선'이 경사면과 만나는 지점의 '내각'으로 표시 ──
   (function drawAngle30(){
     // 가장 왼쪽 광선(k=-1)의 시작점에서 광선 방향으로 진행 → 경사면과 만나는 교점 계산
-    var lx = ox-1.5*sc-1.0*sc, ly = oy-2.5*sc-0.5*sc;   // 왼쪽 광선 시작점
+    var lx = ox-1.5*sc-4.0*sc, ly = oy-2.5*sc-2.0*sc;   // 가장 왼쪽 광선(k=-4) 시작점 — 회전축 왼쪽에서 30° 표시
     // 광선: (lx,ly) + s*(rdx,rdy) / 경사면: (ox,oy) + u*(ev[0],ev[1])
     var det = rdx*(-ev[1]) - rdy*(-ev[0]);
     var hitX, hitY;
@@ -1680,7 +1683,7 @@ function drawSideP2(ctx,W,H,t){
     // 패널 끝(ptx,pty)에서 빛 방향(rd)과 패널 방향(pd)이 이루는 직각 마커
     var mkS = 11;
     var pDir = [-pd[0], -pd[1]];            // 패널 끝→힌지 방향 (직각을 삼각형 '안쪽'에 그리기 위함)
-    var lDir = [-rdx, -rdy];                // 빛이 오는 쪽(위)
+    var lDir = [rdx, rdy];                  // 빛이 '나아가는' 쪽(그림자 방향) — 삼각형 내부
     var c1x = ptx + pDir[0]*mkS, c1y = pty + pDir[1]*mkS;
     var c2x = ptx + lDir[0]*mkS, c2y = pty + lDir[1]*mkS;
     ctx.strokeStyle='rgba(90,255,140,.95)';ctx.lineWidth=2;
