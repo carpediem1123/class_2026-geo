@@ -35,7 +35,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 .adv-tab{flex:1;padding:8px 3px;font-size:11px;font-weight:bold;color:#7799bb;
   background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .adv-tab.on{color:#88ccff;border-bottom-color:#5588ff;background:#0d1630}
-.adv-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:9px 12px;padding-bottom:calc(200px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
+.adv-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:9px 12px;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
 .adv-card{background:#091525;border:1.5px solid #1e3060;border-radius:8px;
   padding:9px 11px;flex-shrink:0;overflow:visible;word-break:keep-all}
 .adv-card.ok-card{border-color:#22aa44}
@@ -321,13 +321,12 @@ S′ = S × cosθ = ?</div>
             <button class="adv-btn" data-q="2q3" data-v="d">4√2π</button>
           </div>
           <div class="adv-fb" id="fb2q3"></div>
-          <div class="adv-ans-box" id="s2done" style="display:none">
-            <div style="font-size:16px;color:#ffdd44;font-weight:bold">S′ = 2√2 π </div>
-            <div style="margin-top:10px;padding:10px;background:#0a1828;border-radius:8px;border:1.5px solid #ffdd44;text-align:center">
-              <div style="font-size:13px;color:#ffdd44;font-weight:bold">🎓 모든 심화 문제 완료!</div>
-              <div style="font-size:11.5px;color:#aabbcc;margin-top:5px;line-height:1.6">수선의 발 → 정사영 도형 → 이면각 → S′<br>정사영의 모든 원리를 정복했어요! 🏆</div>
-              <button onclick="if(window!==window.parent){window.parent.postMessage({type:'advComplete'},'*');window.parent.postMessage({type:'closeAdv'},'*');}" style="margin-top:12px;width:100%;padding:12px;border-radius:9px;background:linear-gradient(135deg,#3a2a00,#1a3a0a);border:2px solid #ffcc44;color:#ffee88;font-size:13.5px;font-weight:bold;cursor:pointer;font-family:inherit">✅ 정사영 탐구로 돌아가기</button>
-            </div>
+          <div class="adv-ans-box" id="s2done" style="display:none;text-align:center">
+            <div style="font-size:16px;color:#ffdd44;font-weight:bold">S′ = 2√2 π</div>
+            <div style="font-size:12.5px;color:#88ffaa;font-weight:bold;margin-top:9px">🎓 모든 심화 문제 완료!</div>
+            <div style="font-size:11px;color:#aabbcc;margin-top:4px;line-height:1.55">수선의 발 → 정사영 도형 → 이면각 → 넓이까지, 정사영의 원리를 정복했어요 🏆</div>
+            <div style="border-top:1px dashed #33507a;margin-top:11px"></div>
+            <button onclick="if(window!==window.parent){window.parent.postMessage({type:'advComplete'},'*');window.parent.postMessage({type:'closeAdv'},'*');}" style="margin-top:11px;width:100%;padding:12px;border-radius:9px;background:linear-gradient(135deg,#3a2a00,#1a3a0a);border:2px solid #ffcc44;color:#ffee88;font-size:13.5px;font-weight:bold;cursor:pointer;font-family:inherit">✅ 정사영 탐구로 돌아가기</button>
           </div>
 <div id="reflection-box" class="adv-card" style="margin-top:20px; border:2px solid #5588ff; display:none;">
             <div class="adv-step" style="color:#88ccff;">최종 성찰 — 사고 유형 진단</div>
@@ -375,7 +374,7 @@ function advScrollTo(el){
     var elRect = el.getBoundingClientRect();
     var boxRect = box.getBoundingClientRect();
     // 요소를 컨테이너 위쪽 약 28% 지점에 두도록 현재 스크롤에서 이동할 양
-    var delta = (elRect.top - boxRect.top) - box.clientHeight*0.28;
+    var delta = (elRect.top - boxRect.top) - box.clientHeight*0.40;   // 40% 지점 — 문항과 그 '윗 맥락'이 함께 보이는 위치
     var target = box.scrollTop + delta;
     target = Math.max(0, Math.min(target, box.scrollHeight - box.clientHeight));
     try{ box.scrollTo({top:target, behavior:'smooth'}); }
@@ -617,7 +616,7 @@ var QDB={
     ng:{
       a:'2π는 cosθ를 제대로 곱하지 않은 값이에요.',
       c:'4π는 원래 넓이 S예요. cosθ를 곱해야 해요!',
-      d:'4√2π는 너무 커요. S=4π × √22 = 2√2π!'
+      d:'4√2π는 너무 커요. S′ = 4π × cos45° = 4π × <span class="frac"><span class="num">√2</span><span class="den">2</span></span> = ?'
     }
   }
 };
@@ -1006,7 +1005,7 @@ function buildCubeScene(){
     var tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;
     var sp=new THREE.Sprite(new THREE.SpriteMaterial({
       map:tex, transparent:true, depthTest:false}));
-    sp.scale.set(5.2, .8, 1);
+    sp.scale.set(3.6, .55, 1);   // 패널 글자와 기존 크기의 중간
     return sp;
   }
   // 범례를 3D 공간이 아닌 '카메라 부착(화면 고정)'으로 — 도형을 어떻게 돌려도 절대 겹치지 않음
@@ -1014,7 +1013,7 @@ function buildCubeScene(){
   var lgEFGH=mkLegend('■ 평면 EFGH (하늘)', '#44ccff');
   var lgEFG=mkLegend('■ 정사영 EFG (연두)', '#88ff00');
   if(cam.parent!==scene) scene.add(cam);   // 카메라 자식이 렌더링되려면 카메라가 씬에 속해야 함
-  [[lgAFC,3.55],[lgEFGH,2.75],[lgEFG,1.95]].forEach(function(a){
+  [[lgAFC,4.05],[lgEFGH,3.5],[lgEFG,2.95]].forEach(function(a){   // 좌상단 구석에 밀착 — 도형 관측 시야 확보
     a[0].position.set(-1.4, a[1], -10);    // 카메라 좌표계 = 화면 좌상단 고정
     a[0].renderOrder=999;
     cam.add(a[0]); advObjs.push(a[0]);
