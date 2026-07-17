@@ -451,18 +451,21 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 4: 공식 선택 -->
           <div class="iq-card" id="iq4">
             <div class="iq-tt">Step 4  정사영 공식 발견</div>
-            <div class="iq-bd">θ=45°일 때: 패널 S=100, 그림자 S′=200 — 그림자가 더 커요!
-그렇다면 뒤집어 생각하면… <strong>패널이 그림자의 정사영</strong>인 셈이죠.
+            <div class="iq-bd">잠깐 — 정사영에서 그림자는 원래 <strong>줄어들었죠?</strong>
+그런데 지금은 그림자(200)가 패널(100)보다 커요. 왜일까요?
 
-정사영 공식의 핵심: <strong>어느 두 면 사이의 각</strong>에 cos을 곱하는가?
+🔍 Side View에서 빛과 <strong>직각</strong>인 쪽을 찾아보세요.
+직각인 건 그림자가 아니라 <strong>패널</strong>!
+그림자의 각 점이 빛을 따라 올라가 패널에 맺히니…
+이번엔 <strong>패널이 그림자의 정사영</strong> — 역할이 뒤집혔어요!
 
-<strong style="font-size:14px">S = S′ × cos( □° )</strong>　□에 들어갈 각을 고르세요.</div>
+<strong style="font-size:14px">패널 = 그림자 × cos( □° )</strong>　□ = 두 면이 이루는 각. 골라보세요.</div>
             <div class="sel-btns" style="margin-top:8px">
               <button class="sel-btn cosPick" data-v="30">30°<br><small style="font-weight:400">빛–경사면</small></button>
               <button class="sel-btn cosPick" data-v="45">45°<br><small style="font-weight:400">패널–수평</small></button>
               <button class="sel-btn cosPick" data-v="60">60°<br><small style="font-weight:400">패널면–경사면 α</small></button>
             </div>
-            <div class="sel-result" id="selResult">S = S′ × cos( ? )</div>
+            <div class="sel-result" id="selResult">패널 = 그림자 × cos( ? )</div>
             <div id="selMsg" style="display:none" class="qmsg"></div>
           </div>
 
@@ -2012,10 +2015,10 @@ document.querySelectorAll('.cosPick').forEach(btn=>{
     const msg=document.getElementById('selMsg');
     msg.style.display='block';
     if(v==='60'){
-      line.textContent='S = S′ × cos(60°)  →  100 = 200 × ½ ✓';
+      line.textContent='패널 = 그림자 × cos(60°)  →  100 = 200 × ½ ✓';
       line.style.color='#44ff88';
       msg.className='qmsg qok';
-      msg.textContent='✅ 발견! 패널은 그림자를 패널면으로 정사영한 도형!\n두 면(패널면 ↔ 경사면 α)이 이루는 각 = 패널 45° + 경사 15° = 60°\n정사영 공식 S = S′·cos(이면각), 완벽해요!';
+      msg.textContent='✅ 발견! 두 면(패널면↔경사면 α)의 각 = 45°+15° = 60°.\n패널 = 그림자 × cos(이면각) — 역할이 뒤집힌 정사영, 완벽해요!';
       setTimeout(()=>{
         // 패널을 0°(수평)로 리셋 후 최종 전력 복구 미션 개방 (기존 완료 시퀀스 유지)
         theta = 0;
@@ -2031,12 +2034,12 @@ document.querySelectorAll('.cosPick').forEach(btn=>{
         }, 500);
       },900);
     }else if(v==='45'){
-      line.textContent='S = S′ × cos(45°) = 200 × 0.71 = 141.4 …?';
+      line.textContent='패널 = 그림자 × cos(45°) = 200 × 0.71 = 141.4 …?';
       line.style.color='#ffcc44';
       msg.className='qmsg qno';
       msg.textContent='🤔 계산하면 100이 안 나오네요.\n45°는 패널과 "수평"이 이루는 각이에요.\n정사영에 필요한 건 두 "면"(패널면 ↔ 경사면 α) 사이의 각!';
     }else{
-      line.textContent='S = S′ × cos(30°) = 200 × 0.87 = 173.2 …?';
+      line.textContent='패널 = 그림자 × cos(30°) = 200 × 0.87 = 173.2 …?';
       line.style.color='#ffcc44';
       msg.className='qmsg qno';
       msg.textContent='🤔 계산하면 100이 안 나오네요.\n30°는 "빛"과 경사면이 이루는 각이에요.\n패널면과 경사면 α가 이루는 각을 Side View에서 찾아보세요!';
@@ -2337,7 +2340,7 @@ function showCompletedMission(){
 function moveSliderForMission(toMission){
   var s=document.getElementById('slSec'), b=document.getElementById('iqBrief'), l=document.getElementById('lps');
   if(!s) return;
-  if(toMission && b){ b.after(s); }
+  if(toMission && b){ b.after(s); if(l) l.scrollTop = 0; }   // 진입 시 맨 위(브리핑)부터 — 갤럭시탭 스크롤 잔존 잘림 방지
   else if(l){ l.prepend(s); }
 }
 document.getElementById('acceptBtn').addEventListener('click',()=>{
@@ -2364,7 +2367,7 @@ document.getElementById('acceptBtn').addEventListener('click',()=>{
   document.getElementById('vtAngInput').textContent='0°';
   // 공식 발견 리셋
   document.getElementById('selMsg').style.display='none';
-  document.getElementById('selResult').textContent='S = S′ × cos( ? )';
+  document.getElementById('selResult').textContent='패널 = 그림자 × cos( ? )';
   document.getElementById('selResult').style.color='';
   document.querySelectorAll('.cosPick,.pbtn').forEach(b=>b.classList.remove('chosen','picked'));
   document.getElementById('missionArea').style.display='none';
