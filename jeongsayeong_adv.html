@@ -35,7 +35,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 .adv-tab{flex:1;padding:8px 3px;font-size:11px;font-weight:bold;color:#7799bb;
   background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .adv-tab.on{color:#88ccff;border-bottom-color:#5588ff;background:#0d1630}
-.adv-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:9px 12px;padding-bottom:calc(200px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
+.adv-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:9px 12px;padding-bottom:calc(200px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
 .adv-card{background:#091525;border:1.5px solid #1e3060;border-radius:8px;
   padding:9px 11px;flex-shrink:0;overflow:visible;word-break:keep-all}
 .adv-card.ok-card{border-color:#22aa44}
@@ -106,6 +106,7 @@ html,body{width:100%;height:100%;overflow:hidden;
           <div class="adv-badge b0">기본개념</div>
           <div class="adv-title">정육면체의 단면 삼각형 정사영</div>
           <div class="adv-body">정육면체에서 평면 <b style="color:#ff66aa">AFC</b>와 평면 <b style="color:#6699ff">EFGH</b>가 이루는 각을 θ라 할 때 cosθ를 구하시오.
+
 3D 화면을 드래그해 정육면체를 살펴보세요!</div>
         </div>
         <div class="adv-card" id="s0q1">
@@ -362,6 +363,13 @@ function advScrollTo(el){
   if(!el) return;
   var box = el.closest ? el.closest('.adv-scroll') : null;
   if(!box){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} return; }
+  // [iOS 스크롤 잠김 해제] 콘텐츠가 방금 늘어난 경우(힌트 버튼 등장 등) 아이패드가
+  // 스크롤 가능 영역을 재계산하지 않는 버그가 있어, overflow를 잠깐 껐다 켜서 강제 재계산.
+  try{
+    box.style.overflowY='hidden';
+    void box.offsetHeight;          // 리플로우 강제
+    box.style.overflowY='auto';
+  }catch(e){}
   var doScroll=function(){
     // getBoundingClientRect로 '실제 화면상' 위치 차이를 계산 (offsetTop은 중첩 요소에서 부정확)
     var elRect = el.getBoundingClientRect();
@@ -443,7 +451,7 @@ function clearAdv(){
   if(window._shadowFloor){ scene.remove(window._shadowFloor); window._shadowFloor=null; }
   advObjs.forEach(function(o){
     if(o._isDivLbl){ /* div 레이블은 clearLblOverlay에서 처리 */ return; }
-    scene.remove(o);
+    if(o.parent) o.parent.remove(o); else scene.remove(o);   // 카메라 부착 범례 포함 정리
     if(o.geometry)o.geometry.dispose();
     if(o.material&&!Array.isArray(o.material))o.material.dispose();
   });
@@ -1001,16 +1009,16 @@ function buildCubeScene(){
     sp.scale.set(5.2, .8, 1);
     return sp;
   }
+  // 범례를 3D 공간이 아닌 '카메라 부착(화면 고정)'으로 — 도형을 어떻게 돌려도 절대 겹치지 않음
   var lgAFC=mkLegend('■ 평면 AFC (분홍)', '#ff66aa');
-  lgAFC.position.set(-1, 7.5, s*.5);
-  scene.add(lgAFC); advObjs.push(lgAFC);
-
   var lgEFGH=mkLegend('■ 평면 EFGH (하늘)', '#44ccff');
   var lgEFG=mkLegend('■ 정사영 EFG (연두)', '#88ff00');
-  lgEFG.position.set(-1, 6.1, s*.5);
-  scene.add(lgEFG); advObjs.push(lgEFG);
-  lgEFGH.position.set(-1, 6.8, s*.5);
-  scene.add(lgEFGH); advObjs.push(lgEFGH);
+  if(cam.parent!==scene) scene.add(cam);   // 카메라 자식이 렌더링되려면 카메라가 씬에 속해야 함
+  [[lgAFC,3.55],[lgEFGH,2.75],[lgEFG,1.95]].forEach(function(a){
+    a[0].position.set(-1.4, a[1], -10);    // 카메라 좌표계 = 화면 좌상단 고정
+    a[0].renderOrder=999;
+    cam.add(a[0]); advObjs.push(a[0]);
+  });
 
   // 수선 점선 (숨김)
   _projLines=[];
@@ -1767,6 +1775,7 @@ function updCam(){
   var tx=(CAM.tx!==undefined?CAM.tx:0), ty=(CAM.ty!==undefined?CAM.ty:1), tz=(CAM.tz!==undefined?CAM.tz:0);
   // 카메라는 타겟(도형 중심)을 기준으로 궤도 회전 → 모든 꼭짓점이 골고루 보임
   cam.position.set(tx+r*Math.sin(ph)*Math.sin(th), ty+r*Math.cos(ph), tz+r*Math.sin(ph)*Math.cos(th));
+  cam.up.set(0, Math.sin(ph)>=0 ? 1 : -1, 0);   // 정수리(위)·발밑(아래)을 넘어가도 화면이 자연스럽게 이어지는 텀블 처리
   cam.lookAt(new THREE.Vector3(tx, ty, tz));
 }
 
@@ -1781,7 +1790,7 @@ canvas.addEventListener('mousedown', function(e){drag={on:true,x:e.clientX,y:e.c
 canvas.addEventListener('mousemove', function(e){
   if(!drag.on)return;
   CAM.th -= (e.clientX-drag.x)*.007;
-  CAM.ph = TMU.clamp(CAM.ph+(e.clientY-drag.y)*.007, .02, PI*.98);  // 상하 회전 범위 확대(거의 정수리~발밑까지) — 짐벌락만 회피
+  CAM.ph = (CAM.ph+(e.clientY-drag.y)*.007 + PI*2) % (PI*2);  // 상하 무제한 — 정수리·발밑을 넘어 연이어 도는 텀블 회전
   drag.x=e.clientX; drag.y=e.clientY;
 });
 canvas.addEventListener('mouseup', function(){drag.on=false;});
@@ -1791,7 +1800,7 @@ canvas.addEventListener('touchstart', function(e){
 canvas.addEventListener('touchmove', function(e){
   e.preventDefault(); if(!drag.on)return;
   CAM.th -= (e.touches[0].clientX-drag.x)*.007;
-  CAM.ph = TMU.clamp(CAM.ph+(e.touches[0].clientY-drag.y)*.007,.02,PI*.98);  // 터치도 동일하게 확대
+  CAM.ph = (CAM.ph+(e.touches[0].clientY-drag.y)*.007 + PI*2) % (PI*2);  // 터치도 무제한 텀블
   drag.x=e.touches[0].clientX; drag.y=e.touches[0].clientY;
 },{passive:false});
 canvas.addEventListener('touchend', function(){drag.on=false;});
