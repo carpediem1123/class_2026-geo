@@ -836,7 +836,7 @@ function updateLogic() {
       statusBox.style.color = "#00ff88";
       if (btnAction) {
         btnAction.disabled = false;
-        btnAction.innerText = "전방위 수직 교차 시점 자동 검증";
+        btnAction.innerText = "여러 각도에서 직각 확인 (시점 회전)";
         btnAction.className = "btn-success";
       }
     } else {
@@ -855,7 +855,7 @@ function updateLogic() {
        state = 'STEP3_READY_LASER';
        stepTitle.innerText = "🛡️ 4단계: 평면의 수직 최종 스캔 검증";
        guideText.innerText = "최종 검증 단계입니다. 버튼을 눌러 평면 위를 무한 회전하는 가상 광선 g선 레이저를 가동하세요.";
-       dynamicBtnContainer.innerHTML = `<button id="btn-action" class="btn-success">최종 전방위 교차 레이저 스캔 가동</button>`;
+       dynamicBtnContainer.innerHTML = `<button id="btn-action" class="btn-success">🛡 모든 방향의 직선과도 수직일까? — g선 스캔</button>`;
     }
   }
   else if (state === 'STEP4') {
@@ -863,7 +863,7 @@ function updateLogic() {
     lineG.rotation.y = scanAngle;
     antennaGroup.rotation.set(0,0,0); 
 
-    statusBox.innerHTML = `🛡️ [수학적 정리 실시간 입증]<br>만나는 두 직선과 수직인 기둥은 평면 위의 모든 직선(g)과 직교합니다.<br>➔ 스캔각: ${(Math.round(scanAngle*(180/Math.PI))%360)}° | 공간 내적: 0.0000`;
+    statusBox.innerHTML = `🛡️ 정리의 약속, 실시간 확인!<br>우리는 두 지지대(m, n)와만 직각을 맞췄어요. 그런데 —<br>회전하는 초록 직선(g)이 <b>어느 방향</b>이어도 기둥과 90°! (지금 g선 방향: ${(Math.round(scanAngle*(180/Math.PI))%360)}°)`;
     statusBox.style.color = "#00ffff";
 
     finishTimer += 1;
@@ -923,7 +923,7 @@ dynamicBtnContainer.addEventListener('click', (e) => {
       autoRotateAngle = Math.atan2(camera.position.x, camera.position.z);
       document.getElementById('sliderZ').disabled = true;
       document.getElementById('sliderX').disabled = true;
-      statusBox.innerHTML = `⚙️ 전방위 수직 일치 상태 자동 분석 락 가동...`;
+      statusBox.innerHTML = `⚙️ 기둥 수직 상태 확인 중...`;
     }
     else if (state === 'STEP3_READY_LASER') {
       state = 'STEP4';
@@ -1476,12 +1476,9 @@ function completeProof() {
     const kLab = createLabelTexture('k', '#d97706');
     kLab.position.set(5.2, 0.25, 0);
     grp.add(kLab);
-    const bigRA = makeRightAngleMarker(new THREE.Vector3(1,0,0), 0xff44aa, 0.95, true);  // 다른 기호(0.35~0.5)보다 큰 직각 + 굵은선 + 가림 방지
+    const bigRA = makeRightAngleMarker(new THREE.Vector3(1,0,0), 0xff44aa, 0.63, false);  // 한 줄 직각 기호 (기존의 2/3 크기)
+    bigRA.children.forEach(function(l){ l.material.depthTest = false; l.renderOrder = 999; });  // 평면에 가려지지 않게만 유지
     grp.add(bigRA);
-    const perpLabel = createLabelTexture('⊥', '#ff44aa');
-    perpLabel.scale.multiplyScalar(1.9);
-    perpLabel.position.set(1.25, 1.35, 0);
-    grp.add(perpLabel);
     proofMeshGroup.add(grp);
     window._sweepGrp = grp;
 
