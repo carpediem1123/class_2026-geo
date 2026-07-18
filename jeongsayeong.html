@@ -2477,7 +2477,9 @@ function openAdvIframe(){
   if(frame) {
     // indexOf === -1 비교를 명확하게 명시하여 무한 중첩 로드 버그를 완벽하게 차단합니다.
     if(!frame.src || frame.src === "" || frame.src === "about:blank" || frame.src.indexOf("jeongsayeong_adv.html") === -1) {
-      frame.src = "jeongsayeong_adv.html?v=20260612a";
+      // 버전을 하드코딩하지 않고, 사령부→본체로 전달된 최신 BUILD(?v=...)를 그대로 전파
+      // (고정 버전이면 아이패드가 옛 adv 캐시를 계속 재사용 — 그간 아이패드만 수정이 반영 안 되던 원인)
+      frame.src = "jeongsayeong_adv.html" + (location.search || "?v=1");
     }
   }
   document.getElementById('advPanel').style.display = 'flex';
