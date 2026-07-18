@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a1628">
-<title>공간잇기 — KOSA-1 사령부</title>
+<title>공간잇기2 — KOSA-1 사령부</title>
 <!-- 폰트: 비차단 로딩 — 화면은 즉시 표시(시스템 폰트), 웹폰트는 도착하는 대로 교체(swap) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -291,7 +291,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
 <script>
 // ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
-var BUILD = '20260707h';
+var BUILD = '20260707i';
 
 // ── 선다운로드: 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아 캐시에 저장 ──
 // [v20260704 수정] 이전 버전의 결함 해결:
@@ -360,5 +360,7 @@ if (sessionStorage.getItem('kosa_return')) {
   sessionStorage.removeItem('kosa_return');
 }
 </script>
+<div id="hubBuildBadge" style="position:fixed;left:8px;bottom:6px;font-size:11px;color:#8fb4e8;background:rgba(10,20,40,.75);padding:2px 7px;border-radius:8px;border:1px solid #2a4a7a;z-index:99;pointer-events:none;font-family:monospace"></div>
+<script>document.getElementById('hubBuildBadge').textContent='hub '+BUILD;</script>
 </body>
 </html>
