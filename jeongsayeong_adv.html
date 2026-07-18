@@ -1517,12 +1517,16 @@ function buildBoxScene(){
     var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,fog:false}));
     sp.scale.set(5.2,.8,1);return sp;
   }
+  // 기본개념과 동일 규격: 60% 크기 + 카메라 부착(화면 좌상단 고정 — 회전해도 안 겹침)
   var lgABCD=mkLeg('■ 평면 ABCD (주황)', '#ffaa44');
-  lgABCD.position.set(-0.5, s+2.5, s*.5);
-  scene.add(lgABCD); advObjs.push(lgABCD);
   var lgAFGD=mkLeg('■ 평면 AFGD (초록)', '#44ffaa');
-  lgAFGD.position.set(-0.5, s+1.8, s*.5);
-  scene.add(lgAFGD); advObjs.push(lgAFGD);
+  if(cam.parent!==scene) scene.add(cam);
+  [[lgABCD,4.05],[lgAFGD,3.5]].forEach(function(a){
+    a[0].scale.set(3.1,.48,1);
+    a[0].position.set(-1.4, a[1], -10);
+    a[0].renderOrder=999;
+    cam.add(a[0]); advObjs.push(a[0]);
+  });
 
   updCam();
 }
