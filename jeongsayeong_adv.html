@@ -483,7 +483,7 @@ function showCongrats(msg){
   if(!el){
     el=document.createElement('div');
     el.id='congrats-toast';
-    el.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;'+
+    el.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 58px);right:14px;'+   // 탭바(심화①·②) 아래로 — 가림 방지
       'background:linear-gradient(135deg,#1a3a0a,#0a2818);'+
       'border:2px solid #44ff88;border-radius:10px;padding:11px 16px;'+
       'color:#88ffaa;font-size:12.5px;font-weight:bold;text-align:center;'+
@@ -1005,7 +1005,7 @@ function buildCubeScene(){
     var tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;
     var sp=new THREE.Sprite(new THREE.SpriteMaterial({
       map:tex, transparent:true, depthTest:false}));
-    sp.scale.set(3.6, .55, 1);   // 패널 글자와 기존 크기의 중간
+    sp.scale.set(3.1, .48, 1);   // 원본의 60% 크기
     return sp;
   }
   // 범례를 3D 공간이 아닌 '카메라 부착(화면 고정)'으로 — 도형을 어떻게 돌려도 절대 겹치지 않음
