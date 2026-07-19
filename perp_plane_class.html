@@ -303,7 +303,7 @@
 <body>
 
 <!-- iOS 직접 이동 모드 전용: 사령부 복귀 버튼 — 우측 상단, 타 모듈(.hb)과 동일 디자인 -->
-<button id="bHub" onclick="window.location.href='index.html'+(location.search||'')" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:8500;width:auto;background:#162030;border:2px solid #2a3a4a;border-radius:7px;color:#88aacc;font-size:12px;padding:6px 10px;min-height:36px;line-height:1;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
+<button id="bHub" onclick="window.location.href='hub.html'+(location.search||'')" style="display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:8500;width:auto;background:#162030;border:2px solid #2a3a4a;border-radius:7px;color:#88aacc;font-size:12px;padding:6px 10px;min-height:36px;line-height:1;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.5)">◀ 사령부</button>
 
 <button id="lab-tab-btn" class="lab-locked" onclick="toggleLabPanel()">
   <div class="lab-tab-dot"></div>
@@ -495,7 +495,7 @@
       try {
         if(window.parent && window.parent !== window && window.parent.closeGame){ window.parent.closeGame(); return; }
       } catch(e) {}
-      window.location.href = 'index.html' + (location.search || '');   // 버전 전파 — 옛 index 캐시 재생 방지
+      window.location.href = 'hub.html' + (location.search || '');   // 버전 전파 — 옛 index 캐시 재생 방지
     }
     function goNext(){
       try {
