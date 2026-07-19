@@ -8,7 +8,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a1628">
 <title>공간잇기(空間+IT+Geo)</title>
-<!-- 폰트: 비차단 로딩 — 화면은 즉시 표시(시스템 폰트), 웹폰트는 도착하는 대로 교체(swap) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700;900&display=swap" media="print" onload="this.media='all'">
@@ -16,17 +15,15 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%}
-body{width:100%;height:100%;height:100dvh;overflow:hidden;   /* dvh: 아이패드 탭바·주소창 제외한 실제 가시 높이 */
+body{width:100%;height:100%;height:100dvh;overflow:hidden;
   font-family:'Noto Sans KR',sans-serif;background:#0a1628;
   position:fixed;top:0;left:0;right:0;bottom:0}
 
-/* ── 배경 그리드 ── */
-body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;
-  background-image:linear-gradient(rgba(40,80,140,.15) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(40,80,140,.15) 1px,transparent 1px);
-  background-size:40px 40px;z-index:0}
-
-/* ── 우주 별 배경 (그리드 뒤 반짝임) ── */
+/* ── 배경 그리드 + 별 ── */
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(40,120,180,.1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(40,120,180,.1) 1px,transparent 1px);
+  background-size:44px 44px}
 body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;
   background-image:
     radial-gradient(1.5px 1.5px at 18px 32px,rgba(255,255,255,.95),transparent),
@@ -41,143 +38,17 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   background-size:260px 240px;background-repeat:repeat;
   animation:starTwinkle 4.5s ease-in-out infinite alternate}
 @keyframes starTwinkle{from{opacity:.45}to{opacity:.9}}
-
-#app{position:relative;z-index:1;width:100%;height:100%;
-  display:-webkit-flex;display:flex;
-  -webkit-flex-direction:column;flex-direction:column;
-  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  opacity:0;transition:opacity .7s ease}
-#app.app-visible{opacity:1}
-
-/* ── 헤더 ── */
-#hd{flex-shrink:0;background:#06101e;border-bottom:2px solid #1e3a6a;
-  padding:9px 20px;display:flex;align-items:center;justify-content:space-between}
-.hd-left{display:flex;flex-direction:column;gap:3px}
-  .hd-title{font-size:17px;color:#cfe6ff;font-weight:900;letter-spacing:.02em}
-.hd-title .dashes{color:#5599ff;font-weight:400}
-.hd-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:#6f9ecf;letter-spacing:.08em}
-.hd-right{display:flex;gap:16px;align-items:center}
-.status-chip{font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 10px;
-  border-radius:3px;display:flex;align-items:center;gap:5px}
-.chip-r{background:#1a0505;border:1px solid #883322;color:#ff7755}
-.chip-y{background:#1a1400;border:1px solid #886611;color:#ffd344}
-.dot{width:6px;height:6px;border-radius:50%;animation:blink 1.2s step-end infinite}
-.dot-r{background:#ff4422}.dot-y{background:#ffcc22}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* ── 메인 콘텐츠 ── */
-#main{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;
-  gap:10px;padding:10px 18px;min-height:0;overflow:hidden}
-
-/* ── 스토리 배너 ── */
-#story{grid-column:1/-1;background:#08162c;border:1.5px solid #2a4a80;
-  border-left:4px solid #5599ff;border-radius:8px;padding:9px 16px;
-  display:flex;align-items:flex-start;gap:12px;max-height:90px;overflow:hidden}
-.story-icon{font-size:28px;flex-shrink:0;margin-top:2px}
-.story-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:#5f8fc5;
-  letter-spacing:.15em;margin-bottom:2px}
-  .story-body{font-size:12px;color:#d6e6fb;line-height:1.7;word-break:keep-all}
-.story-body b{color:#8ec3ff;font-weight:700}
-.story-body em{color:#ffd34a;font-style:normal;font-weight:700}
-
-/* ── 모듈 카드 ── */
-.mod{background:#07111f;border:1.5px solid #1a3060;border-radius:10px;
-  display:flex;flex-direction:column;overflow:hidden;min-height:0}
-
-.mod-header{padding:10px 14px 9px;flex-shrink:0}
-.mod-tag{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;
-  margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.tag-dot{width:8px;height:8px;border-radius:50%}
-.mod-title{font-size:17px;font-weight:900;line-height:1.2;margin-bottom:4px}
-.mod-desc{font-size:12px;line-height:1.7;word-break:keep-all}
-
-/* ── 미션 목록 ── */
-.missions{flex:1;border-top:1px solid #101e38;padding:8px 14px;
-  display:flex;flex-direction:column;gap:6px;overflow-y:auto}
-.mission{display:flex;align-items:flex-start;gap:10px}
-.m-num{font-family:'Share Tech Mono',monospace;font-size:10px;flex-shrink:0;
-  padding:3px 7px;border-radius:3px;margin-top:1px;font-weight:bold}
-.m-name{font-size:12.5px;font-weight:700;margin-bottom:1px}
-  .m-detail{font-size:10.5px;line-height:1.45;word-break:keep-all}
-
-/* ── 접속 버튼 ── */
-.mod-btn{flex-shrink:0;margin:0 14px;padding:9px;border-radius:6px;
-  text-align:center;font-family:'Share Tech Mono',monospace;font-size:13px;
-  letter-spacing:.06em;font-weight:bold;border:none;cursor:pointer;
-  transition:all .18s;display:block;width:calc(100% - 36px)}
-.btn-row{flex-shrink:0;display:flex;gap:8px;margin:0 14px 10px}
-.btn-row .mod-btn{flex:1;margin:0;width:auto;padding:9px 6px;line-height:1.35}
-.btn-sub{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10.5px;
-  font-weight:700;letter-spacing:0;opacity:.85;margin-top:2px}
-.mod-last{margin-bottom:10px}
-
-/* ═ 모듈1 — 주황-적색 테마 (수직의 세계) ═ */
-.mod-red .mod-header{background:linear-gradient(135deg,#150500 0%,#0a0200 100%)}
-.mod-red .mod-tag{color:#e07a4a}
-.mod-red .tag-dot{background:#ff6644;animation:blink 1s step-end infinite}
-.mod-red .mod-title{color:#ffaa77}
-.mod-red .mod-desc{color:#d8a585}
-.mod-red .mod-desc b{color:#ffb888}
-.mod-red .missions{background:#080c10}
-.mod-red .m-num{background:#241006;color:#ff9355;border:1px solid #58300f}
-.mod-red .m-name{color:#ffbf91}
-.mod-red .m-detail{color:#bb9176}
-.mod-red .mod-btn{background:#221000;color:#ff9355;border:2px solid #88401a}
-.mod-red .mod-btn:hover{background:#341803;border-color:#ff6630;color:#ffc09a}
-.mod-red .btn-gap{color:#a05a32}
-
-/* ═ 모듈2 — 금색 테마 (그림자의 세계) ═ */
-.mod-gold .mod-header{background:linear-gradient(135deg,#171100 0%,#0c0900 100%);
-  border-top:3px solid #ffcc22;position:relative}
-.mod-gold .mod-header::after{content:'★ FINAL';position:absolute;top:12px;right:14px;
-  font-family:'Share Tech Mono',monospace;font-size:10px;color:#8a6e10;letter-spacing:.15em}
-.mod-gold .mod-tag{color:#d4a830}
-.mod-gold .tag-dot{background:#ffcc33;animation:blink .8s step-end infinite}
-.mod-gold .mod-title{color:#ffdd66}
-.mod-gold .mod-desc{color:#d3bb78}
-.mod-gold .mod-desc b{color:#ffd34a}
-.mod-gold .missions{background:#080c10}
-.mod-gold .m-num{background:#211803;color:#f0b830;border:1px solid #5d4408}
-.mod-gold .m-name{color:#ffd97e}
-.mod-gold .m-detail{color:#bfa86a}
-.mod-gold .mod-btn{background:#2a1d00;color:#ffe066;border:2px solid #b07d10}
-.mod-gold .mod-btn:hover{background:#3d2b02;border-color:#ffcc22;color:#fff0a8}
-
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.mod{animation:fadeIn .5s ease both}
-.mod-red{animation-delay:.1s}.mod-gold{animation-delay:.25s}
-#story{animation:fadeIn .4s ease both}
-
-/* ── 게임 오버레이 ── */
-#overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9000;flex-direction:column;background:#000}
-#overlay.active{display:flex}
-#ov-bar{flex-shrink:0;height:46px;background:#060e1c;border-bottom:1.5px solid #1a3060;
-  display:flex;align-items:center;padding:0 16px;gap:14px}
-#ov-back{background:#0b1a30;border:1.5px solid #1e3a60;color:#5599cc;
-  font-family:'Share Tech Mono',monospace;font-size:12px;padding:7px 16px;
-  border-radius:5px;cursor:pointer;letter-spacing:.05em;transition:all .15s}
-#ov-back:hover{background:#102240;border-color:#3366aa;color:#88bbee}
-#ov-title{font-family:'Share Tech Mono',monospace;font-size:12.5px;color:#a8cdf5;letter-spacing:.08em}
-#gf{flex:1;border:none;width:100%;background:#000}
-
 /* ================================================================
-   오프닝(대문) 화면 — HUD / Mission Control 스타일
-   컬러 언어: #app과 동일한 남색·검정 베이스 + 시안(#5599ff/#22d3ee) · 오렌지(#ff6644) 포인트
+   대문(오프닝) — HUD / Mission Control 스타일
    ================================================================ */
 #intro-screen{
-  position:fixed;inset:0;z-index:9999;
+  position:fixed;inset:0;z-index:10;
   background:radial-gradient(ellipse at 50% 20%,#0c1c33 0%,#050b15 62%,#020407 100%);
   display:flex;align-items:center;justify-content:center;
-  padding:22px;overflow:hidden;
-  transition:opacity .6s ease;
-}
-#intro-screen.intro-hide{opacity:0;pointer-events:none}
-
-/* 오프닝 전용 배경 그리드 (앱 배경과 동일 언어) */
-#intro-screen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(rgba(40,120,180,.1) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(40,120,180,.1) 1px,transparent 1px);
-  background-size:44px 44px}
+  padding:calc(env(safe-area-inset-top,0px) + 22px) calc(env(safe-area-inset-right,0px) + 22px) calc(env(safe-area-inset-bottom,0px) + 22px) calc(env(safe-area-inset-left,0px) + 22px);
+  overflow:auto}
 
 .monitor-frame{
   position:relative;z-index:1;
@@ -186,21 +57,17 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   background:linear-gradient(180deg,#0a1424 0%,#060d18 100%);
   padding:22px 26px;border-radius:10px;
   box-shadow:0 0 0 1px rgba(85,153,255,.08),0 30px 80px rgba(0,0,0,.65),
-    inset 0 0 40px rgba(0,20,40,.4);
-}
+    inset 0 0 40px rgba(0,20,40,.4)}
 
-/* 화면/브리핑 3:2 분할 — 2560×1600 등 와이드 태블릿 해상도에 맞춘 가로 레이아웃 */
 .intro-body{display:grid;grid-template-columns:3fr 2fr;gap:22px;align-items:stretch}
 .intro-body .mission-panel{margin-top:0;height:100%;display:flex;flex-direction:column}
 .intro-body .mission-panel .mission-text{flex:0 0 auto}
 .intro-body .start-btn{margin-top:auto}
-
 @media (max-width:860px){
   .intro-body{grid-template-columns:1fr}
   .intro-body .mission-panel{margin-top:0}
 }
 
-/* 프레임 상단 HUD 바 */
 .frame-topbar{display:flex;align-items:center;justify-content:space-between;
   margin-bottom:12px;font-family:'Share Tech Mono',monospace;
   font-size:10.5px;letter-spacing:.14em;color:#4f7fb8}
@@ -208,7 +75,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 .frame-topbar .rec .dot{width:6px;height:6px;border-radius:50%;background:#ff4422;
   animation:blink 1s step-end infinite}
 
-/* ── 연구 제목 (최상단 히어로) — 프로그램명 "공간잇기"를 절대적으로 강조 ── */
+/* ── 연구 제목 ── */
 .research-title{text-align:center;margin-bottom:16px;padding-bottom:16px;
   border-bottom:1px solid rgba(85,153,255,.22);position:relative}
 .rt-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;
@@ -223,37 +90,28 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   font-size:clamp(12px,2vw,15px);letter-spacing:.1em;color:#ffb98a;font-weight:700}
 .research-title-sub .rt-sep{color:#3a5a80;margin:0 12px}
 
-/* ── CRT 화면 (Ken Burns + 스캔라인 + 비네트 + 코너 브래킷) ── */
+/* ── CRT 화면 ── */
 .crt-screen{
   position:relative;width:100%;height:auto;aspect-ratio:16/9;
   overflow:hidden;border-radius:4px;
-  border:1px solid #24466f;
-  background:#000;
-  box-shadow:0 0 0 1px rgba(34,224,255,.06);
-}
-
+  border:1px solid #24466f;background:#000;
+  box-shadow:0 0 0 1px rgba(34,224,255,.06)}
 #introImage{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   filter:saturate(1.08) contrast(1.05);
   animation:kenburns 22s ease-in-out infinite alternate;
-  transform-origin:58% 42%;
-}
+  transform-origin:58% 42%}
 @keyframes kenburns{
   from{transform:scale(1) translate(0,0)}
   to{transform:scale(1.12) translate(-1.2%,1%)}
 }
-
-/* 스캔라인 오버레이 */
 .crt-screen::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
   background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,
     rgba(0,0,0,.28) 3px,rgba(0,0,0,0) 4px);
   mix-blend-mode:multiply;opacity:.55}
-
-/* 비네트 */
 .crt-screen::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
   background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,4,10,.75) 100%)}
 
-/* 레이더 스윕(시그니처 요소) */
 .radar-sweep{position:absolute;top:14px;right:16px;width:46px;height:46px;z-index:4;
   border:1px solid rgba(34,224,255,.35);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -266,7 +124,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   top:38%;left:58%;animation:blink 1.6s step-end infinite}
 @keyframes radarspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
-/* 코너 브래킷 (HUD 프레임) */
 .hud-corner{position:absolute;width:22px;height:22px;z-index:4;pointer-events:none;
   border:2px solid rgba(34,224,255,.55)}
 .hud-corner.tl{top:10px;left:10px;border-right:none;border-bottom:none}
@@ -274,7 +131,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 .hud-corner.bl{bottom:10px;left:10px;border-right:none;border-top:none}
 .hud-corner.br{bottom:10px;right:10px;border-left:none;border-top:none}
 
-/* 좌상단 글리치 텍스트 */
 .glitch-text{position:absolute;top:16px;left:16px;z-index:4;
   font-family:'Share Tech Mono',monospace;color:#eaf6ff}
 .glitch-text h2{font-size:15px;letter-spacing:.04em;
@@ -289,7 +145,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   97%{opacity:1;transform:translate(0,0)}
 }
 
-/* 하단 타임스탬프/좌표 리드아웃 */
 .hud-readout{position:absolute;bottom:14px;left:16px;z-index:4;
   font-family:'Share Tech Mono',monospace;font-size:9.5px;letter-spacing:.1em;
   color:rgba(150,200,255,.75);line-height:1.5}
@@ -302,7 +157,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   display:flex;align-items:center;gap:8px}
 .panel-title::before{content:'';width:7px;height:7px;background:#22e0ff;border-radius:50%;
   box-shadow:0 0 6px 2px rgba(34,224,255,.6);flex-shrink:0}
-
 .panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .panel-grid .label{font-family:'Share Tech Mono',monospace;font-size:9.5px;
   letter-spacing:.18em;color:#4f7fb8;margin-bottom:4px}
@@ -310,19 +164,16 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 .panel-grid .value{font-size:14px;font-weight:700;color:#e7f2ff;line-height:1.4}
 .panel-grid .value span{display:block;font-family:'Share Tech Mono',monospace;
   font-size:10.5px;font-weight:400;color:#7fa8d8;margin-top:2px}
-
-/* 대원 자격(CREW) 셀 — 대상 학년을 명확히 부각 */
 .crew-cell{padding:8px 10px;border-radius:6px;
   background:rgba(255,102,68,.08);border:1px solid rgba(255,140,90,.28)}
 .crew-cell .label{color:#ff8f66}
 .crew-value{color:#ffcf9a !important;font-size:15px;font-weight:900;letter-spacing:.01em}
-
 .mission-text{font-size:12.5px;line-height:1.75;color:#c8dcf5;word-break:keep-all;
   padding:11px 13px;border-left:3px solid #ff6644;background:rgba(255,102,68,.06);
   border-radius:0 5px 5px 0;margin-bottom:16px}
 .mission-text b{color:#ffcf9a;font-weight:700}
 
-/* ── START 버튼 (기존 mod-btn 언어와 통일) ── */
+/* ── START 버튼 ── */
 .start-btn{display:block;margin:0 auto;width:100%;max-width:320px;
   padding:13px 20px;border-radius:6px;text-align:center;
   font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:bold;
@@ -343,8 +194,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   .rt-code{letter-spacing:.14em}
   .research-title-sub .rt-sep{margin:0 6px}
 }
-
-/* 모션 최소화 환경: 애니메이션 억제 */
 @media (prefers-reduced-motion:reduce){
   #introImage{animation:none}
   .glitch-text h2{animation:none}
@@ -356,7 +205,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 </head>
 <body>
 
-<!-- ===================== 오프닝(대문) 화면 ===================== -->
+<!-- ===================== 대문 — 여기서 [START] → 사령부(hub.html) ===================== -->
 <div id="intro-screen">
   <div class="monitor-frame">
 
@@ -376,18 +225,15 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
     <div class="crt-screen">
       <img id="introImage" src="mars.png" alt="화성 남극 기지 KOSA-1 위성 영상">
-
       <span class="hud-corner tl"></span>
       <span class="hud-corner tr"></span>
       <span class="hud-corner bl"></span>
       <span class="hud-corner br"></span>
       <div class="radar-sweep"></div>
-
       <div class="glitch-text">
         <h2>📡 KOSA-1 EMERGENCY SIGNAL</h2>
         <p>SIGNAL LOST...</p>
       </div>
-
       <div class="hud-readout">
         LAT 88.2°S · LON 114.7°E&nbsp;&nbsp;|&nbsp;&nbsp;2047.09.14 03:22 KST
       </div>
@@ -395,7 +241,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
     <div class="mission-panel">
       <div class="panel-title">MISSION BRIEFING</div>
-
       <div class="panel-grid">
         <div>
           <div class="label">TARGET UNIT</div>
@@ -406,12 +251,10 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
           <div class="value crew-value">고등학교 2학년 이상</div>
         </div>
       </div>
-
       <div class="mission-text">
         <b>KOSA-1</b> 화성기지와의 통신이 두절되었습니다.<br>
         복구 임무를 시작합니다.
       </div>
-
       <button class="start-btn" onclick="startMission()">▶ START MISSION</button>
     </div>
 
@@ -420,218 +263,25 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
   </div>
 </div>
 
-<div id="app">
-  <!-- 헤더 -->
-  <div id="hd">
-    <div class="hd-left">
-      <div class="hd-title">🛰 공간잇기 <span class="dashes">┄┄┄</span> KOSA-1 사령부</div>
-      <div class="hd-sub">SPACE CONNECTION (空間+IT+Geo) · 점선으로 개념을 잇다 · MARS POLAR BASE α-7</div>
-    </div>
-    <div class="hd-right">
-      <div class="status-chip chip-r"><span class="dot dot-r"></span>구조 시스템 OFFLINE</div>
-      <div class="status-chip chip-y"><span class="dot dot-y"></span>전력 23% 위험</div>
-      <div class="status-chip chip-r"><span class="dot dot-r"></span>통신 불능</div>
-    </div>
-  </div>
-
-  <!-- 메인 그리드 -->
-  <div id="main">
-
-    <!-- 스토리 배너 -->
-    <div id="story">
-      <div class="story-icon">📡</div>
-      <div class="story-text">
-        <div class="story-label">[ 2047.09.14 03:22 KST ] 긴급 브리핑</div>
-        <div class="story-body">
-          화성 남극 기지 <b>KOSA-1</b>에 자기 폭풍이 강타 — 기하 제어 시스템 전면 손상, <em>72시간 내 기지 붕괴</em> 예측.
-          당신은 긴급 복구 요원입니다. 끊어진 공간 개념들을 <b>점선(가이드선)으로 다시 이어</b>
-          기지의 수직 체계를 복구하고, <b>정사영</b>으로 태양광 패널을 최적화해 <em>생명유지장치</em>에 전력을 공급하십시오.
-        </div>
-      </div>
-    </div>
-
-    <!-- MODULE 01: 수직관계 ┄▶ 삼수선 -->
-    <div class="mod mod-red">
-      <div class="mod-header">
-        <div class="mod-tag">
-          <span class="tag-dot"></span>MODULE 01 · 수직의 세계 잇기
-        </div>
-        <div class="mod-title">🏗️ 기지 구조 복구 작전</div>
-        <div class="mod-desc">
-          <b>직선과 평면의 수직</b>에서 출발해 <b>삼수선의 정리</b>까지,<br>
-          하나의 수직이 다음 수직으로 이어지는 길을 점선으로 연결합니다.
-        </div>
-      </div>
-      <div class="missions">
-        <div class="mission">
-          <span class="m-num">S1</span>
-          <div class="m-info">
-            <div class="m-name">📐 직선과 평면의 수직</div>
-            <div class="m-detail">기둥 l ⊥ 평면 위 두 직선 → 평면 전체와 수직 · 기지 기둥 정밀 보정</div>
-          </div>
-        </div>
-        <div class="mission">
-          <span class="m-num">S2</span>
-          <div class="m-info">
-            <div class="m-name">📡 삼수선의 정리 ①②③</div>
-            <div class="m-detail">통신 케이블 복구 · 수선의 발 · 안테나 기하학적 기립</div>
-          </div>
-        </div>
-        <div class="mission">
-          <span class="m-num">📝</span>
-          <div class="m-info">
-            <div class="m-name">미션 성찰로그</div>
-            <div class="m-detail">S2 전체 미션 완수 후 성찰로그 기록 → 모듈1 임무 완료</div>
-          </div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="mod-btn" onclick="openGame('perp_plane_class.html','MODULE 01-1 — 직선과 평면의 수직')">🛠️ 1단계 접속<span class="btn-sub">직선과 평면의 수직</span></button>
-        <button class="mod-btn" onclick="openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리')">📡 2단계 접속<span class="btn-sub">삼수선의 정리</span></button>
-      </div>
-    </div>
-
-    <!-- MODULE 02: 정사영 -->
-    <div class="mod mod-gold">
-      <div class="mod-header">
-        <div class="mod-tag">
-          <span class="tag-dot"></span>MODULE 02 · 그림자의 세계 잇기
-        </div>
-        <div class="mod-title">⚡ 생명유지장치 전력 복구</div>
-        <div class="mod-desc">
-          모듈1의 <b>수선의 발</b>이 모이면 <b>정사영</b>이 됩니다.<br>
-          cos θ로 그림자의 넓이를 다스려 태양광 패널 전력을 최대로!
-        </div>
-      </div>
-      <div class="missions">
-        <div class="mission">
-          <span class="m-num">F01</span>
-          <div class="m-info">
-            <div class="m-name">☀️ 개념탐구 — 정사영과 수선의 발</div>
-            <div class="m-detail">태양 고도 분석 · S′ = S·cos θ 원리 발견</div>
-          </div>
-        </div>
-        <div class="mission">
-          <span class="m-num">F02</span>
-          <div class="m-info">
-            <div class="m-name">🔍 개념이해 — 입체도형 속 정사영</div>
-            <div class="m-detail">정육면체·정사면체 단면의 정사영 심화 탐구 · 공간잇기 힌트로 안내</div>
-          </div>
-        </div>
-        <div class="mission">
-          <span class="m-num">F03</span>
-          <div class="m-info">
-            <div class="m-name">🚀 미션탐구 — 최적 각도 제어</div>
-            <div class="m-detail">전력 최대화 각도 산출 → 생명유지장치 복구</div>
-          </div>
-        </div>
-        <div class="mission">
-          <span class="m-num">📝</span>
-          <div class="m-info">
-            <div class="m-name">미션 성찰로그</div>
-            <div class="m-detail">미션 완수 후 성찰로그 기록 → 모듈2 임무 완료</div>
-          </div>
-        </div>
-      </div>
-      <button class="mod-btn mod-last" onclick="openGame('jeongsayeong.html','MODULE 02 — 정사영 탐구')">⚡ 정사영 모듈 접속</button>
-    </div>
-
-  </div><!-- /main -->
-</div><!-- /app -->
-
-<!-- 게임 오버레이 — iOS Safari는 iframe 내 WebGL을 막으므로 직접 이동 방식 사용 -->
-<div id="overlay">
-  <div id="ov-bar">
-    <button id="ov-back" onclick="closeGame()">◀ 사령부로 복귀</button>
-    <span id="ov-title"></span>
-  </div>
-  <iframe id="gf" src="" allow="accelerometer; autoplay; camera; gyroscope; microphone"></iframe>
-</div>
-
 <script>
-// ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
-var BUILD = '20260707j';
-
-// ── 선다운로드: 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아 캐시에 저장 ──
-// [v20260704 수정] 이전 버전의 결함 해결:
-//   ① 모듈 접속 버튼을 누르면 진행 중인 선다운로드를 즉시 전부 중단 (대역폭 경쟁·중복 다운로드 방지)
-//   ② 2.5초 뒤 시작 — 도착하자마자 클릭하는 학생과 겹치지 않도록
-//   ③ 데이터 절약 모드·2G급 느린 회선에서는 아예 실행하지 않음
-var warmController = null;   // 진행 중인 다운로드 중단용 제어기
-var warmStopped = false;
-function stopWarming(){
-  warmStopped = true;
-  if(warmController){ try{ warmController.abort(); }catch(e){} warmController = null; }
+// ── 대문 → 사령부(hub.html) 이동 ──
+// 항상 새 요청(Date.now)으로 hub를 받아, '옛 사령부 캐시 재생' 문제를 구조적으로 차단.
+// (hub는 약 18KB — 매 입장마다 새로 받아도 비용이 거의 없고, hub의 BUILD가 이후 모듈 캐시를 관리)
+function startMission(){
+  window.location.href = 'hub.html?v=' + Date.now();
 }
-(function prefetchModules(){
+
+// ── 대문에서 머무는 동안 3D 엔진 선다운로드 (학생이 브리핑을 읽는 시간 활용) ──
+(function(){
   if(!window.fetch) return;
   var c = navigator.connection;
-  if(c && (c.saveData || /2g/.test(c.effectiveType||''))) return;   // 느린 회선: 선다운로드 생략
-  var files=['three.min.js','OrbitControls.js',
-    'perp_plane_class.html?v='+BUILD,'samsuseon.html?v='+BUILD,
-    'jeongsayeong.html?v='+BUILD,'jeongsayeong_adv.html?v='+BUILD];
+  if(c && (c.saveData || /2g/.test(c.effectiveType||''))) return;
   setTimeout(function(){
-    if(warmStopped) return;
-    warmController = window.AbortController ? new AbortController() : null;
-    (function warm(i){
-      if(warmStopped || i>=files.length) return;
-      var opt = {cache:'force-cache'};
-      if(warmController) opt.signal = warmController.signal;
-      var nx = function(){ warm(i+1); };   // 성공·실패 모두 다음 파일로 (중단 여부는 재귀 첫 줄에서 확인)
-      fetch(files[i], opt).then(nx, nx);
-    })(0);
-  }, 2500);
+    ['three.min.js','OrbitControls.js'].forEach(function(f){
+      fetch(f,{cache:'force-cache'}).catch(function(){});
+    });
+  }, 1200);
 })();
-
-// iOS Safari 감지
-var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-function openGame(file, title) {
-  stopWarming();                 // 선다운로드 즉시 중단 — 모듈 로딩에 대역폭 전부 양보
-  file = file + '?v=' + BUILD;   // 캐시 우회 — 항상 최신 모듈 로드
-  if (isIOS) {
-    // iOS: 같은 탭에서 직접 이동 (WebGL iframe 제한 우회)
-    sessionStorage.setItem('kosa_return', '1');
-    sessionStorage.setItem('kosa_title', title);
-    window.location.href = file;
-  } else {
-    // PC/Android: iframe 오버레이
-    document.getElementById('gf').src = file;
-    document.getElementById('ov-title').textContent = title;
-    document.getElementById('overlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-}
-
-function closeGame() {
-  document.getElementById('overlay').classList.remove('active');
-  document.getElementById('gf').src = '';
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeGame();
-});
-
-// 모듈에서 복귀 시 플래그 정리
-if (sessionStorage.getItem('kosa_return')) {
-  sessionStorage.removeItem('kosa_return');
-}
-
-// ── 오프닝 화면 → 메인 화면 페이드 전환 ──
-function startMission(){
-  var intro = document.getElementById('intro-screen');
-  var app = document.getElementById('app');
-
-  app.classList.add('app-visible');   // 메인 화면 서서히 나타남
-  intro.classList.add('intro-hide');  // 오프닝 화면 서서히 사라짐
-
-  // 트랜지션 종료 후 오프닝을 완전히 제거 (뒤 레이어 클릭 방해 방지)
-  setTimeout(function(){
-    intro.style.display = 'none';
-  }, 650);
-}
 </script>
 </body>
 </html>
