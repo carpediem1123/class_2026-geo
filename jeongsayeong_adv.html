@@ -35,7 +35,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 .adv-tab{flex:1;padding:8px 3px;font-size:11px;font-weight:bold;color:#7799bb;
   background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .adv-tab.on{color:#88ccff;border-bottom-color:#5588ff;background:#0d1630}
-.adv-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:9px 12px;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
+.adv-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:9px 12px;padding-bottom:calc(140px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
 .adv-card{background:#091525;border:1.5px solid #1e3060;border-radius:8px;
   padding:9px 11px;flex-shrink:0;overflow:visible;word-break:keep-all}
 .adv-card.ok-card{border-color:#22aa44}
@@ -105,7 +105,9 @@ html,body{width:100%;height:100%;overflow:hidden;
         <div class="adv-card">
           <div class="adv-badge b0">기본개념</div>
           <div class="adv-title">정육면체의 단면 삼각형 정사영</div>
-          <div class="adv-body">정육면체에서 평면 <b style="color:#ff66aa">AFC</b>와 평면 <b style="color:#6699ff">EFGH</b>가 이루는 각을 θ라 할 때 cosθ를 구하시오.</div>
+          <div class="adv-body">정육면체에서 평면 <b style="color:#ff66aa">AFC</b>와 평면 <b style="color:#6699ff">EFGH</b>가 이루는 각을 θ라 할 때 cosθ를 구하시오.
+
+3D 화면을 드래그해 정육면체를 살펴보세요!</div>
         </div>
         <div class="adv-card" id="s0q1">
           <div class="adv-step">STEP 1 — 수선의 발 찾기</div>
@@ -683,11 +685,13 @@ window.adv0Step2=function(){
   }
   if(_projLines) _projLines.forEach(function(l){ l.visible=false; });
   document.getElementById('s0q2').style.display='block';
+  setTimeout(function(){advScrollTo(document.getElementById('s0q2'));},100);   // 새 문항이 잘리지 않게
   document.getElementById('prog0').style.width='33%';
   setTimeout(function(){advScrollTo(document.getElementById('s0q2'));},100);
 };
 window.adv0Step3=function(){
   document.getElementById('s0q3').style.display='block';
+  setTimeout(function(){advScrollTo(document.getElementById('s0q3'));},100);   // 새 문항이 잘리지 않게
   setTimeout(function(){advScrollTo(document.getElementById('s0q3'));},100);
 };
 window.adv1Step1=function(){
@@ -808,6 +812,7 @@ function _drawProjArrow(from,to){
 }
 window.adv2Step2=function(){
   document.getElementById('s2q2').style.display='block';
+  setTimeout(function(){advScrollTo(document.getElementById('s2q2'));},100);
   document.getElementById('prog2').style.width='40%';
   // 타원 밝게 표시
   if(window._ellMesh){
@@ -827,6 +832,7 @@ window.adv2Step2=function(){
 }
 window.adv2Step3=function(){
   document.getElementById('s2q3').style.display='block';
+  setTimeout(function(){advScrollTo(document.getElementById('s2q3'));},100);
   document.getElementById('prog2').style.width='66%';
   setTimeout(function(){advScrollTo(document.getElementById('s2q3'));},100);
 };
