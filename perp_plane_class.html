@@ -396,9 +396,9 @@
       </div>
       두 각이 같고, 그 합이 평각(180°)이므로 각각 <strong>90°</strong>!<br>
       따라서 <strong>선분 OC ⊥ 직선 l</strong> 입니다.<br><br>
-      그런데 OC는 평면 α 위의 <strong>임의의</strong> 직선 k였습니다.┴┻┷┸
+      그런데 OC는 평면 α 위의 <strong>임의의</strong> 직선 k였습니다.
       그렇다면 직선 l은 평면 α와 어떤 관계일까요?
-      <div class="lab-blank-q" data-step="7b" data-answer="수직|수직이다|⊥|ㅗ|┴|┻|┷|┸|직교|수직이다.|l⊥α">
+      <div class="lab-blank-q" data-step="7b" data-answer="수직|수직이다|⊥|ㅗ|┴|ㅗ|┻|┷|┸|직교|수직이다.|l⊥α">
         <span class="lab-blank-eq">직선 l <input type="text" class="lab-blank-in" maxlength="6" placeholder="?"> 평면 α</span>
         <div class="lab-blank-hint"></div>
       </div>
@@ -478,14 +478,14 @@
 
 <div class="modal-overlay" id="mission-modal">
   <div class="modal-box">
-    <div class="modal-title">MISSION ACCOMPLISHED</div>
-    <div class="modal-text">
+    <div class="modal-title" id="mm-title">MISSION ACCOMPLISHED</div>
+    <div class="modal-text" id="mm-text">
       화성 기지 설계를 위한 지면 수직 기준대 설치 임무를 성공적으로 완수했습니다.<br>
       교과서 속 공간도형 정리가 실제 건축 공학에 구현되는 과정을 증명했습니다.
     </div>
     
     <div class="btn-container">
-      <button class="btn-warning" onclick="unlockLabPanel(); toggleLabPanel(); modal.style.display='none'; modal.style.opacity='0';">🔬 수학실험실에서 교과서 증명 보기</button>
+      <button class="btn-warning" id="mm-labbtn" onclick="unlockLabPanel(); toggleLabPanel(); modal.style.display='none'; modal.style.opacity='0';">🔬 수학실험실에서 교과서 증명 보기</button>
       <button class="btn-success" onclick="goNext()">┄┄▶ 다음 개념 잇기: 삼수선의 정리</button>
       <button onclick="goHub()">◀ 사령부로 복귀</button>
     </div>
@@ -943,6 +943,21 @@ dynamicBtnContainer.addEventListener('click', (e) => {
     const answer = document.getElementById('quiz-select').value;
     if(answer === 'correct') {
       state = 'FINISHED';
+      // [미션 완수 안내] 실험실 증명까지 마친 경우: 여정 요약 + 다음 행선지를 명확히
+      try {
+        if (typeof proofCompleted !== 'undefined' && proofCompleted) {
+          document.getElementById('mm-title').textContent = '🎉 MISSION COMPLETE';
+          document.getElementById('mm-text').innerHTML =
+            '<span style="display:inline-block;text-align:left;line-height:1.9">' +
+            '✅ 쓰러진 기둥 복구 (l ⊥ m, l ⊥ n)<br>' +
+            '✅ 수학실험실 — 증명 완성 (l ⊥ α)<br>' +
+            '✅ 핵심 개념 최종 정리 — 설계 승인</span><br><br>' +
+            '<b>모듈 01-1의 모든 임무를 완수했습니다!</b><br>' +
+            '이 수직 위에 다음 개념, <b>삼수선의 정리</b>가 세워집니다.';
+          var lb = document.getElementById('mm-labbtn');
+          if (lb) lb.style.display = 'none';   // 이미 다녀온 실험실 재안내 제거 → 다음 단계 버튼이 주인공
+        }
+      } catch(e) {}
       modal.style.display = 'flex';
       setTimeout(() => { modal.style.opacity = '1'; }, 50);
     } else {
