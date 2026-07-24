@@ -1132,6 +1132,7 @@ var restoreSceneForMission=function(mis){
   var pos=getPos();
   
   if(mis===1){
+    if(s&&s.missionDone){ lsPH.installed=true; lsOH_cable.installed=true; }   // [복습] 완수 상태 = 케이블 복구 완료
     // 미션1: OH 케이블 상태 복원
     lsOH.line.visible=false;
     mvOHCable(pos.O,pos.H);
@@ -1157,6 +1158,7 @@ var restoreSceneForMission=function(mis){
     mastGroup.position.copy(pos.O.clone().addScaledVector(PN,MAST_H/2));
   }
   else if(mis===2){
+    if(s&&s.missionDone){ lsOH_cable.installed=true; }   // [복습] 완수한 M2 = OH가 l에 이어진 복구 상태
     // 미션2: 복원
     lsOH.line.visible=true;
     if(!lsOH_cable.installed){
@@ -1486,6 +1488,7 @@ var showTransit=function(mis,nextMis){
         restoreMissionState(n);
         restoreSceneForMission(n);
         buildUI();
+        if(ST.missionDone){ showCompleteCard(n); }   // [복습] 완수 미션이면 카드도 해당 미션 것으로
         var spEl=document.getElementById('sp');if(spEl)spEl.scrollTop=0;
         if(ST.introMode){showIntro(n);}else{activateMission();}
       }else{
@@ -1839,7 +1842,8 @@ var updAntenna=function(){
       mastGroup.quaternion.slerpQuaternions(FALLEN_Q,UPRIGHT_Q,t);
       mastGroup.position.lerpVectors(mastFallenPos,antTargetPos,t);
     }
-    if(antAnim>=1){antAnimating=false;buildSteps();setTimeout(function(){showCompleteCard(ST.mis);},800);}
+    if(antAnim>=1){antAnimating=false;commActive=true;commPulse=0;   // M1·M2와 동일: 복구된 안테나에서 송출 깜빡임
+      buildSteps();setTimeout(function(){showCompleteCard(ST.mis);},800);}
   } else if(antAnim>=1){
     // 설치 완료 후: P 이동 시 마스트가 현재 O 위치를 항상 따라가도록
     var pos=getPos();
@@ -2342,6 +2346,7 @@ for(var ti=1;ti<=3;ti++){(function(i){document.getElementById('m'+i).onclick=fun
     // 3D 씬도 해당 미션 상태에 맞게 복원
     restoreSceneForMission(i);
     buildUI();
+    if(ST.missionDone){ showCompleteCard(i); }   // [복습] 완수 미션이면 카드도 해당 미션 것으로
     var spEl=document.getElementById('sp');if(spEl)spEl.scrollTop=0;
     if(ST.introMode){
       showIntro(i);
