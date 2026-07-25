@@ -650,14 +650,6 @@ function _isLightLabel(hex) {
   if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
   return (0.299*r + 0.587*g + 0.114*b) > 150;
 }
-// 밝은 색 글자의 후광용 — 검은 테두리 대신 '자기 색의 어두운 톤'을 써서 색 정체성을 지킨다
-function _darkenLabel(hex, f) {
-  var c = String(hex).replace('#', '');
-  if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
-  var r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
-  if (isNaN(r) || isNaN(g) || isNaN(b)) return 'rgba(6,16,30,.9)';
-  return 'rgba(' + Math.round(r*f) + ',' + Math.round(g*f) + ',' + Math.round(b*f) + ',.92)';
-}
 function paintLabelSprite(sprite) {
   const text = sprite.userData.labelText, color = sprite.userData.labelColor;
   const S = 128;                                   // 여유 있는 고해상도 캔버스
@@ -680,11 +672,10 @@ function paintLabelSprite(sprite) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   // 후광: 3D의 선·면과 글자가 겹쳐 '잘린 것처럼' 보이는 문제를 원천 차단
-  ctx.lineWidth = Math.max(2.5, size * 0.095);      // 얇은 후광 — 선과의 분리 기능은 유지하되 시각적으로 가볍게
+  ctx.lineWidth = Math.max(3, size * 0.15);
   ctx.lineJoin = 'round';
   ctx.miterLimit = 2;
-  // 어두운 글자 → 흰 후광 / 밝은 글자(예: 연두색 l) → 검정 대신 '자기 색의 어두운 톤'
-  ctx.strokeStyle = _isLightLabel(color) ? _darkenLabel(color, 0.34) : 'rgba(255,255,255,.94)';
+  ctx.strokeStyle = _isLightLabel(color) ? 'rgba(6,16,30,.92)' : 'rgba(255,255,255,.96)';
   ctx.strokeText(text, S / 2, S / 2);
   ctx.fillStyle = color;
   ctx.fillText(text, S / 2, S / 2);
