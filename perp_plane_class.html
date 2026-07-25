@@ -639,28 +639,53 @@ terrain.rotation.x = -Math.PI / 2;
 scene.add(terrain);
 
 // --- 3. 3D 텍스트 레이블 시스템 (뎁스 보정 적용 완료) ---
-function createLabelTexture(text, color) {
+// 3D 라벨(O, A, B, C, k, m, n …) — 글자가 잘리지 않도록 '실제 글자 폭을 재서' 캔버스에 맞춘다.
+// (이전: 64px 고정 캔버스에 44px 글자 → PC의 기본 글꼴이 넓으면 글자가 캔버스 밖으로 나가 잘림)
+var _pendingLabels = [];
+function paintLabelSprite(sprite) {
+  const text = sprite.userData.labelText, color = sprite.userData.labelColor;
+  const S = 128;                                   // 여유 있는 고해상도 캔버스
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = S; canvas.height = S;
   const ctx = canvas.getContext('2d');
+  let size = 76;
+  ctx.font = 'bold ' + size + 'px sans-serif';
+  const maxW = S * 0.80;                           // 좌우 10%씩 여백 확보
+  const w = ctx.measureText(text).width;
+  if (w > maxW) {                                  // 넘치면 글자를 줄여 반드시 안쪽에 들어오게
+    size = Math.max(12, Math.floor(size * maxW / w));
+    ctx.font = 'bold ' + size + 'px sans-serif';
+  }
   ctx.fillStyle = color;
-  ctx.font = 'bold 44px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, 32, 32);
-  
+  ctx.fillText(text, S / 2, S / 2);
   const texture = new THREE.CanvasTexture(canvas);
-  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  texture.minFilter = THREE.LinearFilter;
+  if (sprite.material.map) sprite.material.map.dispose();
+  sprite.material.map = texture;
+  sprite.material.needsUpdate = true;
+}
+function createLabelTexture(text, color) {
+  const mat = new THREE.SpriteMaterial({ transparent: true });
   const sprite = new THREE.Sprite(mat);
+  sprite.userData.labelText = text;
+  sprite.userData.labelColor = color;
+  paintLabelSprite(sprite);
   sprite.scale.set(0.6, 0.6, 1);
-  
   // 메쉬 뒤로 가려지거나 잘리지 않도록 깊이 버퍼 오버라이드 고정
   sprite.material.depthTest = false;
   sprite.material.depthWrite = false;
   sprite.renderOrder = 9999;
-  
+  if (_pendingLabels) _pendingLabels.push(sprite);   // 웹폰트 도착 전 생성분 → 아래에서 다시 그림
   return sprite;
+}
+// 웹폰트가 늦게 도착하면 글자 폭이 달라질 수 있으므로, 폰트 로딩이 끝나면 한 번 다시 그린다
+if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(function () {
+    _pendingLabels.forEach(function (s) { try { paintLabelSprite(s); } catch (e) {} });
+    _pendingLabels = null;                           // 이후 생성분은 이미 로드된 글꼴로 정확히 그려짐
+  });
 }
 
 // --- 4. 지지대 및 기둥 구성 (정밀 위치 및 색상 완전 보정판) ---
@@ -1061,9 +1086,20 @@ function drawProofTriangle(v1, v2, v3, colorHex) {
   return new THREE.Mesh(geom, mat);
 }
 
-function makeRightAngleMarker(vecDir, colorHex, size, bold) {
+function makeRightAngleMarker(vecDir, colorHex, size, bold, fillHex) {
   const marker = new THREE.Group();
   size = size || 0.35;
+  if (fillHex !== undefined) {
+    // 직각 기호 내부를 채운 정사각형 — 한눈에 '직각'을 인식하도록
+    const fg = new THREE.PlaneGeometry(size, size);
+    fg.translate(size / 2, size / 2, 0);           // 꼭짓점 기준으로 이동(회전이 원점 기준으로 맞도록)
+    const fill = new THREE.Mesh(fg, new THREE.MeshBasicMaterial({
+      color: fillHex, transparent: true, opacity: 0.92,
+      side: THREE.DoubleSide, depthTest: false, depthWrite: false
+    }));
+    fill.renderOrder = 998;
+    marker.add(fill);
+  }
   const mkLine = function(s){
     const p1 = new THREE.Vector3(s, 0, 0);
     const p2 = new THREE.Vector3(s, s, 0);
@@ -1491,9 +1527,13 @@ function completeProof() {
     const kLab = createLabelTexture('k', '#d97706');
     kLab.position.set(5.2, 0.25, 0);
     grp.add(kLab);
-    const bigRA = makeRightAngleMarker(new THREE.Vector3(1,0,0), 0xff44aa, 0.63, false);  // 한 줄 직각 기호 (기존의 2/3 크기)
+    // 노란 정사각형 직각 기호(내부 채움) — l ⊥ k 를 빠르게 인식
+    const bigRA = makeRightAngleMarker(new THREE.Vector3(1,0,0), 0xd97706, 0.63, false, 0xffdd00);
     bigRA.children.forEach(function(l){ l.material.depthTest = false; l.renderOrder = 999; });  // 평면에 가려지지 않게만 유지
     grp.add(bigRA);
+    // [시작 위치] 방금까지 증명해 온 '그 k'의 방향에서 출발 (예전엔 m 자리에서 시작했음)
+    const vkDir = pC.clone().normalize();
+    grp.rotation.y = Math.atan2(-vkDir.z, vkDir.x);
     proofMeshGroup.add(grp);
     window._sweepGrp = grp;
 
