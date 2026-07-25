@@ -25,6 +25,15 @@
   input[type=range]:disabled { opacity: 0.2; cursor: not-allowed; }
   
   .btn-container { display: flex; flex-direction: column; gap: 8px; }
+  /* 완수 모달: [사령부] [복습(관제소/실험실)] [삼수선] 1행 3열 */
+  .modal-box .btn-container { display: flex; flex-direction: column; gap: 8px; }
+  .modal-box .mm-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: stretch; }
+  .modal-box .mm-nav > button { height: 100%; line-height: 1.45; }
+  .modal-box .mm-cell { background: rgba(90,150,255,.07); border: 1px solid rgba(90,150,255,.3);
+    border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 5px; justify-content: center; }
+  .modal-box .mm-cell-label { font-size: 10px; color: #7f9ec0; text-align: center; letter-spacing: .05em; }
+  .modal-box .mm-mini { padding: 7px 4px; font-size: 11.5px; background: #182a52; }
+  @media (max-width: 620px) { .modal-box .mm-nav { grid-template-columns: 1fr; } }
   .btn-row { display: flex; gap: 8px; width: 100%; }
   button { width: 100%; padding: 11px; background: #1e3a8a; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; transition: all 0.2s; }
   button:hover:not(:disabled) { background: #2563eb; box-shadow: 0 0 10px rgba(37,99,235,0.5); }
@@ -484,10 +493,22 @@
       교과서 속 공간도형 정리가 실제 건축 공학에 구현되는 과정을 증명했습니다.
     </div>
     
+    <div id="mm-choice" style="display:none;margin:14px 0 10px;padding:9px 12px;border-radius:8px;
+         background:rgba(90,150,255,.08);border:1px solid rgba(90,150,255,.35);line-height:1.6">
+      <div style="font-size:13.5px;color:#9ecbff;font-weight:bold">🧭 이제 어디로 갈까요?</div>
+    </div>
+
     <div class="btn-container">
       <button class="btn-warning" id="mm-labbtn" onclick="unlockLabPanel(); toggleLabPanel(); modal.style.display='none'; modal.style.opacity='0';">🔬 수학실험실에서 교과서 증명 보기</button>
-      <button class="btn-success" onclick="goNext()">┄┄▶ 다음 개념 잇기: 삼수선의 정리</button>
-      <button onclick="goHub()">◀ 사령부로 복귀</button>
+      <div class="mm-nav">
+        <button onclick="goHub()">◀ 사령부로<br>복귀</button>
+        <div class="mm-cell" id="mm-review" style="display:none">
+          <div class="mm-cell-label">복습 · 그대로 다시 보기</div>
+          <button class="mm-mini" onclick="reviewControl()">🛰 관제소</button>
+          <button class="mm-mini" onclick="reviewLab()">🔬 수학실험실</button>
+        </div>
+        <button class="btn-success" onclick="goNext()">┄┄▶ 다음 공간잇기<br>삼수선의 정리</button>
+      </div>
     </div>
     <script>
     // 공간잇기 네비게이션: iframe(PC)·직접이동(iOS) 모두 지원
@@ -497,13 +518,38 @@
       } catch(e) {}
       window.location.href = 'hub.html' + (location.search || '');   // 버전 전파 — 옛 index 캐시 재생 방지
     }
+    // ── 완수 후 복습: 관제소·실험실을 그대로 다시 보고, 준비되면 [다음 행선지 선택]으로 이 창을 다시 연다 ──
+    function closeFinishModal(){
+      var m = document.getElementById('mission-modal');
+      if(m){ m.style.opacity='0'; m.style.display='none'; }
+    }
+    function ensureFinishAgainBtn(){
+      var c = document.getElementById('btn-container-dynamic');
+      if(!c) return;
+      c.style.display = 'block';
+      if(!document.getElementById('btn-finish-again')){
+        c.innerHTML = '<button id="btn-finish-again" class="btn-success">🎉 다음 행선지 선택</button>';
+      }
+    }
+    function reviewControl(){
+      closeFinishModal();
+      ensureFinishAgainBtn();
+      var g = document.getElementById('guide-text');
+      if(g) g.innerText = "복습 모드 — 기둥·지지대·g선을 자유롭게 살펴보세요. 준비되면 [다음 행선지 선택]을 누르세요.";
+    }
+    function reviewLab(){
+      closeFinishModal();
+      ensureFinishAgainBtn();
+      try{ if(typeof unlockLabPanel === 'function') unlockLabPanel(); }catch(e){}
+      try{ if(typeof toggleLabPanel === 'function') toggleLabPanel(); }catch(e){}
+    }
     function goNext(){
       try {
         if(window.parent && window.parent !== window && window.parent.openGame){
           window.parent.openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리'); return;
         }
       } catch(e) {}
-      window.location.href = 'samsuseon.html?v=20260612a';
+      window.location.href = 'samsuseon.html' + (location.search || '');   // 버전 전파(옛 파일 캐시 재생 방지)
     }
     </script>
 
@@ -650,6 +696,14 @@ function _isLightLabel(hex) {
   if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
   return (0.299*r + 0.587*g + 0.114*b) > 150;
 }
+// 밝은 색 글자의 후광용 — 검은 테두리 대신 '자기 색의 어두운 톤'을 써서 색 정체성을 지킨다
+function _darkenLabel(hex, f) {
+  var c = String(hex).replace('#', '');
+  if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+  var r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return 'rgba(6,16,30,.9)';
+  return 'rgba(' + Math.round(r*f) + ',' + Math.round(g*f) + ',' + Math.round(b*f) + ',.92)';
+}
 function paintLabelSprite(sprite) {
   const text = sprite.userData.labelText, color = sprite.userData.labelColor;
   const S = 128;                                   // 여유 있는 고해상도 캔버스
@@ -672,10 +726,11 @@ function paintLabelSprite(sprite) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   // 후광: 3D의 선·면과 글자가 겹쳐 '잘린 것처럼' 보이는 문제를 원천 차단
-  ctx.lineWidth = Math.max(3, size * 0.15);
+  ctx.lineWidth = Math.max(2.5, size * 0.095);      // 얇은 후광 — 선과의 분리 기능은 유지하되 시각적으로 가볍게
   ctx.lineJoin = 'round';
   ctx.miterLimit = 2;
-  ctx.strokeStyle = _isLightLabel(color) ? 'rgba(6,16,30,.92)' : 'rgba(255,255,255,.96)';
+  // 어두운 글자 → 흰 후광 / 밝은 글자(예: 연두색 l) → 검정 대신 '자기 색의 어두운 톤'
+  ctx.strokeStyle = _isLightLabel(color) ? _darkenLabel(color, 0.34) : 'rgba(255,255,255,.94)';
   ctx.strokeText(text, S / 2, S / 2);
   ctx.fillStyle = color;
   ctx.fillText(text, S / 2, S / 2);
@@ -907,12 +962,19 @@ function updateLogic() {
     lineG.rotation.y = scanAngle;
     antennaGroup.rotation.set(0,0,0); 
 
-    statusBox.innerHTML = `🛡️ 정리의 약속, 실시간 확인!<br>우리는 두 지지대(m, n)와만 직각을 맞췄어요. 그런데 —<br>회전하는 <b>노란 광선 g</b>가 <b>어느 방향</b>을 향해도 기둥과 90°! (지금 g선 방향: ${(Math.round(scanAngle*(180/Math.PI))%360)}°)`;
+    statusBox.innerHTML = `🛡️ 두 지지대(m, n)와만 맞췄는데 —<br>노란 <b>g선</b>이 <b>어느 방향</b>이어도 기둥과 90°! (g선 ${(Math.round(scanAngle*(180/Math.PI))%360)}°)`;
     statusBox.style.color = "#00ffff";
 
     finishTimer += 1;
-    if(finishTimer > 180) { 
-      buildSummaryPhase(); 
+    // [학습 순서 고정] g선 스캔으로 '현상'을 확인한 다음은 수학실험실에서의 '증명'.
+    // 핵심 개념 최종 정리는 증명을 마치고 관제소로 돌아온 뒤에 열린다. (예전엔 여기서 바로 최종 정리로 넘어갔음)
+    if (finishTimer === 181) {
+      stepTitle.innerText = "🔬 다음 임무: 수학실험실에서 증명";
+      guideText.innerText = "어느 방향의 g선과도 90°! 그런데 왜 두 직선만으로 충분할까요? 실험실에서 증명해 봅시다.";
+      dynamicBtnContainer.style.display = 'block';
+      dynamicBtnContainer.innerHTML = `<button id="btn-goto-lab" class="btn-success">🔬 수학실험실에서 증명하기</button>`;
+      var _lb = document.getElementById('lab-tab-btn');
+      if (_lb) { _lb.classList.add('lab-justUnlocked'); setTimeout(function(){ _lb.classList.remove('lab-justUnlocked'); }, 4000); }
     }
   }
 }
@@ -983,23 +1045,34 @@ dynamicBtnContainer.addEventListener('click', (e) => {
       unlockLabPanel();   // 🔓 미션 완료 → 수학실험실 잠금 해제
     }
   } 
+  else if (target.id === 'btn-finish-again') {
+    modal.style.display = 'flex';                       // 복습을 마치고 다시 행선지 선택
+    setTimeout(() => { modal.style.opacity = '1'; }, 50);
+  }
+  else if (target.id === 'btn-goto-lab') {
+    toggleLabPanel();   // 관제소 → 수학실험실 (증명 활동)
+  }
   else if (target.id === 'btn-quiz-submit') {
     const answer = document.getElementById('quiz-select').value;
     if(answer === 'correct') {
       state = 'FINISHED';
+      window._missionApproved = true;   // 최종 승인 완료 표시 (실험실 재방문 후 복귀 시 최종정리 재개방 방지)
       // [미션 완수 안내] 실험실 증명까지 마친 경우: 여정 요약 + 다음 행선지를 명확히
       try {
         if (typeof proofCompleted !== 'undefined' && proofCompleted) {
           document.getElementById('mm-title').textContent = '🎉 MISSION COMPLETE';
           document.getElementById('mm-text').innerHTML =
             '<span style="display:inline-block;text-align:left;line-height:1.9">' +
-            '✅ 쓰러진 기둥 복구 (l ⊥ m, l ⊥ n)<br>' +
-            '✅ 수학실험실 — 증명 완성 (l ⊥ α)<br>' +
-            '✅ 핵심 개념 최종 정리 — 설계 승인</span><br><br>' +
-            '<b>모듈 01-1의 모든 임무를 완수했습니다!</b><br>' +
-            '이 수직 위에 다음 개념, <b>삼수선의 정리</b>가 세워집니다.';
+            '✅ 기둥 복구 (l ⊥ m, n)<br>' +
+            '✅ 실험실 증명 (l ⊥ α)<br>' +
+            '✅ 개념 정리 · 설계 승인</span><br><br>' +
+            '<b>모듈 01-1 완수!</b> 이 수직 위에 <b>삼수선의 정리</b>가 세워집니다.';
           var lb = document.getElementById('mm-labbtn');
           if (lb) lb.style.display = 'none';   // 이미 다녀온 실험실 재안내 제거 → 다음 단계 버튼이 주인공
+          var ch = document.getElementById('mm-choice');
+          if (ch) ch.style.display = 'block';  // 🧭 다음 행선지(삼수선 / 사령부) 선택 안내
+          var rv = document.getElementById('mm-review');
+          if (rv) rv.style.display = 'flex';   // 🔁 복습(관제소 / 실험실) 경로 노출
         }
       } catch(e) {}
       modal.style.display = 'flex';
@@ -1014,17 +1087,18 @@ function buildSummaryPhase() {
   state = 'STEP_SUMMARY';
   dynamicBtnContainer.style.display = 'block';
   stepTitle.innerText = "📝 핵심 기하학 개념 최종 정리";
-  guideText.innerText = "탐구를 통해 완성된 기하학적 정리를 요약 문장으로 완성하고 설계 승인을 신청하세요.";
+  guideText.innerText = "요약 문장을 완성하고 설계 승인을 신청하세요.";
   
   statusBox.innerHTML = `
-    <div style="font-family:inherit; font-size:12px; color:#fff; line-height:1.7;">
-      직선 l이 평면 α 위의 만나는 두 직선 m, n과 각각 
+    <div style="font-family:inherit; font-size:12px; color:#fff; line-height:1.85;">
+      직선 l이 평면 α 위의 만나는 <strong>두 직선 m, n과 각각</strong> 
       <select id="quiz-select" style="background:#152238; color:#00ff88; border:1px solid #2e436e; font-weight:bold; padding:2px; border-radius:3px; outline:none;">
         <option value="wrong">평행</option>
         <option value="wrong">꼬인위치</option>
         <option value="correct">수직</option>
-      </select> 일 때, <br>
-      직선 l은 평면 α와 두 직선을 이루는 평면과 수직이 된다.
+      </select> 일 때,<br>직선 l은
+      <b style="color:#00ff88;font-size:12px">평면과 수직</b>
+      <span style="color:#8fd9ff;font-family:monospace">(l⊥α)</span>이다.
     </div>
   `;
   dynamicBtnContainer.innerHTML = `<button id="btn-quiz-submit" class="btn-success">개념 검증 및 기지 최종 승인</button>`;
@@ -1712,6 +1786,8 @@ function toggleLabPanel() {
     targetCamPos.set(0, 3, 14);
     camera.position.copy(targetCamPos);
     controls.target.set(0, 2.5, 0);
+    // [3단계] 증명을 마치고 돌아왔으므로 '핵심 기하학 개념 최종 정리'를 여기서 개방
+    if (!window._missionApproved) buildSummaryPhase();   // 이미 최종 승인까지 마친 뒤의 재방문이면 그대로 둔다
   }
 }
 
