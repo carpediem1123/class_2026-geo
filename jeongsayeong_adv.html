@@ -36,7 +36,11 @@ html,body{width:100%;height:100%;overflow:hidden;
   background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .adv-tab.on{color:#88ccff;border-bottom-color:#5588ff;background:#0d1630}
 .adv-nextnote{font-size:10px;color:#3d5a80;text-align:center;letter-spacing:.05em;margin-top:2px}
-.adv-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:9px 12px;padding-bottom:calc(140px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px;overscroll-behavior:contain}  /* 하단 여백 넉넉히 → 오답 시 힌트버튼·다음버튼이 항상 스크롤 범위 안에 들어와 아이패드에서도 확실히 스크롤됨 */
+/* [스크롤 안정화] 사파리는 '세로 flex 컨테이너 + 하단 padding'에서 스크롤 가능 높이를 잘못 계산한다.
+   (자식이 display:none→block으로 나타날 때 특히) → 블록 배치로 바꾸고, 하단 여백은 '실제 요소'(.adv-scroll-tail)로 확보 */
+.adv-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:9px 12px;display:block;flex-direction:column;overscroll-behavior:contain}   /* flex-direction: 혹시 display:flex가 지정되어도 세로 배치 보장 */
+.adv-scroll > *{margin-bottom:7px}                                     /* 기존 gap:7px 대체 */
+.adv-scroll-tail{height:calc(150px + env(safe-area-inset-bottom,0px));margin:0;pointer-events:none}
 .adv-card{background:#091525;border:1.5px solid #1e3060;border-radius:8px;
   padding:9px 11px;flex-shrink:0;overflow:visible;word-break:keep-all}
 .adv-card.ok-card{border-color:#22aa44}
@@ -360,6 +364,20 @@ S′ = S × cosθ = ?</div>
 ══════════════════════════════════════ */
 var advTab=0;
 
+// [스크롤 안정화] 각 스크롤 영역 맨 끝에 '실제 여백 요소'를 붙인다 — padding과 달리 스크롤 높이에 확실히 포함된다
+(function addScrollTails(){
+  var mk = function(){
+    document.querySelectorAll('.adv-scroll').forEach(function(sc){
+      if(sc.lastElementChild && sc.lastElementChild.className==='adv-scroll-tail') return;   // 구형 사파리 호환(선택자 의존 제거)
+      var tail=document.createElement('div');
+      tail.className='adv-scroll-tail';
+      tail.setAttribute('aria-hidden','true');
+      sc.appendChild(tail);
+    });
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mk); else mk();
+})();
+
 // ── 아이패드 안정 스크롤: scrollIntoView는 iOS에서 불안정하므로 스크롤 컨테이너를 직접 이동 ──
 // 대상 요소를 화면 '위쪽 1/3' 지점으로 끌어올린다. (중앙으로 하면 마지막 요소가 하단 경계에
 //  걸려 안 보이는 경우가 있어, 위쪽에 두고 아래 여백을 남기는 방식이 더 안정적)
@@ -518,7 +536,7 @@ window.switchAdvTab=function(n){
   advTab=n;
   [0,1,2].forEach(function(i){
     document.getElementById('at'+i).className='adv-tab'+(i===n?' on':'');
-    document.getElementById('ac'+i).style.display=(i===n?'flex':'none');
+    document.getElementById('ac'+i).style.display=(i===n?'block':'none');   // 스크롤 안정화: 블록 배치 유지(flex 지정 시 카드가 가로로 늘어섬)
   });
   clearAdv();
   if(n===0) buildCubeScene();
@@ -692,12 +710,10 @@ window.adv0Step2=function(){
   document.getElementById('s0q2').style.display='block';
   setTimeout(function(){advScrollTo(document.getElementById('s0q2'));},100);   // 새 문항이 잘리지 않게
   document.getElementById('prog0').style.width='33%';
-  setTimeout(function(){advScrollTo(document.getElementById('s0q2'));},100);
 };
 window.adv0Step3=function(){
   document.getElementById('s0q3').style.display='block';
   setTimeout(function(){advScrollTo(document.getElementById('s0q3'));},100);   // 새 문항이 잘리지 않게
-  setTimeout(function(){advScrollTo(document.getElementById('s0q3'));},100);
 };
 window.adv1Step1=function(){
   // G 점과 레이블 공개 (학생이 발견한 무게중심!)
