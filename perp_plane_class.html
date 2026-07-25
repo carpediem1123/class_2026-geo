@@ -642,23 +642,42 @@ scene.add(terrain);
 // 3D 라벨(O, A, B, C, k, m, n …) — 글자가 잘리지 않도록 '실제 글자 폭을 재서' 캔버스에 맞춘다.
 // (이전: 64px 고정 캔버스에 44px 글자 → PC의 기본 글꼴이 넓으면 글자가 캔버스 밖으로 나가 잘림)
 var _pendingLabels = [];
+// 글자가 밝은 색인지 판정 → 후광(halo) 색을 반대로 (어두운 배경/밝은 배경 모두에서 또렷하게)
+function _isLightLabel(hex) {
+  var c = String(hex).replace('#', '');
+  if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+  var r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
+  return (0.299*r + 0.587*g + 0.114*b) > 150;
+}
 function paintLabelSprite(sprite) {
   const text = sprite.userData.labelText, color = sprite.userData.labelColor;
   const S = 128;                                   // 여유 있는 고해상도 캔버스
   const canvas = document.createElement('canvas');
   canvas.width = S; canvas.height = S;
   const ctx = canvas.getContext('2d');
-  let size = 76;
-  ctx.font = 'bold ' + size + 'px sans-serif';
-  const maxW = S * 0.80;                           // 좌우 10%씩 여백 확보
-  const w = ctx.measureText(text).width;
-  if (w > maxW) {                                  // 넘치면 글자를 줄여 반드시 안쪽에 들어오게
-    size = Math.max(12, Math.floor(size * maxW / w));
-    ctx.font = 'bold ' + size + 'px sans-serif';
-  }
-  ctx.fillStyle = color;
+  let size = 72;
+  const setFont = function () { ctx.font = 'bold ' + size + 'px sans-serif'; };
+  setFont();
+  // 필요한 폭을 '실제 잉크 범위'로 계산 — advance width는 글자가 옆으로 삐져나가는 경우를 놓친다
+  const needW = function () {
+    const m = ctx.measureText(text);
+    const l = (m.actualBoundingBoxLeft  != null) ? m.actualBoundingBoxLeft  : m.width / 2;
+    const r = (m.actualBoundingBoxRight != null) ? m.actualBoundingBoxRight : m.width / 2;
+    return Math.max(l, r) * 2;                     // 가운데 정렬 기준으로 필요한 전체 폭
+  };
+  const maxW = S * 0.76;                           // 좌우 12% 여백(후광 두께까지 감안)
+  let guard = 0;
+  while (needW() > maxW && size > 12 && guard++ < 24) { size = Math.floor(size * 0.9); setFont(); }
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  // 후광: 3D의 선·면과 글자가 겹쳐 '잘린 것처럼' 보이는 문제를 원천 차단
+  ctx.lineWidth = Math.max(3, size * 0.15);
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+  ctx.strokeStyle = _isLightLabel(color) ? 'rgba(6,16,30,.92)' : 'rgba(255,255,255,.96)';
+  ctx.strokeText(text, S / 2, S / 2);
+  ctx.fillStyle = color;
   ctx.fillText(text, S / 2, S / 2);
   const texture = new THREE.CanvasTexture(canvas);
   texture.minFilter = THREE.LinearFilter;
@@ -672,7 +691,7 @@ function createLabelTexture(text, color) {
   sprite.userData.labelText = text;
   sprite.userData.labelColor = color;
   paintLabelSprite(sprite);
-  sprite.scale.set(0.6, 0.6, 1);
+  sprite.scale.set(0.74, 0.74, 1);   // 캔버스 확대(64→128)에 맞춘 보정 — 화면상 크기는 기존과 동일
   // 메쉬 뒤로 가려지거나 잘리지 않도록 깊이 버퍼 오버라이드 고정
   sprite.material.depthTest = false;
   sprite.material.depthWrite = false;
@@ -888,7 +907,7 @@ function updateLogic() {
     lineG.rotation.y = scanAngle;
     antennaGroup.rotation.set(0,0,0); 
 
-    statusBox.innerHTML = `🛡️ 정리의 약속, 실시간 확인!<br>우리는 두 지지대(m, n)와만 직각을 맞췄어요. 그런데 —<br>회전하는 초록 직선(g)이 <b>어느 방향</b>이어도 기둥과 90°! (지금 g선 방향: ${(Math.round(scanAngle*(180/Math.PI))%360)}°)`;
+    statusBox.innerHTML = `🛡️ 정리의 약속, 실시간 확인!<br>우리는 두 지지대(m, n)와만 직각을 맞췄어요. 그런데 —<br>회전하는 <b>노란 광선 g</b>가 <b>어느 방향</b>을 향해도 기둥과 90°! (지금 g선 방향: ${(Math.round(scanAngle*(180/Math.PI))%360)}°)`;
     statusBox.style.color = "#00ffff";
 
     finishTimer += 1;
@@ -1543,11 +1562,16 @@ function completeProof() {
       n++; grp.visible = (n % 2 === 1);
       if (n >= 9) {
         clearInterval(tk); grp.visible = true;
-        if (window._kSweepT) clearInterval(window._kSweepT);
-        window._kSweepT = setInterval(() => {
-          if (!grp.parent) { clearInterval(window._kSweepT); window._kSweepT = null; return; }  // 그룹이 사라지면 자동 정지
-          grp.rotation.y += 0.012;   // '임의의 방향 어디서나 수직'을 감상할 수 있는 느린 속도
-        }, 16);
+        // [속도 통일] 타이머 방식은 PC의 무거운 렌더 루프에 밀려 느려짐 → 경과 시간 기반으로 회전
+        window._kSweepT = true;                    // 회전 진행 플래그 (정지 코드와 호환)
+        var _kLast = (window.performance && performance.now) ? performance.now() : Date.now();
+        (function spinK(now) {
+          if (!window._kSweepT || !grp.parent) { window._kSweepT = null; return; }   // 그룹이 사라지면 자동 정지
+          var t = now || ((window.performance && performance.now) ? performance.now() : Date.now());
+          var dt = Math.min((t - _kLast) / 1000, 0.05); _kLast = t;
+          grp.rotation.y += 0.80 * dt;             // 초당 약 46° — 어떤 기기에서도 같은 속도
+          requestAnimationFrame(spinK);
+        })(_kLast);
       }
     }, 300);
   } catch (err) { console.warn(err); }
