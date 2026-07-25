@@ -13,8 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;overflow:hidden;
-  font-family:'Noto Sans KR',sans-serif;position:fixed;top:0;left:0;right:0;bottom:0;
-  -webkit-overflow-scrolling:touch}
+  font-family:'Noto Sans KR',sans-serif;position:fixed;top:0;left:0;right:0;bottom:0;}
 
 #app{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;
   width:100%;height:100%;background:#182535;overflow:hidden;
@@ -66,7 +65,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;ove
 .sto-left{flex:1;display:flex;flex-direction:column;min-width:0;gap:3px;min-height:0;overflow:hidden}
 .sto-log{font-size:11px;color:#cc9944;line-height:1.65;white-space:pre-line;
   flex:1;overflow-y:auto;min-height:0;
-  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  overscroll-behavior:contain;
   scrollbar-width:thin;scrollbar-color:#2a4466 transparent}
 .sto-log::-webkit-scrollbar{width:4px}
 .sto-log::-webkit-scrollbar-track{background:transparent}
@@ -104,7 +103,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;ove
   border:1px solid #440800;border-radius:3px;padding:2px 5px;flex-shrink:0}
 .sa-info{flex:1;min-width:0}
 .sa-title{font-size:12px;color:#ffaa44;font-weight:bold;margin-bottom:1px}
-.sa-story{font-size:9.5px;color:#b98a4d;line-height:1.5;white-space:pre-line;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.sa-story{font-size:9.5px;color:#b98a4d;line-height:1.5;white-space:pre-line;overflow-y:auto;touch-action:pan-y}
 .sa-thm{flex-shrink:0;background:#06050d;border:1px solid #220a33;border-radius:5px;
   padding:4px 7px;text-align:center}
 .sa-thm-eq{font-size:9.5px;color:#aa66cc;line-height:1.7;white-space:pre-line}
@@ -130,7 +129,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;ove
 #sbo{font-size:11px;color:#cc8844;line-height:1.7;white-space:pre-line}
 
 /* ── 좌측 패널 스텝 카드 ── */
-#sp{flex:3;padding:8px;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#sp{flex:3;padding:8px;padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));overflow-y:auto;min-height:0;overscroll-behavior:contain}   /* 하단 여백: 마지막 STEP 카드까지 확실히 스크롤 */
 .sv{background:#16243a;border-radius:6px;padding:8px 10px;margin-bottom:7px;border-left:4px solid #223355}
 .sv.ac{border-left-color:#ff9944;background:#1e1500}
 .sv.dn{border-left-color:#00cc55;background:#0a1e10}
@@ -159,7 +158,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;ove
 
 /* ── 우측 슬라이더 패널 ── */
 #rp{width:280px;flex-shrink:0;background:#111e2e;border-left:2px solid #1e3248;
-  display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden}
 #ct{flex-shrink:0;padding:10px 10px 16px;background:#111e2e;border-top:1px solid #1e3248}
 .cr{display:flex;flex-direction:column;align-items:stretch;gap:4px;margin-bottom:8px}
 .cr-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#99aacc;font-weight:bold;padding:0 2px}
@@ -274,8 +273,6 @@ button,.mt,.hb,.cb,.ab,.tr-btn,#ioBtn{
   -webkit-user-select:none;
   user-select:none;
 }
-#lp-scroll{-webkit-overflow-scrolling:touch;}
-#hd{-webkit-overflow-scrolling:touch;}
 input[type=range]{touch-action:pan-x;cursor:pointer;}
 
 @media (hover:none) and (pointer:coarse){
@@ -2439,6 +2436,37 @@ setTimeout(function(){showTransit(0,1);},200);
 })();
 </script>
 
+<!-- ═══ 모듈1 완수 안내 (성찰로그 제출 후) ═══ -->
+<div id="m1DoneBox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9600;
+     background:rgba(2,8,16,.9);align-items:center;justify-content:center;padding:16px">
+  <div style="max-width:520px;width:100%;background:linear-gradient(180deg,#081a12,#04100a);
+       border:2px solid #44ffaa;border-radius:14px;padding:22px 20px;text-align:center;
+       box-shadow:0 0 40px rgba(68,255,170,.25)">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:19px;color:#66ffbb;font-weight:bold;letter-spacing:.05em">
+      🎉 MODULE 01 완수
+    </div>
+    <div id="m1DoneName" style="font-size:12.5px;color:#aaddc4;margin-top:9px;line-height:1.75"></div>
+    <div style="font-size:11.5px;color:#7fb8a0;margin-top:8px;line-height:1.7">
+      직선⊥평면 → 삼수선의 정리까지, <b style="color:#aaffdd">수직의 세계</b>를 모두 이었습니다.
+    </div>
+    <div style="margin:15px 0 10px;padding:8px;border-radius:8px;background:rgba(68,255,170,.07);
+         border:1px solid rgba(68,255,170,.3);font-size:13px;color:#9fe8c6;font-weight:bold">
+      🧭 이제 어디로 갈까요?
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <button onclick="window.location.href='hub.html'+(location.search||'')"
+        style="padding:12px 8px;border:none;border-radius:7px;background:#1e3a8a;color:#fff;
+        font-size:12.5px;font-weight:bold;cursor:pointer;font-family:inherit;line-height:1.45">◀ 사령부로<br>복귀</button>
+      <button onclick="window.location.href='jeongsayeong.html'+(location.search||'')"
+        style="padding:12px 8px;border:none;border-radius:7px;background:#0c3a22;border:1.5px solid #44ffaa;
+        color:#aaffdd;font-size:12.5px;font-weight:bold;cursor:pointer;font-family:inherit;line-height:1.45">┄┄▶ 다음 공간잇기<br>⚡ 정사영</button>
+    </div>
+    <button onclick="document.getElementById('m1DoneBox').style.display='none'"
+      style="margin-top:9px;width:100%;padding:8px;border:1px solid #2a4a3a;border-radius:6px;
+      background:transparent;color:#6f9e88;font-size:11px;cursor:pointer;font-family:inherit">닫고 미션 다시 보기</button>
+  </div>
+</div>
+
 <!-- ═══ 공간잇기 성찰로그 (모듈1: 수직관계 → 삼수선) ═══ -->
 <div id="reflectBox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:rgba(2,8,16,.88);align-items:center;justify-content:center;padding:16px">
   <div style="width:100%;max-width:420px;max-height:92vh;overflow-y:auto;background:#041208;border:1.5px dashed #2a8a5a;border-radius:14px;box-shadow:0 0 40px rgba(40,200,120,.18)">
@@ -2530,7 +2558,13 @@ document.getElementById('reflectionForm').addEventListener('submit', function(e)
 
   var finish = function(){
     document.getElementById('reflectBox').style.display = 'none';
-    alert('✅ 성찰로그가 기록되었습니다!\n\n' + sname + ' 요원님, 모듈1 완수!\n이제 사령부에서 모듈2(정사영)로 이동하세요.');
+    // 브라우저 기본 alert → 프로그램 톤에 맞는 완수 안내 + 다음 행선지 버튼
+    var nm = document.getElementById('m1DoneName');
+    if (nm) nm.innerHTML = '✅ 성찰로그가 기록되었습니다.<br><b style="color:#ccffe8">' +
+      (sname || '대원') + '</b> 요원님, 모듈1 임무 완수!';
+    var box = document.getElementById('m1DoneBox');
+    if (box) box.style.display = 'flex';
+    else alert('✅ 성찰로그가 기록되었습니다! 모듈1 완수!');
   };
 
   if (!SHEET_URL) {
