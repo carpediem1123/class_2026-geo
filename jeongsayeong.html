@@ -2048,9 +2048,9 @@ document.querySelectorAll('.cosPick').forEach(btn=>{
 });
 
 /* ═══ Phase 1 객관식 ══════════════════════════════════════ */
-const hintMap={sin:'❌ θ=0°일 때 S\'=100인데\nsin0°=0이라 맞지 않아요!',
-  tan:'❌ θ=90°일 때 S\'=0이어야\n하는데 tan90°=∞이에요!',
-  inv:'❌ θ가 커질수록 S\'이 감소해야\n하는데 1/cosθ는 증가해요!'};
+const hintMap={sin:'❌ θ=0°일 때 S\'=100인데\nsin0°=0이라 맞지 않아요!(side view 참고)',
+  tan:'❌ θ=90°일 때 S\'=0이어야\n하는데 tan90°=∞이에요!(side view 참고)',
+  inv:'❌ θ가 커질수록 S\'이 감소해야\n하는데 1/cosθ는 증가해요!(side view 참고)'};
 document.querySelectorAll('.qbtn').forEach(btn=>{
   btn.addEventListener('click',function(){
     const val=this.dataset.val;
