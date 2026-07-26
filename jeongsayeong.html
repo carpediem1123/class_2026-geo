@@ -9,13 +9,28 @@
 <meta name="theme-color" content="#0a1020">
 <!-- GitHub Pages: 이 파일을 /docs/jeongsaeyeong.html 또는 루트에 두면 됩니다 -->
 <!-- 삼수선 모듈 병합 시: index.html에서 iframe 또는 JS import로 분리 로드 권장 -->
-<title>공간잇기 M02 — 정사영 탐구</title>
+<title>공간잇기 F1–3 — 정사영 탐구</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
   font-family:'Noto Sans KR',sans-serif;background:#0a1020;
   -webkit-overflow-scrolling:touch;position:fixed;top:0;left:0;right:0;bottom:0}
+  /* ── 모듈 상단 바 (단독 실행 시 표시 · iframe 안에서는 숨김 → 바 중복 방지) ── */
+  #mod-bar{flex-shrink:0;display:none;align-items:center;gap:14px;
+    padding-top:env(safe-area-inset-top,0px);padding-left:16px;padding-right:12px;
+    height:calc(46px + env(safe-area-inset-top,0px));
+    background:#060e1c;border-bottom:1.5px solid #1a3060}
+  body.has-mod-bar #mod-bar{display:flex}
+  #mod-back{width:auto;min-height:0;flex-shrink:0;background:#0b1a30;border:1.5px solid #1e3a60;
+    color:#5599cc;font-family:'Share Tech Mono',ui-monospace,monospace;font-size:12px;
+    padding:7px 16px;border-radius:5px;letter-spacing:.05em;cursor:pointer}
+  #mod-back:hover{background:#102240;border-color:#3366aa;color:#88bbee}
+  #mod-title{font-family:'Share Tech Mono',ui-monospace,monospace;font-size:12.5px;color:#a8cdf5;
+    letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 개념이해(전체화면 패널)는 상단 바 아래에서 열려 바가 계속 보이도록 */
+  body.has-mod-bar #advPanel{top:calc(46px + env(safe-area-inset-top,0px));height:auto;bottom:0}
+  body.has-mod-bar #advCloseBtn{top:calc(46px + env(safe-area-inset-top,0px) + 9px)}
 #app{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;
   width:100%;height:100%;
   padding-top:env(safe-area-inset-top);
@@ -284,11 +299,15 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
 </head>
 <body>
 <div id="app">
+  <div id="mod-bar">
+    <button id="mod-back" onclick="window.location.href='hub.html'+(location.search||'')">◀ 사령부로 복귀</button>
+    <span id="mod-title">MODULE 02 — 정사영 탐구</span>
+  </div>
   <div id="hd">
     <span class="ti">🛰 공간잇기 · 정사영</span>
-    <button class="tab on" id="tab1">📐 개념탐구</button>
-    <button id="tab3" class="tab" data-locked="1">🔒 개념이해</button>
-    <button class="tab" id="tab2" data-locked="1">🔒 미션탐구</button>
+    <button class="tab on" id="tab1" title="F1 — 개념탐구">📐 개념탐구</button>
+    <button id="tab3" class="tab" data-locked="1" title="F2 — 개념이해">🔒 개념이해</button>
+    <button class="tab" id="tab2" data-locked="1" title="F3 — 미션탐구">🔒 미션탐구</button>
     <div style="width:1px;height:24px;background:#1e3060;margin:0 2px;flex-shrink:0"></div>
     <button class="hb on" id="bM">🪐 Mars</button>
     <button class="hb" id="bG">📐 기하</button>
@@ -2166,6 +2185,22 @@ var resetFootAnim = function(){};  // 클로저 내부에서 실제 구현으로
             var dot = new THREE.Mesh(dotG, dotM);
             dot.position.copy(bot);
             addFootObj(dot);
+            // ⊥ 직각 기호 — '수직으로 내렸다'는 핵심 개념을 발 지점에 명시
+            (function(){
+              var up = new THREE.Vector3(0, 1, 0);                     // 수선 방향(위)
+              var h  = new THREE.Vector3(bot.x > 0 ? -1 : 1, 0, 0);    // 평면 위 방향(그림자 안쪽)
+              var ms = 0.42;
+              var mkPts = [
+                bot.clone().addScaledVector(h, ms),
+                bot.clone().addScaledVector(h, ms).addScaledVector(up, ms),
+                bot.clone().addScaledVector(up, ms)
+              ];
+              var mk = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(mkPts),
+                new THREE.LineBasicMaterial({ color: 0x44ffaa })
+              );
+              addFootObj(mk);
+            })();
             // 레이블 P′ (수선의 발)
             var lc = document.createElement('canvas'); lc.width=72; lc.height=36;
             var lctx = lc.getContext('2d');
@@ -2617,11 +2652,19 @@ function updateTabLocks(){
 (function(){
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS || sessionStorage.getItem('kosa_return')) {
-    var btn = document.getElementById('bHub');
-    if (btn) btn.style.display = '';
-  }
+  // (구) 헤더의 사령부 버튼 — 상단 바의 복귀 버튼으로 대체되어 표시하지 않음
 })();
+
+// 모듈 상단 바: 단독 실행일 때만 표시(iframe 안이면 부모 바가 있으므로 숨겨 중복 차단).
+// 제목은 사령부가 넘겨준 값을 사용 → 표기 체계를 바꿔도 자동 반영.
+(function(){
+  if (window.self !== window.top) return;
+  document.body.classList.add('has-mod-bar');
+  try{
+    // 제목은 각 모듈에 고정 표기 (사령부 값으로 덮어쓰면 모듈 간 이동 시 옛 제목이 남음)
+  }catch(e){}
+})();
+
 }
 
 // ── 성찰로그 선택 강조: :has() 미지원 구형 브라우저용 폴백 (.sel 클래스 부여) ──
