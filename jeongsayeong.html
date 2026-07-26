@@ -2166,6 +2166,22 @@ var resetFootAnim = function(){};  // 클로저 내부에서 실제 구현으로
             var dot = new THREE.Mesh(dotG, dotM);
             dot.position.copy(bot);
             addFootObj(dot);
+            // ⊥ 직각 기호 — '수직으로 내렸다'는 핵심 개념을 발 지점에 명시
+            (function(){
+              var up = new THREE.Vector3(0, 1, 0);                     // 수선 방향(위)
+              var h  = new THREE.Vector3(bot.x > 0 ? -1 : 1, 0, 0);    // 평면 위 방향(그림자 안쪽)
+              var ms = 0.42;
+              var mkPts = [
+                bot.clone().addScaledVector(h, ms),
+                bot.clone().addScaledVector(h, ms).addScaledVector(up, ms),
+                bot.clone().addScaledVector(up, ms)
+              ];
+              var mk = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(mkPts),
+                new THREE.LineBasicMaterial({ color: 0x44ffaa })
+              );
+              addFootObj(mk);
+            })();
             // 레이블 P′ (수선의 발)
             var lc = document.createElement('canvas'); lc.width=72; lc.height=36;
             var lctx = lc.getContext('2d');
