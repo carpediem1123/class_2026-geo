@@ -569,9 +569,9 @@ var QDB={
     hint:true,
     ok:'✅ 정답! 수선의 발 = 무게중심 G\n정사면체에서 꼭짓점→바닥 수선의 발은\n항상 정삼각형의 무게중심이에요!',
     ng:{
-      b:'❌ D는 바닥의 꼭짓점이에요.\n힌트 버튼을 눌러 수선의 발을 확인해보세요!',
-      c:'❌ BC의 중점은 무게중심이 아니에요.\n힌트 버튼을 눌러 수선의 발을 확인해보세요!',
-      d:'❌ CD의 중점은 무게중심이 아니에요.\n힌트 버튼을 눌러 수선의 발을 확인해보세요!'
+      b:'🤔 3D 화면을 돌려 <b>바로 위에서</b> 내려다보세요. A는 바닥의 어느 자리에 겹쳐 보이나요?',
+      c:'🤔 A는 B, C, D 세 꼭짓점에서 <b>모두 같은 거리</b>에 있어요. 그런 자리가 바닥 어디일지 위에서 살펴보세요.',
+      d:'🤔 A에서 옆으로 새지 않고 곧장 내려가면 어디에 닿을까요? 위에서 내려다보며 확인해 보세요.'
     }
   },
   '1q1':{
@@ -579,9 +579,9 @@ var QDB={
     ok:'정답! M′은 DG의 중점\nA의 수선의발=G, D의 수선의발=D\nM=AD 중점 → M′= (G+D)/2 = DG의 중점',
     hint:true,
     ng:{
-      a:'G는 A의 수선의 발이에요. M의 수선의 발은 달라요!',
-      c:'BC의 중점은 수선의 발이 아닙니다.',
-      d:'D의 수선의 발은 D 자신이고, M의 수선의 발은 D와 G 사이!'
+      a:'🤔 M은 A와 D의 중점이에요. 위에서 내려다볼 때 M의 그림자는 A의 그림자와 같은 자리일까요?',
+      c:'🤔 3D 화면을 위에서 내려다보며, M이 바닥의 어느 지점과 겹쳐 보이는지 확인해 보세요.',
+      d:'🤔 A와 D의 그림자를 각각 찾아보세요. 그 중점인 M의 그림자는 어디쯤 생길까요?'
     },
     hint:true
   },
@@ -607,8 +607,8 @@ var QDB={
     ans:'a',
     ok:'✅ 정답! 넓이가 작아진 타원이에요.<br>정사영 공식: S′ = S·cosθ = 4π × <span class="frac"><span class="num">√2</span><span class="den">2</span></span> &lt; 4π<br>한 방향(단축)만 cos45°배로 줄어들어요.',
     ng:{
-      b:'🤔 정말 커질까요? 3D 화면을 돌려서 <b>빛이 어느 방향으로</b> 원을 비추는지 관찰해 보세요. 빛과 나란한 방향의 길이는 어떻게 될까요? 공간잇기 힌트로 수선의 발을 직접 내려 봐도 좋아요!',
-      c:'🤔 모양이 그대로일까요? 두 평면(원이 있는 면과 그림자가 생기는 면)이 <b>서로 어떤 각</b>을 이루는지 3D 화면에서 관찰해 보세요. 기울어져 있다면 그림자는 어떻게 될까요?'
+      b:'🤔 정사영은 평면 AFGD에 <b>수직으로</b> 빛을 비췄을 때 생기는 그림자예요. 그 방향으로 원 위의 점들을 내리면, 그림자가 원보다 커질 수 있을까요?',
+      c:'🤔 평면 AFGD에 수직으로 빛을 비춘다고 상상해 보세요. 원이 놓인 면과 그림자가 생기는 면이 나란하지 않다면, 그림자의 모양은 그대로일까요? 공간잇기 힌트로 직접 내려 봐도 좋아요!'
     },
     hint_a: true,
     hint:true
@@ -825,21 +825,8 @@ function _drawProjArrow(from,to,showPerp,ctrP){
     );
     mk.visible=false;
     scene.add(mk); advObjs.push(mk);
-  } else {
-    cone=new THREE.Mesh(
-      new THREE.ConeGeometry(0.08,0.20,8),
-      new THREE.MeshBasicMaterial({color:0xffdd44})
-    );
-    // ConeGeometry 기본 방향 (0,1,0) → 법선 방향 (-1,-1,0)/√2
-    var q=new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0,1,0),
-      new THREE.Vector3(-1/Math.sqrt(2),-1/Math.sqrt(2),0)
-    );
-    cone.setRotationFromQuaternion(q);
-    cone.position.copy(to);
-    cone.visible=false;
-    scene.add(cone); advObjs.push(cone);
   }
+  // 나머지 점선은 끝 표시 없이 '그냥 점선' — 화살촉은 방향을 뜻해 수직 개념과 어긋나므로 사용하지 않음
   // 성장 애니메이션
   var t0=Date.now(), dur=1000;
   (function grow(){
@@ -1236,6 +1223,21 @@ function buildTetraScene(){
 }
 
 // ── 심화1 힌트: M 반짝임 → BCD에 그림자 ──
+// 바닥면(y=0)에 수직으로 내렸음을 나타내는 ⊥ 직각 기호 (심화①의 공간잇기 힌트용)
+function makeFootPerpMark(footPos, colorHex, size){
+  var s = size || 0.5;
+  var up = new THREE.Vector3(0, 1, 0);
+  var h  = new THREE.Vector3(1, 0, 0);
+  var base = new THREE.Vector3(footPos.x, 0.02, footPos.z);
+  return new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([
+      base.clone().addScaledVector(h, s),
+      base.clone().addScaledVector(h, s).addScaledVector(up, s),
+      base.clone().addScaledVector(up, s)
+    ]),
+    new THREE.LineBasicMaterial({ color: colorHex })
+  );
+}
 window.showTetraHint = function(){
   if(document.getElementById('hint_1q1') && document.getElementById('hint_1q1').dataset.busy==='1') return;
   hintBtnCycle('hint_1q1', '👁 수선 내리는 중...');
@@ -1278,11 +1280,13 @@ window.showTetraHint = function(){
           new THREE.MeshBasicMaterial({color:0x00ffcc,transparent:true,opacity:1}));
         mk.position.set(to.x,0.05,to.z); mk.castShadow=false;
         scene.add(mk); advObjs.push(mk);
+        var pmk=makeFootPerpMark(to, 0xffdd44, 0.45);   // ⊥ 직각 기호
+        scene.add(pmk); advObjs.push(pmk);
         var bt=Date.now();
         (function blink(){
           var bp=Date.now()-bt;
           if(bp<2400){mk.material.opacity=(Math.sin(bp/400*Math.PI*2)>0)?1.0:0.1;requestAnimationFrame(blink);}
-          else{mk.material.opacity=0; scene.remove(dl);}
+          else{mk.material.opacity=0; scene.remove(dl); scene.remove(pmk);}
         })();
       }
     })();
@@ -1371,11 +1375,13 @@ window.showTetraHint0 = function(){
         new THREE.MeshBasicMaterial({color:0x44ff88,transparent:true,opacity:1}));
       mk.position.set(0,0.05,0); mk.castShadow=false;
       scene.add(mk); advObjs.push(mk);
+      var pmk0=makeFootPerpMark(to, 0xffdd44, 0.5);   // ⊥ 직각 기호
+      scene.add(pmk0); advObjs.push(pmk0);
       var bt=Date.now();
       (function blink(){
         var bp=Date.now()-bt;
         if(bp<2400){mk.material.opacity=(Math.sin(bp/400*Math.PI*2)>0)?1.0:0.1;requestAnimationFrame(blink);}
-        else{mk.material.opacity=0; scene.remove(dl);}   // step1의 M'와 동일하게: 깜빡임 후 완전히 사라짐 (답 잔존 방지)
+        else{mk.material.opacity=0; scene.remove(dl); scene.remove(pmk0);}   // step1의 M'와 동일하게: 깜빡임 후 완전히 사라짐 (답 잔존 방지)
       })();
     }
   })();
