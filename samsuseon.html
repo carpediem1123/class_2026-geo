@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#040410">
-<title>공간잇기 M01-2 — 삼수선의 정리</title>
+<title>공간잇기 S2 — 삼수선의 정리</title>
 <style>
 @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)}}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -15,6 +15,18 @@ html{width:100%;height:100%;height:-webkit-fill-available}
 body{width:100%;height:100%;height:-webkit-fill-available;background:#182535;overflow:hidden;
   font-family:'Noto Sans KR',sans-serif;position:fixed;top:0;left:0;right:0;bottom:0;}
 
+  /* ── 모듈 상단 바 (단독 실행 시 표시 · iframe 안에서는 숨김 → 바 중복 방지) ── */
+  #mod-bar{flex-shrink:0;display:none;align-items:center;gap:14px;
+    padding-top:env(safe-area-inset-top,0px);padding-left:16px;padding-right:12px;
+    height:calc(46px + env(safe-area-inset-top,0px));
+    background:#060e1c;border-bottom:1.5px solid #1a3060}
+  body.has-mod-bar #mod-bar{display:flex}
+  #mod-back{width:auto;min-height:0;flex-shrink:0;background:#0b1a30;border:1.5px solid #1e3a60;
+    color:#5599cc;font-family:'Share Tech Mono',ui-monospace,monospace;font-size:12px;
+    padding:7px 16px;border-radius:5px;letter-spacing:.05em;cursor:pointer}
+  #mod-back:hover{background:#102240;border-color:#3366aa;color:#88bbee}
+  #mod-title{font-family:'Share Tech Mono',ui-monospace,monospace;font-size:12.5px;color:#a8cdf5;
+    letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #app{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;
   width:100%;height:100%;background:#182535;overflow:hidden;
   padding-top:env(safe-area-inset-top);
@@ -285,6 +297,10 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
 </head>
 <body>
 <div id="app">
+  <div id="mod-bar">
+    <button id="mod-back" onclick="window.location.href='hub.html'+(location.search||'')">◀ 사령부로 복귀</button>
+    <span id="mod-title">MODULE 01-S2 — 삼수선의 정리</span>
+  </div>
   <!-- 전체화면 전환 오버레이 (좌우패널 포함 전체 덮음) -->
   <div id="transit">
     <button class="tr-close" id="trClose" title="닫고 현재 미션 관찰">✕</button>
@@ -350,7 +366,7 @@ input[type=range]{touch-action:pan-x;cursor:pointer;}
 
   <!-- 헤더 -->
   <div id="hd">
-    <span class="ti">🛰 공간잇기 · 삼수선</span>
+    <span class="ti">🛰 공간잇기 · 삼수선 <span style="font-size:9.5px;color:#8fb8dd;letter-spacing:.04em;font-weight:400">점┄평면┄직선, 수선으로 잇다</span></span>
     <button class="mt ac" id="m1">🚨 M1</button>
     <button class="mt lk" id="m2">🔒 M2</button>
     <button class="mt lk" id="m3">🔒 M3</button>
@@ -2429,11 +2445,19 @@ setTimeout(function(){showTransit(0,1);},200);
 (function(){
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS || sessionStorage.getItem('kosa_return')) {
-    var btn = document.getElementById('bHub');
-    if (btn) btn.style.display = '';
-  }
+  // (구) 헤더의 사령부 버튼 — 상단 바의 복귀 버튼으로 대체되어 표시하지 않음
 })();
+
+// 모듈 상단 바: 단독 실행일 때만 표시(iframe 안이면 부모 바가 있으므로 숨겨 중복 차단).
+// 제목은 사령부가 넘겨준 값을 사용 → 표기 체계를 바꿔도 자동 반영.
+(function(){
+  if (window.self !== window.top) return;
+  document.body.classList.add('has-mod-bar');
+  try{
+    // 제목은 각 모듈에 고정 표기 (사령부 값으로 덮어쓰면 모듈 간 이동 시 옛 제목이 남음)
+  }catch(e){}
+})();
+
 </script>
 
 <!-- ═══ 모듈1 완수 안내 (성찰로그 제출 후) ═══ -->
