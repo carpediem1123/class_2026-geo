@@ -22,11 +22,16 @@
   #mod-back:hover { background: #102240; border-color: #3366aa; color: #88bbee; }
   #mod-title { font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 12.5px; color: #a8cdf5;
     letter-spacing: .08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* 상단 바 높이(46px)만큼 패널들을 내림 */
-  body.has-mod-bar #lab-tab-btn { top: calc(56px + env(safe-area-inset-top, 0px)); }
-  body.has-mod-bar #ui-panel    { top: calc(56px + env(safe-area-inset-top, 0px)); }
-  body.has-mod-bar #story-panel { top: calc(102px + env(safe-area-inset-top, 0px)); }
-  body.has-mod-bar #lab-panel   { top: calc(46px + env(safe-area-inset-top, 0px)); }
+  /* 상단 바 높이(46px)만큼 패널들을 내림.
+     ※ 바는 position:fixed(시각 뷰포트 기준), 패널은 absolute(문서 기준)라
+        iOS에서 두 좌표계가 어긋나 패널 윗부분이 바에 가려지는 일이 있었다 → 패널도 fixed로 통일 */
+  body.has-mod-bar #lab-tab-btn { position: fixed; top: calc(58px + env(safe-area-inset-top, 0px)); }
+  body.has-mod-bar #ui-panel    { position: fixed; top: calc(64px + env(safe-area-inset-top, 0px));
+    max-height: calc(100vh - 78px - env(safe-area-inset-top, 0px));
+    max-height: calc(100dvh - 78px - env(safe-area-inset-top, 0px));
+    overflow-y: auto; overscroll-behavior: contain; }
+  body.has-mod-bar #story-panel { position: fixed; top: calc(110px + env(safe-area-inset-top, 0px)); }
+  body.has-mod-bar #lab-panel   { position: fixed; top: calc(46px + env(safe-area-inset-top, 0px)); }
   #ui-panel { position: absolute; top: 10px; right: 10px; width: 340px; background: rgba(10, 16, 32, 0.94); border: 2px solid #1a2a50; border-radius: 8px; padding: 15px; z-index: 10; box-shadow: 0 0 20px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px; }
   .step-title { font-size: 14px; font-weight: bold; color: #00d4ff; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; border-bottom: 1px solid #1a2a50; padding-bottom: 6px; }
   .guide-text { font-size: 12px; line-height: 1.4; color: #b0c4de; min-height: 45px; }
@@ -1123,7 +1128,8 @@ function buildSummaryPhase() {
       </select> 일 때,<br>
       ➔ 직선 l은
       <b style="color:#00ff88;font-size:14px">평면과 수직</b>
-      <span style="color:#8fd9ff;font-family:monospace">( l ⊥ α )</span>이다.
+      <span style="color:#8fd9ff;font-family:monospace">( l ⊥ α )</span>
+      <div style="margin-top:7px;font-size:10.5px;color:#7f9ec0">※ <b style="color:#9ecbff">평면과 수직</b> = 평면 위 <b style="color:#9ecbff">모든</b> 직선과 수직 — 두 직선만 확인하면 보장됩니다.</div>
     </div>
   `;
   dynamicBtnContainer.innerHTML = `<button id="btn-quiz-submit" class="btn-success">개념 검증 및 기지 최종 승인</button>`;
@@ -1289,6 +1295,14 @@ function updateProofGeometryEngine(stepNum) {
     labelK.position.copy(dir).multiplyScalar(5.2).setY(0.25);
     labelK.userData.isK = true;
     proofMeshGroup.add(labelK);
+    // [복습 대응] 증명을 이미 완료했다면 l⊥k 직각 기호(노란 정사각형)를 정적으로도 표시.
+    // (완료 피날레는 매 렌더 초기화되는 그룹에 있어, 실험실에 다시 들어오면 기호가 사라졌다)
+    if (typeof proofCompleted !== 'undefined' && proofCompleted) {
+      var revRA = makeRightAngleMarker(dir.clone(), 0xd97706, 0.63, false, 0xffdd00);
+      revRA.children.forEach(function(o){ if(o.material){ o.material.depthTest = false; } o.renderOrder = 999; });
+      revRA.userData.isK = true;                   // 피날레가 시작되면 함께 숨겨짐(중복 방지)
+      proofMeshGroup.add(revRA);
+    }
   }
 
   // O 점은 stepNum>=1부터 항상 (가정 조건의 핵심)
@@ -1418,7 +1432,7 @@ function goLabStep(n) {
   if (currentLabStep === totalLabSteps) {
     var finBox = document.querySelector('.lab-blank-q[data-step="7b"]');
     var solved = proofCompleted || (finBox && finBox.dataset.solved === '1');
-    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : (solved ? '🎉 증명 완성!' : '✏️ 빈칸을 채우면 증명 완성');
+    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : (solved ? '🎉 증명 완성 — 기둥 고정!' : '✏️ 빈칸을 채우면 증명 완성');
     nextBtn.style.background = '#1a4a2a';
     nextBtn.style.color = '#44ff88';
     nextBtn.disabled = proofCompleted || !solved;   // 최종 빈칸을 스스로 채워야 완증 버튼 활성화
@@ -1473,7 +1487,7 @@ function setupBlankInteraction() {
           var fin = document.getElementById('proof-final-msg');
           if (fin) fin.style.display = 'block';
           var nb = document.getElementById('btn-lab-next');
-          if (nb) { nb.disabled = false; nb.textContent = '🎉 증명 완성!'; }
+          if (nb) { nb.disabled = false; nb.textContent = '🎉 증명 완성 — 기둥 고정!'; }
         }
       } else if (norm(raw).length > 0) {
         this.style.borderColor = '#ff8844';
