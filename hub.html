@@ -205,14 +205,14 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
       </div>
       <div class="missions">
         <div class="mission">
-          <span class="m-num">S1</span>
+          <span class="m-num" title="Space 1 — 수직의 세계">S1</span>
           <div class="m-info">
             <div class="m-name">📐 직선과 평면의 수직</div>
             <div class="m-detail">기둥 l ⊥ 평면 위 두 직선 → 평면 전체와 수직 · 기지 기둥 정밀 보정</div>
           </div>
         </div>
         <div class="mission">
-          <span class="m-num">S2</span>
+          <span class="m-num" title="Space 2 — 수직의 세계">S2</span>
           <div class="m-info">
             <div class="m-name">📡 삼수선의 정리 ①②③</div>
             <div class="m-detail">통신 케이블 복구 · 수선의 발 · 안테나 기하학적 기립</div>
@@ -227,8 +227,8 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
         </div>
       </div>
       <div class="btn-row">
-        <button class="mod-btn" onclick="openGame('perp_plane_class.html','MODULE 01-1 — 직선과 평면의 수직')">🛠️ 1단계 접속<span class="btn-sub">직선과 평면의 수직</span></button>
-        <button class="mod-btn" onclick="openGame('samsuseon.html','MODULE 01-2 — 삼수선의 정리')">📡 2단계 접속<span class="btn-sub">삼수선의 정리</span></button>
+        <button class="mod-btn" onclick="openGame('perp_plane_class.html','MODULE 01-S1 — 직선과 평면의 수직')">🛠️ 1단계 접속<span class="btn-sub">직선과 평면의 수직</span></button>
+        <button class="mod-btn" onclick="openGame('samsuseon.html','MODULE 01-S2 — 삼수선의 정리')">📡 2단계 접속<span class="btn-sub">삼수선의 정리</span></button>
       </div>
     </div>
 
@@ -246,21 +246,21 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
       </div>
       <div class="missions">
         <div class="mission">
-          <span class="m-num">F01</span>
+          <span class="m-num" title="Flat 1 — 그림자의 세계">F1</span>
           <div class="m-info">
             <div class="m-name">☀️ 개념탐구 — 정사영과 수선의 발</div>
             <div class="m-detail">태양 고도 분석 · S′ = S·cos θ 원리 발견</div>
           </div>
         </div>
         <div class="mission">
-          <span class="m-num">F02</span>
+          <span class="m-num" title="Flat 2 — 그림자의 세계">F2</span>
           <div class="m-info">
             <div class="m-name">🔍 개념이해 — 입체도형 속 정사영</div>
             <div class="m-detail">정육면체·정사면체 단면의 정사영 심화 탐구 · 공간잇기 힌트로 안내</div>
           </div>
         </div>
         <div class="mission">
-          <span class="m-num">F03</span>
+          <span class="m-num" title="Flat 3 — 그림자의 세계">F3</span>
           <div class="m-info">
             <div class="m-name">🚀 미션탐구 — 최적 각도 제어</div>
             <div class="m-detail">전력 최대화 각도 산출 → 생명유지장치 복구</div>
@@ -291,7 +291,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 
 <script>
 // ── 빌드 버전: 파일을 새로 올릴 때 이 값만 바꾸면 모든 학생 기기가 새 파일을 받습니다 ──
-var BUILD = '20260709a';
+var BUILD = '20260709g';
 
 // ── 선다운로드: 학생이 사령부 화면을 보는 동안 모듈·3D엔진을 미리 받아 캐시에 저장 ──
 // [v20260704 수정] 이전 버전의 결함 해결:
