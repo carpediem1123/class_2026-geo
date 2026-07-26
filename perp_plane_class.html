@@ -1110,13 +1110,13 @@ dynamicBtnContainer.addEventListener('click', (e) => {
 function buildSummaryPhase() {
   state = 'STEP_SUMMARY';
   dynamicBtnContainer.style.display = 'block';
-  stepTitle.innerText = "📝 핵심 개념 최종 정리";
+  stepTitle.innerText = "📝 핵심 기하학 개념 최종 정리";
   guideText.innerText = "요약 문장을 완성하고 설계 승인을 신청하세요.";
   
   statusBox.innerHTML = `
     <div style="font-family:inherit; font-size:12px; color:#fff; line-height:1.85;">
-      직선 l이 평면 α 위의 만나는 두 직선 m, n과 각각 
-      <select id="quiz-select" style="background:#152238; color:#00ff88; border:1px solid #2e436e; font-weight:bold; padding:2px; border-radius:3px; outline:none; color-scheme: dark;">
+      직선 l이 평면 α 위의 만나는 <strong>두 직선 m, n과 각각</strong> 
+	<select id="quiz-select" style="background:#152238; color:#00ff88; border:1px solid #2e436e; font-weight:bold; padding:2px; border-radius:3px; outline:none; color-scheme: dark;">
         <option value="wrong">평행</option>
         <option value="wrong">꼬인위치</option>
         <option value="correct">수직</option>
@@ -1416,7 +1416,7 @@ function goLabStep(n) {
   if (currentLabStep === totalLabSteps) {
     var finBox = document.querySelector('.lab-blank-q[data-step="7b"]');
     var solved = proofCompleted || (finBox && finBox.dataset.solved === '1');
-    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : (solved ? '🎉 증명 완성 — 기둥 고정!' : '✏️ 빈칸을 채우면 증명 완성');
+    nextBtn.textContent = proofCompleted ? '✅ 증명 완료!' : (solved ? '🎉 증명 완성!' : '✏️ 빈칸을 채우면 증명 완성');
     nextBtn.style.background = '#1a4a2a';
     nextBtn.style.color = '#44ff88';
     nextBtn.disabled = proofCompleted || !solved;   // 최종 빈칸을 스스로 채워야 완증 버튼 활성화
@@ -1471,7 +1471,7 @@ function setupBlankInteraction() {
           var fin = document.getElementById('proof-final-msg');
           if (fin) fin.style.display = 'block';
           var nb = document.getElementById('btn-lab-next');
-          if (nb) { nb.disabled = false; nb.textContent = '🎉 증명 완성 — 기둥 고정!'; }
+          if (nb) { nb.disabled = false; nb.textContent = '🎉 증명 완성!'; }
         }
       } else if (norm(raw).length > 0) {
         this.style.borderColor = '#ff8844';
