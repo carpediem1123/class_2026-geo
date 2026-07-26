@@ -770,6 +770,9 @@ function _showBoxProjArrows(){
   // AFGD 법선 n=(-1,-1,0)/√2, A=(0,s,0)
   var nx=-1/Math.sqrt(2), ny=-1/Math.sqrt(2), nz=0;
   var Ax=0, Ay=s, Az=0;
+  // 타원(정사영)의 중심 = 원 중심의 정사영 — 직각 기호를 '평면 안쪽'으로 향하게 하는 기준
+  var tC=(cx-Ax)*nx+(cy-Ay)*ny+(cz-Az)*nz;
+  var _ellipseCtr=new THREE.Vector3(cx-tC*nx, cy-tC*ny, cz-tC*nz);
   // 원 위 12개 점 (30° 간격) → 수선의 발 계산
   var N=12;
   for(var i=0;i<N;i++){
@@ -782,14 +785,16 @@ function _showBoxProjArrows(){
       setTimeout(function(){
         _drawProjArrow(
           new THREE.Vector3(Px,Py,Pz),
-          new THREE.Vector3(Ppx,Ppy,Ppz)
+          new THREE.Vector3(Ppx,Ppy,Ppz),
+          i < 2,      // 대표 2개에만 직각 기호(나머지는 화살촉) — 12개 전부면 화면이 복잡해짐
+          _ellipseCtr
         );
       }, i*120);
     })(i);
   }
 }
 
-function _drawProjArrow(from,to){
+function _drawProjArrow(from,to,showPerp,ctrP){
   // 점선
   var dp=new Float32Array(6);
   dp[0]=from.x;dp[1]=from.y;dp[2]=from.z;
@@ -801,20 +806,40 @@ function _drawProjArrow(from,to){
   }));
   dl.computeLineDistances();
   scene.add(dl); advObjs.push(dl);
-  // 화살표 머리: 법선 방향 (-1,-1,0)/√2 고정
-  var cone=new THREE.Mesh(
-    new THREE.ConeGeometry(0.08,0.20,8),
-    new THREE.MeshBasicMaterial({color:0xffdd44})
-  );
-  // ConeGeometry 기본 방향 (0,1,0) → 법선 방향 (-1,-1,0)/√2
-  var q=new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(0,1,0),
-    new THREE.Vector3(-1/Math.sqrt(2),-1/Math.sqrt(2),0)
-  );
-  cone.setRotationFromQuaternion(q);
-  cone.position.copy(to);
-  cone.visible=false;
-  scene.add(cone); advObjs.push(cone);
+  // 끝 표시: 대표 2개는 ⊥ 직각 기호(평면 AFGD와 수직임을 강조), 나머지는 화살촉
+  var cone=null, mk=null;
+  if(showPerp){
+    var upDir=new THREE.Vector3().subVectors(from,to).normalize();   // 발 → 원 위의 점(수선 방향)
+    var hDir=(ctrP? ctrP.clone().sub(to) : new THREE.Vector3(0,0,1));// 평면 안쪽(타원 중심) 방향
+    hDir.addScaledVector(upDir, -hDir.dot(upDir));                   // 수선 성분 제거 → 평면 위 방향
+    if(hDir.length()<0.01) hDir.set(0,0,1);
+    hDir.normalize();
+    var ms=0.40;
+    mk=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        to.clone().addScaledVector(hDir,ms),
+        to.clone().addScaledVector(hDir,ms).addScaledVector(upDir,ms),
+        to.clone().addScaledVector(upDir,ms)
+      ]),
+      new THREE.LineBasicMaterial({color:0xffdd44})
+    );
+    mk.visible=false;
+    scene.add(mk); advObjs.push(mk);
+  } else {
+    cone=new THREE.Mesh(
+      new THREE.ConeGeometry(0.08,0.20,8),
+      new THREE.MeshBasicMaterial({color:0xffdd44})
+    );
+    // ConeGeometry 기본 방향 (0,1,0) → 법선 방향 (-1,-1,0)/√2
+    var q=new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0,1,0),
+      new THREE.Vector3(-1/Math.sqrt(2),-1/Math.sqrt(2),0)
+    );
+    cone.setRotationFromQuaternion(q);
+    cone.position.copy(to);
+    cone.visible=false;
+    scene.add(cone); advObjs.push(cone);
+  }
   // 성장 애니메이션
   var t0=Date.now(), dur=1000;
   (function grow(){
@@ -826,8 +851,9 @@ function _drawProjArrow(from,to){
     dl.computeLineDistances();
     if(p<1){ requestAnimationFrame(grow); }
     else{
-      cone.visible=true;
-      setTimeout(function(){ scene.remove(dl); scene.remove(cone); },3000);
+      if(cone) cone.visible=true;
+      if(mk) mk.visible=true;
+      setTimeout(function(){ scene.remove(dl); if(cone) scene.remove(cone); if(mk) scene.remove(mk); },3000);
     }
   })();
 }
@@ -1563,13 +1589,21 @@ function buildBoxScene(){
   var FOOT_ANS = {A:'E', F:'F', C:'G'};
   var FOOT_OK = {
     A:'✅ 정답! A 바로 아래가 E입니다.',
-    F:'✅ 정답! F는 이미 아랫면에 있어요. F의 수선의 발은 F 자신!',
+    F:'✅ 정답! F는 두 평면 AFC·EFGH가 <b>만나는 점</b> — 정사영해도 제자리라 수선의 발은 F 자신!',
     C:'✅ 정답! C 바로 아래가 G입니다.'
   };
+  // 오답 피드백: '무엇이 아닌지'를 알려주면 소거법으로 답이 드러나므로,
+  // 판별 기준(수직·직각)으로 시선을 돌리는 질문형으로 구성한다.
   var FOOT_NG = {
-    A:{E:'',F:'❌ F는 A 바로 아래가 아니에요.',G:'❌ G는 A의 대각선 맞은편이에요.',H:'❌ H는 A 바로 아래가 아니에요.'},
-    F:{E:'❌ E는 F 옆 꼭짓점이에요.',G:'❌ G는 F와 다른 꼭짓점이에요.',H:'❌ H는 F와 다른 꼭짓점이에요.'},
-    C:{E:'❌ E는 C 아래가 아니에요.',F:'❌ F는 C 아래가 아니에요.',H:'❌ H는 C와 다른 꼭짓점이에요.'}
+    A:{F:'🤔 A와 F를 이은 선이 아랫면과 직각을 이루나요? 3D 화면을 돌려 살펴보세요.',
+       G:'🤔 A에서 옆으로 새지 않고 곧장 내려가면 어디에 닿을까요?',
+       H:'🤔 A와 H를 이은 선이 아랫면과 직각인지 확인해 보세요.'},
+    F:{E:'🤔 F는 평면 AFC와 아랫면 EFGH <b>둘 다</b>에 속하는 점일까요? 3D 화면을 돌려 확인해 보세요.',
+       G:'🤔 두 평면이 <b>만나는 점</b>은 수직으로 내리면 얼마나 움직일까요?',
+       H:'🤔 F가 두 평면이 만나는 자리에 있는지 3D에서 살펴보세요.'},
+    C:{E:'🤔 C와 E를 이은 선이 아랫면과 직각을 이루나요?',
+       F:'🤔 C에서 옆으로 새지 않고 곧장 내려가면 어디에 닿을까요?',
+       H:'🤔 C와 H를 이은 선이 직각인지 3D 화면을 돌려 확인해 보세요.'}
   };
   var footOrder=['A','F','C'];
   var footDone={A:false,F:false,C:false};
@@ -1618,19 +1652,30 @@ function buildBoxScene(){
         new THREE.LineDashedMaterial({color:0xffdd44, dashSize:0.22, gapSize:0.12}));
       dashL.computeLineDistances();
       scene.add(dashL); advObjs.push(dashL);
-      // 화살표 머리 (처음엔 숨김)
-      var coneG = new THREE.ConeGeometry(0.13, 0.30, 8);
-      var coneM = new THREE.MeshStandardMaterial({color:0xffdd44,emissive:0xffdd44,emissiveIntensity:1.2});
-      var cone  = new THREE.Mesh(coneG, coneM);
-      // 화살표 방향: from→to 벡터 방향으로 cone 회전
-      var dir=new THREE.Vector3(to.x-from.x,to.y-from.y,to.z-from.z).normalize();
-      var axis=new THREE.Vector3(1,0,0).cross(dir).normalize();
-      var angle=Math.acos(new THREE.Vector3(1,0,0).dot(dir));
-      if(axis.length()>0.001) cone.setRotationFromAxisAngle(axis,angle);
-      // cone을 to 위치에서 살짝 떨어진 곳에
-      cone.position.set(to.x+dir.x*0.15, to.y+dir.y*0.15, to.z+dir.z*0.15);
-      cone.visible = false;
-      scene.add(cone); advObjs.push(cone);
+      // ⊥ 직각 기호 (처음엔 숨김) — 화살촉 대신, '평면에 수직으로 내렸다'는 개념을 표시
+      var mk = null;
+      var upDir = new THREE.Vector3(from.x-to.x, from.y-to.y, from.z-to.z);
+      if (upDir.length() > 0.01) {
+        upDir.normalize();
+        // 평면(EFGH) 안쪽을 향하는 방향: 면 중심 방향에서 수선 성분을 제거
+        var fcen = new THREE.Vector3().addVectors(_cubeV.E, _cubeV.G).multiplyScalar(0.5);
+        var hDir = fcen.clone().sub(to);
+        hDir.addScaledVector(upDir, -hDir.dot(upDir));
+        if (hDir.length() < 0.01) hDir.set(1, 0, 0);
+        hDir.normalize();
+        var ms = 0.45;
+        var mkPts = [
+          to.clone().addScaledVector(hDir, ms),
+          to.clone().addScaledVector(hDir, ms).addScaledVector(upDir, ms),
+          to.clone().addScaledVector(upDir, ms)
+        ];
+        mk = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(mkPts),
+          new THREE.LineBasicMaterial({ color: 0xffdd44 })
+        );
+        mk.visible = false;
+        scene.add(mk); advObjs.push(mk);
+      }
       // 애니메이션: 1600ms 동안 from→to 방향으로 성장
       var t0=Date.now(), dur=1600;
       (function growLine(){
@@ -1644,10 +1689,10 @@ function buildBoxScene(){
         if(p<1){
           requestAnimationFrame(growLine);
         } else {
-          cone.visible=true;
+          if (mk) mk.visible=true;
           revealShadow();   // ★ 점선이 끝점에 '도달한 뒤에야' 그림자(수선의 발)를 밝힘 — 답이 먼저 보이는 착각 방지
           setTimeout(function(){
-            scene.remove(dashL); scene.remove(cone);
+            scene.remove(dashL); if (mk) scene.remove(mk);
           }, 2800);
         }
       })();
@@ -1733,7 +1778,9 @@ function buildBoxScene(){
       try{
         btn.classList.add('ng');
         fb.className='adv-fb ng';
-        fb.innerHTML='❌ 틀렸어요!';
+        // [수정] 선택한 꼭짓점별 구체 피드백(FOOT_NG)을 실제로 사용.
+        //  그동안 표는 정의만 되어 있고 쓰이지 않아 어떤 오답이든 '❌ 틀렸어요!'만 나왔음.
+        fb.innerHTML = (FOOT_NG[pt] && FOOT_NG[pt][val]) ? FOOT_NG[pt][val] : '❌ 틀렸어요!';
         fb.style.display='block';
       }catch(e){}
       if(hintBtn){
