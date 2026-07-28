@@ -405,11 +405,12 @@ S'/S 값을 보며 다음 중 [?]에
             <div class="iq-bd">"대원님, 현재 기지는 <strong>15° 기울어진 언덕(경사면 α)</strong> 위에 있습니다.
 태양광선도 경사면과 <strong>30°</strong>로 비스듬히 내리쬐고 있군요!
 패널이 태양빛을 가장 <strong>수직으로</strong> 받아 효율 100%가 되는
-최적의 각도 θ를 찾아내십시오!"</div>
+최적의 각도 θ와, <strong>그때 그림자 넓이 S′</strong>까지 보고하십시오!"</div>
             <div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;font-size:10.5px;font-weight:bold">
               <span style="background:#1a1000;border:1px solid #aa6600;color:#ffcc44;padding:4px 8px;border-radius:10px">📐 경사면 15°</span>
               <span style="background:#1a1000;border:1px solid #aa6600;color:#ffcc44;padding:4px 8px;border-radius:10px">☀️ 빛–경사면 30°</span>
-              <span style="background:#0a2015;border:1px solid #22aa44;color:#55ff88;padding:4px 8px;border-radius:10px">🎯 목표: 효율 100%의 θ</span>
+              <span style="background:#0a2015;border:1px solid #22aa44;color:#55ff88;padding:4px 8px;border-radius:10px">🎯 목표① 효율 100%의 θ</span>
+              <span style="background:#0a2015;border:1px solid #22aa44;color:#55ff88;padding:4px 8px;border-radius:10px">🎯 목표② 그때의 그림자 S′</span>
             </div>
           </div>
 
@@ -470,7 +471,9 @@ S'/S 값을 보며 다음 중 [?]에
           <!-- Step 4: 공식 선택 -->
           <div class="iq-card" id="iq4">
             <div class="iq-tt">Step 4  정사영 공식 발견</div>
-            <div class="iq-bd">잠깐 — 정사영에서 그림자는 원래 <strong>줄어들었죠?</strong>
+            <div class="iq-bd">🎯 목표① 달성! 이제 <strong>목표② — 그때의 그림자 넓이 S′</strong>를 수학으로 설명할 차례입니다.
+
+잠깐 — 정사영에서 그림자는 원래 <strong>줄어들었죠?</strong>
 그런데 지금은 그림자(200)가 패널(100)보다 커요. 왜일까요?
 
 🔍 Side View에서 빛과 <strong>직각</strong>을 이루는 축을 찾아보세요.
@@ -590,6 +593,10 @@ S'/S 값을 보며 다음 중 [?]에
 태양광 패널의 에너지 효율(E)은 태양광선과 패널의 법선(수직선)이 이루는 각도(θ)에 대한 코사인 값으로 결정됩니다.
 
 E = cos(θ)
+
+🌑 그림자 넓이가 알려주는 것
+빛의 방향이 일정할 때, 패널이 만든 <b>그림자 넓이는 패널이 가로챈 빛의 양에 정비례</b>합니다.
+그래서 그림자가 가장 커지는 순간이 곧 효율이 최대인 순간 — 이 미션의 두 목표(θ와 S′)는 사실 같은 이야기의 두 얼굴입니다.
 
 이 원리는 태양광 발전뿐만 아니라 조명 설계, 태양열 시스템 등 다양한 분야에서 활용됩니다.
 (💡교육과정 외 심화 내용. 참고만 해주세요!)</div>
@@ -2037,7 +2044,7 @@ document.querySelectorAll('.cosPick').forEach(btn=>{
       line.textContent='패널 = 그림자 × cos(60°)  →  100 = 200 × ½ ✓';
       line.style.color='#44ff88';
       msg.className='qmsg qok';
-      msg.textContent='✅ 발견! 두 면(패널면↔경사면 α)의 각 = 45°+15° = 60°.\n패널 = 그림자 × cos(이면각) — 역할이 뒤집힌 정사영, 완벽해요!';
+      msg.textContent='✅ 발견! 두 면(패널면↔경사면 α)의 각 = 45°+15° = 60°.\n패널 = 그림자 × cos(이면각) — 역할이 뒤집힌 정사영!\n🎯 θ = 45°, S′ = 200 — 두 목표 모두 달성했습니다!';
       setTimeout(()=>{
         // 패널을 0°(수평)로 리셋 후 최종 전력 복구 미션 개방 (기존 완료 시퀀스 유지)
         theta = 0;
