@@ -330,7 +330,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;
       <div class="lps" id="lps">
         <!-- 슬라이더 항상 최상단 -->
         <div class="sec" id="slSec">
-          <div class="st" id="slTitle">미션! 패널을 얼마나 몇 도(°)로 조절해야할까?</div>
+          <div class="st" id="slTitle">🔭 관찰! 패널 S를 기울이면 그림자 S′는 어떻게 변할까?</div>
           <div class="tr" style="flex-direction:column;align-items:stretch;gap:6px">
             <div style="display:flex;gap:8px;align-items:center">
               <label style="flex-shrink:0">θ</label>
@@ -404,7 +404,8 @@ S'/S 값을 보며 다음 중 [?]에
             <div class="iq-tt" style="color:#ffaa44">📡 긴급 교신 — 미션 브리핑</div>
             <div class="iq-bd">"대원님, 현재 기지는 <strong>15° 기울어진 언덕(경사면 α)</strong> 위에 있습니다.
 태양광선도 경사면과 <strong>30°</strong>로 비스듬히 내리쬐고 있군요!
-패널이 태양빛을 가장 <strong>수직으로</strong> 받아 효율 100%가 되는 <strong style="color: #ffd700;">최적의 각도 θ</strong>와, <strong style="color: #ffd700;">그때 그림자 넓이 S′</strong>까지 보고하십시오!"</div>
+패널이 태양빛을 가장 <strong>수직으로</strong> 받아 효율 100%가 되는
+최적의 각도 θ와, <strong>그때 그림자 넓이 S′</strong>까지 보고하십시오!"</div>
             <div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;font-size:10.5px;font-weight:bold">
               <span style="background:#1a1000;border:1px solid #aa6600;color:#ffcc44;padding:4px 8px;border-radius:10px">📐 경사면 15°</span>
               <span style="background:#1a1000;border:1px solid #aa6600;color:#ffcc44;padding:4px 8px;border-radius:10px">☀️ 빛–경사면 30°</span>
@@ -552,7 +553,8 @@ S'/S 값을 보며 다음 중 [?]에
 화성 착륙지 경사면 -15°
 태양이 화성에 30° 고도로 비춤!
 
-패널 각도를 최적화하여 정사영 넓이를 최대화하고
+패널 각도를 최적화하여
+정사영 넓이를 최대화하고
 생명유지장치 전력을 복구하라!</div>
         <button class="ov-btn" id="acceptBtn">🚀 임무 수락!</button>
       </div>
@@ -2380,6 +2382,11 @@ function showCompletedMission(){
 function moveSliderForMission(toMission){
   var s=document.getElementById('slSec'), b=document.getElementById('iqBrief'), l=document.getElementById('lps');
   if(!s) return;
+  // 단계에 맞는 안내 문구 — 개념탐구는 '관찰', 미션탐구는 '임무'
+  var t=document.getElementById('slTitle');
+  if(t) t.textContent = toMission
+    ? '미션! 패널을 몇 도(°)로 조절해야 할까?'
+    : '🔭 관찰! 패널 S를 기울이면 그림자 S′는 어떻게 변할까?';
   if(toMission && b){ b.after(s); if(l) l.scrollTop = 0; }   // 진입 시 맨 위(브리핑)부터 — 갤럭시탭 스크롤 잔존 잘림 방지
   else if(l){ l.prepend(s); }
 }
